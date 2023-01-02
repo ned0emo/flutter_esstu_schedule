@@ -1,6 +1,13 @@
 part of 'settings_cubit.dart';
 
-@immutable
-abstract class SettingsState {}
+class SettingsState {
+  bool horizontalSwipe;
+  bool darkTheme;
+  bool autoUpdate;
 
-class SettingsInitial extends SettingsState {}
+  SettingsState({
+    required this.horizontalSwipe,
+    required this.darkTheme,
+    required this.autoUpdate,
+  });
+}

@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'home/app.dart';
 
-void main() {
+Future<void> main() async {
   runApp(const App());
 }
 
