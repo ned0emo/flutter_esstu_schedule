@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../all_groups_bloc/all_groups_cubit.dart';
+import '../current_group_bloc/current_group_cubit.dart';
 
 class StudentsNavigation extends StatelessWidget {
   const StudentsNavigation({super.key});
@@ -97,7 +98,9 @@ class BakDrawerElement extends StatelessWidget {
     return ListTile(
       title: Text(course),
       onTap: () {
-        BlocProvider.of<AllGroupsCubit>(context).selectCourse(course, 0, firstPartOfLink);
+        BlocProvider.of<CurrentGroupCubit>(context).hideSchedule();
+        BlocProvider.of<AllGroupsCubit>(context)
+            .selectCourse(course, 0, firstPartOfLink);
         Navigator.pop(context);
       },
     );
@@ -116,6 +119,12 @@ class MagDrawerElement extends StatelessWidget {
     return ListTile(
       title: Text(course),
       onTap: () {
+        BlocProvider.of<CurrentGroupCubit>(context).hideSchedule();
+        BlocProvider.of<AllGroupsCubit>(context).selectCourse(
+          course,
+          isMag ? 2 : 1,
+          firstPartOfLink,
+        );
         Navigator.pop(context);
       },
     );
@@ -134,6 +143,13 @@ class ZoDrawerElement extends StatelessWidget {
     return ListTile(
       title: Text(course),
       onTap: () {
+        BlocProvider.of<CurrentGroupCubit>(context).hideSchedule();
+        BlocProvider.of<AllGroupsCubit>(context).selectCourse(
+          course,
+          3,
+          firstPartOfLink1,
+          typeLink2: firstPartOfLink2,
+        );
         Navigator.pop(context);
       },
     );

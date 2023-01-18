@@ -34,9 +34,51 @@ class StudentsPage extends StatelessWidget {
           body: state is AllGroupsLoading
               ? const Center(child: CircularProgressIndicator())
               : state is AllGroupsError
-                  ? const Center(child: Text('Ошибка загрузки'))
+                  ? Center(
+                      child: Text(
+                      state.errorMessage,
+                      textAlign: TextAlign.center,
+                    ))
                   : state is AllGroupsLoaded
-                      ? const Center(child: Text('Выберите курс'))
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(15, 10, 0, 10),
+                              child: Image.asset(
+                                'assets/arrowToGroups.png',
+                                height: 60,
+                              ),
+                            ),
+                            const Text(
+                              '\t\tВыберите курс',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Expanded(
+                              child: Container(),
+                            ),
+                            Row(
+                              children: const [
+                                Expanded(
+                                  child: Text(
+                                    'Добавить расписание в избранное',
+                                    textAlign: TextAlign.end,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: FloatingActionButton(
+                                    onPressed: null,
+                                    child: Icon(Icons.star_border),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
                       : StudentsView(),
           drawer: const Drawer(
             child: StudentsNavigation(),

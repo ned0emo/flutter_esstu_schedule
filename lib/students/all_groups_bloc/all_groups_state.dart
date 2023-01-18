@@ -9,9 +9,11 @@ class AllGroupsLoaded extends AllGroupsState {}
 class CourseSelected extends AllGroupsState {
   final Map<String, String> linkGroupMap;
   final String typeLink1;
-  final String typeLink2;
   final String courseName;
   final String currentGroup;
+
+  final String typeLink2;
+  final int weekNumber;
 
   CourseSelected({
     required this.linkGroupMap,
@@ -19,7 +21,12 @@ class CourseSelected extends AllGroupsState {
     required this.typeLink1,
     required this.currentGroup,
     this.typeLink2 = '',
+    this.weekNumber = 0,
   });
 }
 
-class AllGroupsError extends AllGroupsState {}
+class AllGroupsError extends AllGroupsState {
+  final String errorMessage;
+
+  AllGroupsError({this.errorMessage = 'Ошибка загрузки'});
+}
