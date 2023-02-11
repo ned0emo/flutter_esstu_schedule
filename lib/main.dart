@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:jiffy/jiffy.dart';
+import 'package:schedule/app_module.dart';
+import 'package:schedule/app_widget.dart';
 
-import 'home/app.dart';
 
-Future<void> main() async {
-  runApp(const App());
+void main() async {
+  await Jiffy.locale('ru');
+  runApp(ModularApp(module: AppModule(), child: const AppWidget()));
 }
-
-

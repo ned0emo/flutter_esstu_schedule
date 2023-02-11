@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
-import 'package:schedule/settings/bloc/settings_repository.dart';
+import 'package:schedule/modules/settings/bloc/settings_repository.dart';
 
 part 'settings_state.dart';
 
@@ -10,11 +9,11 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const int autoUpdate = 2;
 
   final List<bool> settingsList = [true, false, true];
-  final SettingsRepository repository;
+  final SettingsRepository _settingsRepository;
 
-  SettingsCubit({
-    required this.repository,
-  }) : super(
+  SettingsCubit(SettingsRepository repository)
+      : _settingsRepository = repository,
+        super(
           SettingsState(
             horizontalSwipe: true,
             darkTheme: false,
@@ -23,7 +22,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         );
 
   Future<void> loadSettings() async {
-    final stringSettingsValues = await repository.loadSettings();
+    final stringSettingsValues = await _settingsRepository.loadSettings();
     for (int i = 0; i < stringSettingsValues.length; i++) {
       stringSettingsValues[i] == 'true'
           ? settingsList[i] = true
@@ -47,7 +46,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     final List<bool?> listForSaving = [null, null, null];
     listForSaving[settingType] = settingValue;
 
-    await repository.saveSettings(settingsListForSave: listForSaving);
+    await _settingsRepository.saveSettings(settingsListForSave: listForSaving);
     settingsList[settingType] = settingValue;
 
     emit(

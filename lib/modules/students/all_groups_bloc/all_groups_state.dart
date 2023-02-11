@@ -13,7 +13,6 @@ class CourseSelected extends AllGroupsState {
   final String currentGroup;
 
   final String typeLink2;
-  final int weekNumber;
 
   CourseSelected({
     required this.linkGroupMap,
@@ -21,7 +20,6 @@ class CourseSelected extends AllGroupsState {
     required this.typeLink1,
     required this.currentGroup,
     this.typeLink2 = '',
-    this.weekNumber = 0,
   });
 }
 

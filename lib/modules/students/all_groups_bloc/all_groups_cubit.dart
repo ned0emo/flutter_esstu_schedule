@@ -1,18 +1,19 @@
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
-import 'package:jiffy/jiffy.dart';
-import 'package:schedule/students/all_groups_bloc/all_groups_repository.dart';
+import 'package:schedule/modules/students/all_groups_bloc/all_groups_repository.dart';
+
 part 'all_groups_state.dart';
 
 class AllGroupsCubit extends Cubit<AllGroupsState> {
-  final AllGroupsRepository repository;
-  int weekNumber = 0;
+  final AllGroupsRepository _allGroupsRepository;
   int loadCounter = 0;
   int errorCounter = 0;
   bool continueFillsMaps = true;
 
-  AllGroupsCubit({required this.repository}) : super(AllGroupsLoading());
+  AllGroupsCubit(AllGroupsRepository repository)
+      : _allGroupsRepository = repository,
+        super(AllGroupsLoading());
 
   final bakScheduleMap = <String, Map<String, String>>{
     '1 курс': {},
@@ -54,12 +55,8 @@ class AllGroupsCubit extends Cubit<AllGroupsState> {
   ///
   /// Заполнение мэпов по курсам с парами "Имя группы - Ссылка"
   Future<void> loadGroupList() async {
-    //TODO Возможно, надо перенести в основной кубит
-    //Подумать над правильным распознаванием при смещении номера на сайте
-    await Jiffy.locale('ru');
-    weekNumber = (Jiffy().week + 1) % 2;
 
-    final groupPageList = await repository.loadGroupsPages();
+    final groupPageList = await _allGroupsRepository.loadGroupsPages();
 
     continueFillsMaps = true;
     for (int i = 1; i < 7 && continueFillsMaps; i++) {
@@ -165,7 +162,6 @@ class AllGroupsCubit extends Cubit<AllGroupsState> {
       typeLink1: typeLink1,
       typeLink2: typeLink2,
       currentGroup: linkGroupMap.keys.first,
-      weekNumber: weekNumber,
     ));
   }
 
@@ -179,7 +175,6 @@ class AllGroupsCubit extends Cubit<AllGroupsState> {
         typeLink1: currentState.typeLink1,
         typeLink2: currentState.typeLink2,
         currentGroup: group,
-        weekNumber: currentState.weekNumber,
       ));
     }
   }
