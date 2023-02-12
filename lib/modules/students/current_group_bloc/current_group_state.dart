@@ -7,6 +7,7 @@ class CurrentGroupInitial extends CurrentGroupState {}
 class CurrentGroupLoading extends CurrentGroupState {}
 
 class CurrentGroupLoaded extends CurrentGroupState {
+  final String name;
   final List<List<String>> currentScheduleList;
   final String scheduleFullLink;
   final int openedDayIndex;
@@ -18,6 +19,7 @@ class CurrentGroupLoaded extends CurrentGroupState {
 
 
   CurrentGroupLoaded({
+    required this.name,
     required this.currentScheduleList,
     required this.scheduleFullLink,
     required this.openedDayIndex,
@@ -35,4 +37,8 @@ class CurrentGroupLoaded extends CurrentGroupState {
   int get initialIndex => isZo ? 0 : weekNumber;
 }
 
-class CurrentGroupLoadingError extends CurrentGroupState {}
+class CurrentGroupLoadingError extends CurrentGroupState {
+  final String? message;
+
+  CurrentGroupLoadingError({this.message});
+}

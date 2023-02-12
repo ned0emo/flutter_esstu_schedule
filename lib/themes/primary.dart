@@ -16,6 +16,7 @@ class PrimaryTheme extends ThemeTemplate {
     colorScheme: const ColorScheme.light(
       background: Colors.white,
       primary: Color(0xFF006C84),
+      secondary: Color(0xFF6EB5C0),
     ),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -31,9 +32,6 @@ class PrimaryTheme extends ThemeTemplate {
           fontWeight: FontWeight.w600,
         ),
       ),
-    ),
-    floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: Color(0xFF6EB5C0),
     ),
   );
 }

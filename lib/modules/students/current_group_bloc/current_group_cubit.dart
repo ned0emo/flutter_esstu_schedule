@@ -33,7 +33,7 @@ class CurrentGroupCubit extends Cubit<CurrentGroupState> {
     emit(CurrentGroupInitial());
   }
 
-  Future<void> loadCurrentGroup(String fullLink) async {
+  Future<void> loadCurrentGroup(String fullLink, String name) async {
     emit(CurrentGroupLoading());
     _isZo = false;
 
@@ -122,6 +122,7 @@ class CurrentGroupCubit extends Cubit<CurrentGroupState> {
 
       emit(
         CurrentGroupLoaded(
+          name: name,
           currentScheduleList: currentScheduleList,
           scheduleFullLink: fullLink,
           openedDayIndex: Jiffy().dateTime.weekday - 1,
@@ -132,7 +133,7 @@ class CurrentGroupCubit extends Cubit<CurrentGroupState> {
         ),
       );
     } catch (exception) {
-      emit(CurrentGroupLoadingError());
+      emit(CurrentGroupLoadingError(message: exception.toString()));
     }
   }
 
@@ -141,6 +142,7 @@ class CurrentGroupCubit extends Cubit<CurrentGroupState> {
     if (currentState is CurrentGroupLoaded) {
       emit(
         CurrentGroupLoaded(
+          name: currentState.name,
           currentScheduleList: currentState.currentScheduleList,
           scheduleFullLink: currentState.scheduleFullLink,
           openedDayIndex: index,
@@ -151,26 +153,5 @@ class CurrentGroupCubit extends Cubit<CurrentGroupState> {
         ),
       );
     }
-  }
-
-  Future<bool> addScheduleToFavorite(String name) async {
-    final currentState = state;
-    if (currentState is CurrentGroupLoaded) {
-      try {
-        String scheduleData = currentState.scheduleFullLink;
-        for (List<String> list in currentState.currentScheduleList) {
-          scheduleData += '\n;;;';
-          for (String lesson in list) {
-            scheduleData += '\n$lesson';
-          }
-        }
-
-        await _currentGroupRepository.saveSchedule(name, scheduleData);
-      } catch (_) {
-        return false;
-      }
-    }
-
-    return true;
   }
 }

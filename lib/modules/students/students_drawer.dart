@@ -9,19 +9,32 @@ class StudentsDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return Column(
       children: [
-        SafeArea(
-          child: DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+        Container(
+          color: Theme.of(context).colorScheme.primary,
+          child: SafeArea(
+            child: DrawerHeader(
+              margin: EdgeInsets.zero,
+              child: Row(
+                children: const [
+                  Text('meow'),
+                ],
+              ),
             ),
-            child: const Text('meow'),
           ),
         ),
-        _bakDrawerSection(context),
-        _magDrawerSection(context),
-        _zoDrawerSection(context),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _bakDrawerSection(context),
+                _magDrawerSection(context),
+                _zoDrawerSection(context),
+              ],
+            ),
+          ),
+        )
       ],
     );
   }
@@ -31,10 +44,9 @@ class StudentsDrawer extends StatelessWidget {
 
     return Column(
       children: [
-        Container(
-          height: 30,
-          padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
-          child: const Text(
+        const Padding(
+          padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
+          child: Text(
             'Бакалавриат',
             style: TextStyle(
               fontSize: 18,
@@ -66,10 +78,9 @@ class StudentsDrawer extends StatelessWidget {
 
     return Column(
       children: [
-        Container(
-          height: 30,
-          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-          child: const Text(
+        const Padding(
+          padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
+          child: Text(
             'Колледж',
             style: TextStyle(
               fontSize: 18,
@@ -92,10 +103,9 @@ class StudentsDrawer extends StatelessWidget {
           ),
         ),
         const Divider(),
-        Container(
-          height: 30,
-          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-          child: const Text(
+        const Padding(
+          padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
+          child: Text(
             'Магистратура',
             style: TextStyle(
               fontSize: 18,
@@ -128,10 +138,9 @@ class StudentsDrawer extends StatelessWidget {
 
     return Column(
       children: [
-        Container(
-          height: 30,
-          padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
-          child: const Text(
+        const Padding(
+          padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
+          child: Text(
             'Заочное',
             style: TextStyle(
               fontSize: 18,

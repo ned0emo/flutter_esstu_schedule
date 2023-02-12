@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:schedule/modules/favorite/bloc/favorite_bloc.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_cubit.dart';
 import 'package:schedule/modules/students/students_schedule_tab.dart';
 
@@ -9,34 +11,75 @@ class StudentsTabController extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CurrentGroupCubit, CurrentGroupState>(
-      builder: (context, state) {
-        if (state is CurrentGroupLoaded) {
+      builder: (context, currentGroupState) {
+        if (currentGroupState is CurrentGroupLoaded) {
           return DefaultTabController(
-            length: state.numOfWeeks,
-            initialIndex: state.initialIndex,
+            length: currentGroupState.numOfWeeks,
+            initialIndex: currentGroupState.initialIndex,
             child: Column(
               children: [
                 Expanded(
                   child: Scaffold(
                     body: TabBarView(
                       children: List<StudentsScheduleTab>.generate(
-                        state.numOfWeeks,
+                        currentGroupState.numOfWeeks,
                         (index) => StudentsScheduleTab(tabNum: index),
                       ),
                     ),
-                    floatingActionButton: FloatingActionButton(
-                      onPressed: () {
-                        //TODO: Кнопка добавления в избранное
+                    floatingActionButton:
+                        BlocListener<FavoriteBloc, FavoriteState>(
+                      listener: (context, state) {
+                        if (state is FavoriteExist && state.isNeedSnackBar) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Добавлено в избранное'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (state is FavoriteDoesNotExist && state.isNeedSnackBar) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Удалено из избранного'),
+                            ),
+                          );
+                          return;
+                        }
                       },
-                      child: const Icon(Icons.star_border),
+                      child: BlocBuilder<FavoriteBloc, FavoriteState>(
+                        builder: (context, state) {
+                          return FloatingActionButton(
+                            onPressed: () {
+                              if (state is FavoriteExist) {
+                                Modular.get<FavoriteBloc>().add(DeleteSchedule(
+                                    name: currentGroupState.name));
+                                return;
+                              }
+
+                              if (state is FavoriteDoesNotExist) {
+                                Modular.get<FavoriteBloc>().add(SaveSchedule(
+                                    name: currentGroupState.name,
+                                    link1: currentGroupState.scheduleFullLink,
+                                    scheduleList:
+                                        currentGroupState.currentScheduleList));
+                              }
+                            },
+                            child: state is FavoriteExist
+                                ? const Icon(Icons.star)
+                                : const Icon(Icons.star_border),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
                 TabBar(
                   tabs: List<Tab>.generate(
-                    state.numOfWeeks,
+                    currentGroupState.numOfWeeks,
                     (index) {
-                      final star = index == state.starIndex ? '★' : '';
+                      final star =
+                          index == currentGroupState.starIndex ? '★' : '';
                       return Tab(
                         child: Text(
                           '${index + 1} неделя $star',
@@ -54,11 +97,11 @@ class StudentsTabController extends StatelessWidget {
           );
         }
 
-        if (state is CurrentGroupLoading) {
+        if (currentGroupState is CurrentGroupLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (state is CurrentGroupInitial) {
+        if (currentGroupState is CurrentGroupInitial) {
           return Column(
             children: [
               Image.asset(
@@ -81,8 +124,8 @@ class StudentsTabController extends StatelessWidget {
           );
         }
 
-        if (state is CurrentGroupLoadingError) {
-          return const Center(child: Text('Ошибка загрузки'));
+        if (currentGroupState is CurrentGroupLoadingError) {
+          return Center(child: Text('Ошибка загрузки\n${currentGroupState.message}'));
         }
 
         return const Text('Неизвестная ошибка');
