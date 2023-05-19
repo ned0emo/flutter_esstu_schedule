@@ -135,7 +135,7 @@ class AllGroupsCubit extends Cubit<AllGroupsState> {
   /// 2 - маги;
   /// иначе - заочка.
   Future<void> selectCourse(String courseName, int courseType, String typeLink1,
-      {String typeLink2 = ''}) async {
+      {bool isZo = false}) async {
     final linkGroupMap = courseType == 0
         ? bakScheduleMap[courseName]
         : courseType == 1
@@ -160,7 +160,7 @@ class AllGroupsCubit extends Cubit<AllGroupsState> {
       linkGroupMap: linkGroupMap,
       courseName: courseName,
       typeLink1: typeLink1,
-      typeLink2: typeLink2,
+      isZo: isZo,
       currentGroup: linkGroupMap.keys.first,
     ));
   }
@@ -173,7 +173,7 @@ class AllGroupsCubit extends Cubit<AllGroupsState> {
         linkGroupMap: currentState.linkGroupMap,
         courseName: currentState.courseName,
         typeLink1: currentState.typeLink1,
-        typeLink2: currentState.typeLink2,
+        isZo: currentState.isZo,
         currentGroup: group,
       ));
     }

@@ -11,15 +11,14 @@ class CourseSelected extends AllGroupsState {
   final String typeLink1;
   final String courseName;
   final String currentGroup;
-
-  final String typeLink2;
+  final bool isZo;
 
   CourseSelected({
     required this.linkGroupMap,
     required this.courseName,
     required this.typeLink1,
     required this.currentGroup,
-    this.typeLink2 = '',
+    this.isZo = false,
   });
 }
 

@@ -7,6 +7,7 @@ import 'package:schedule/modules/settings/bloc/settings_cubit.dart';
 import 'package:schedule/modules/settings/bloc/settings_repository.dart';
 import 'package:schedule/modules/settings/settings_module.dart';
 import 'package:schedule/modules/students/students_module.dart';
+import 'package:schedule/modules/teachers/teachers_module.dart';
 
 class HomeModule extends Module {
   @override
@@ -24,5 +25,6 @@ class HomeModule extends Module {
         ChildRoute('/', child: (context, args) => HomePage()),
         ModuleRoute(AppRoutes.studentsRoute, module: StudentsModule()),
         ModuleRoute(AppRoutes.settingsRoute, module: SettingsModule()),
+        ModuleRoute(AppRoutes.teachersRoute, module: TeachersModule()),
       ];
 }

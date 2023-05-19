@@ -47,8 +47,7 @@ class HomePage extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      Modular.to
-                          .pushNamed(AppRoutes.studentsRoute);
+                      Modular.to.pushNamed(AppRoutes.studentsRoute);
                     },
                     //style: _elevatedButtonStyle,
                     child: _homeElevatedButton(
@@ -58,7 +57,7 @@ class HomePage extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // TODO Нажатие кнопки
+                      Modular.to.pushNamed(AppRoutes.teachersRoute);
                     },
                     //style: _elevatedButtonStyle,
                     child: _homeElevatedButton(

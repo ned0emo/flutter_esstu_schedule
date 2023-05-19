@@ -4,7 +4,7 @@ import 'package:schedule/modules/students/all_groups_bloc/all_groups_cubit.dart'
 import 'package:schedule/modules/students/all_groups_bloc/all_groups_repository.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_cubit.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_repository.dart';
-import 'package:schedule/modules/students/students_page.dart';
+import 'package:schedule/modules/students/views/students_page.dart';
 
 class StudentsModule extends Module{
   @override

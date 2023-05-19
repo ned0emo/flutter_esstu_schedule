@@ -47,7 +47,7 @@ class StudentsScheduleTab extends StatelessWidget {
           }
 
           return Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: _dayOfWeekCard(
               index,
               currentState.currentScheduleList[index + tabNum * numOfDays],
@@ -101,7 +101,7 @@ class StudentsScheduleTab extends StatelessWidget {
               side: const BorderSide(
                 color: Colors.transparent,
               ),
-              minimumSize: const Size(400, 50),
+              minimumSize: const Size(400, 60),
             ),
             child: Text(
               dayOfWeek,
@@ -114,21 +114,23 @@ class StudentsScheduleTab extends StatelessWidget {
           isCurrentDayOpened
               ? scheduleList.length <= lessonTimeList.length
                   ? Column(
-                      children: scheduleList.map((String lesson) {
-                        lessonNumber++;
+                      children: scheduleList.map(
+                            (String lesson) {
+                              lessonNumber++;
 
-                        return _lessonSection(
-                          lessonNumber + 1,
-                          lessonTimeList[lessonNumber],
-                          lesson,
-                          isCurrentDay && lessonNumber == currentLesson,
-                        );
-                      }).toList(),
+                              return _lessonSection(
+                                lessonNumber + 1,
+                                lessonTimeList[lessonNumber],
+                                lesson,
+                                isCurrentDay && lessonNumber == currentLesson,
+                              );
+                            },
+                          ).toList() +
+                          [const SizedBox(height: 10)],
                     )
                   : const Text(
                       'Ошибка загрузки расписания. Лист расписания переполнен')
               : const SizedBox(),
-          isCurrentDayOpened ? const SizedBox(height: 10) : const SizedBox()
         ],
       ),
     );
@@ -137,37 +139,45 @@ class StudentsScheduleTab extends StatelessWidget {
   /// Строка пары с номером и временем
   Widget _lessonSection(int lessonNumber, String lessonTime, String lesson,
       bool isCurrentLesson) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         children: [
           const Divider(),
+
+          ///Для вертиклаьных разделителей
           IntrinsicHeight(
             child: Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                  child: Center(
-                    child: Stack(
-                      alignment: AlignmentDirectional.center,
-                      children: [
-                        Icon(
-                          Icons.circle,
-                          color: isCurrentLesson
-                              ? const Color(0xFFFA8D62)
-                              : const Color(0xFF6EB5C0),
-                          size: 30,
-                        ),
-                        Text(
-                          lessonNumber.toString(),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
+                Center(
+                  child: Stack(
+                    alignment: AlignmentDirectional.center,
+                    children: [
+                      Icon(
+                        Icons.circle,
+                        color: isCurrentLesson
+                            ? const Color(0xFFFA8D62)
+                            : const Color(0xFF6EB5C0),
+                        size: 30,
+                      ),
+                      Text(
+                        lessonNumber.toString(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
                 const VerticalDivider(),
-                Text(lessonTime, textAlign: TextAlign.center),
+                SizedBox(
+                  height: 50,
+                  child: Center(
+                    child: Text(
+                      lessonTime,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
                 const VerticalDivider(),
                 Expanded(
                   child: Text(

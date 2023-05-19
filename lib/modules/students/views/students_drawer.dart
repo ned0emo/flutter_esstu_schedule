@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'all_groups_bloc/all_groups_cubit.dart';
-import 'current_group_bloc/current_group_cubit.dart';
+import 'package:schedule/modules/students/all_groups_bloc/all_groups_cubit.dart';
+import 'package:schedule/modules/students/current_group_bloc/current_group_cubit.dart';
 
 class StudentsDrawer extends StatelessWidget {
   const StudentsDrawer({super.key});
@@ -13,11 +12,11 @@ class StudentsDrawer extends StatelessWidget {
       children: [
         Container(
           color: Theme.of(context).colorScheme.primary,
-          child: SafeArea(
+          child: const SafeArea(
             child: DrawerHeader(
               margin: EdgeInsets.zero,
               child: Row(
-                children: const [
+                children: [
                   Text('meow'),
                 ],
               ),
@@ -134,7 +133,6 @@ class StudentsDrawer extends StatelessWidget {
 
   Widget _zoDrawerSection(BuildContext context) {
     const firstPartOfLink1 = '/zo1/';
-    const firstPartOfLink2 = '/zo2/';
 
     return Column(
       children: [
@@ -159,7 +157,7 @@ class StudentsDrawer extends StatelessWidget {
                   '${index + 1} курс',
                   3,
                   firstPartOfLink1,
-                  typeLink2: firstPartOfLink2,
+                  isZo: true,
                 );
                 Navigator.pop(context);
               },

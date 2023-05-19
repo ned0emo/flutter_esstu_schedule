@@ -3,11 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/modules/favorite/bloc/favorite_bloc.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_cubit.dart';
-import 'package:schedule/modules/students/students_schedule_tab.dart';
+import 'package:schedule/modules/students/views/students_schedule_tab.dart';
 
-class StudentsTabController extends StatelessWidget {
+class StudentsTabController extends StatefulWidget {
   const StudentsTabController({super.key});
 
+  @override
+  State<StatefulWidget> createState() => _StudentsTabControllerState();
+}
+
+class _StudentsTabControllerState extends State<StudentsTabController> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CurrentGroupCubit, CurrentGroupState>(
@@ -33,15 +38,18 @@ class StudentsTabController extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Добавлено в избранное'),
+                              duration: Duration(seconds: 1),
                             ),
                           );
                           return;
                         }
 
-                        if (state is FavoriteDoesNotExist && state.isNeedSnackBar) {
+                        if (state is FavoriteDoesNotExist &&
+                            state.isNeedSnackBar) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Удалено из избранного'),
+                              duration: Duration(seconds: 1),
                             ),
                           );
                           return;
@@ -101,31 +109,9 @@ class StudentsTabController extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (currentGroupState is CurrentGroupInitial) {
-          return Column(
-            children: [
-              Image.asset(
-                'assets/arrowToGroups.png',
-                height: 60,
-              ),
-              const Text(
-                'Выберите группу',
-                style: TextStyle(fontSize: 16),
-              ),
-              const Expanded(
-                child: Center(
-                  child: Text(
-                    'Текущая неделя выделена звездочкой ★',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ),
-            ],
-          );
-        }
-
         if (currentGroupState is CurrentGroupLoadingError) {
-          return Center(child: Text('Ошибка загрузки\n${currentGroupState.message}'));
+          return Center(
+              child: Text('Ошибка загрузки\n${currentGroupState.message}'));
         }
 
         return const Text('Неизвестная ошибка');
