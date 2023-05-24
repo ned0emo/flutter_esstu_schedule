@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'faculty_event.dart';
@@ -22,6 +23,7 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
         super(FacultyInitial()) {
     on<FacultyEvent>((event, emit) {});
     on<LoadFaculties>(_loadFaculties);
+    on<ChooseFaculty>(_chooseFaculty);
   }
 
   Future<void> _loadFaculties(
@@ -29,10 +31,12 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
     emit(FacultiesLoadingState());
     try {
       final siteTexts =
-          await _teachersRepository.loadFacultiesPage(bakLink, magLink);
-      final facultyDepartmentLinkMap = _createFacultyDepartmentLinkMap(siteTexts[0], siteTexts[1]);
+          await _teachersRepository.loadFacultiesPages(bakLink, link2: magLink);
+      final facultyDepartmentLinkMap =
+          _createFacultyDepartmentLinkMap(siteTexts[0], siteTexts[1]);
 
-      emit(FacultiesLoadedState(facultyDepartmentLinkMap: facultyDepartmentLinkMap));
+      emit(FacultiesLoadedState(
+          facultyDepartmentLinkMap: facultyDepartmentLinkMap));
     } on RangeError catch (exception) {
       emit(
           FacultiesErrorState('${exception.message}\n${exception.stackTrace}'));
@@ -46,27 +50,25 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
     int facultyWordExistingCheck = 0;
     Iterable<String> bakSiteList = [], magSiteList = [];
 
-    if(bakSiteText.contains('faculty')) {
+    if (bakSiteText.contains('faculty')) {
       bakSiteList = bakSiteText
-        .replaceAll(RegExp(r"<!--.*-->"), '')
-        .split('faculty')
-        .skip(1);
-    }
-    else{
+          .replaceAll(RegExp(r"<!--.*-->"), '')
+          .split('faculty')
+          .skip(1);
+    } else {
       facultyWordExistingCheck++;
     }
 
-    if(magSiteText.contains('faculty')) {
+    if (magSiteText.contains('faculty')) {
       magSiteList = magSiteText
-        .replaceAll(RegExp(r"<!--.*-->"), '')
-        .split('faculty')
-        .skip(1);
-    }
-    else{
+          .replaceAll(RegExp(r"<!--.*-->"), '')
+          .split('faculty')
+          .skip(1);
+    } else {
       facultyWordExistingCheck++;
     }
 
-    if(facultyWordExistingCheck > 1){
+    if (facultyWordExistingCheck > 1) {
       return {};
     }
 
@@ -76,14 +78,13 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
       for (String facultySection in siteList) {
         String facultyName;
 
-        try{
+        try {
           facultyName = facultySection.contains('id')
               ? facultySection.substring(
-              facultySection.indexOf(RegExp(r"[а-я]|[А-Я]")),
-              facultySection.indexOf('</h2>'))
+                  facultySection.indexOf(RegExp(r"[а-я]|[А-Я]")),
+                  facultySection.indexOf('</h2>'))
               : 'Прочее';
-        }
-        catch(e){
+        } catch (e) {
           facultyName = 'Не удалось распознать название факультета';
         }
 
@@ -98,15 +99,14 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
 
           try {
             link =
-                '/$linkName/${departmentSection.substring(
-                0, departmentSection.indexOf('"'))}';
+                '/$linkName/${departmentSection.substring(0, departmentSection.indexOf('"'))}';
             departmentName = departmentSection.substring(
                 departmentSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
                 departmentSection.indexOf('<'));
-          }
-          catch(e){
+          } catch (e) {
             link = '/$linkName/0.htm';
-            departmentName = 'Не удалось распознать ссылку и/или название кафедры';
+            departmentName =
+                'Не удалось распознать ссылку и/или название кафедры';
           }
 
           if (!departmentMap.keys.contains(departmentName)) {
@@ -123,5 +123,13 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
     fillMapByOneSiteText(magSiteList, 'spezialitet');
 
     return facultyMap;
+  }
+
+  Future<void> _chooseFaculty(
+      ChooseFaculty event, Emitter<FacultyState> emit) async {
+    emit(CurrentFacultyState(
+        facultyName: event.facultyName,
+        departmentsMap: event.departmentsMap,
+        weekNumber: (Jiffy().week + 1) % 2));
   }
 }

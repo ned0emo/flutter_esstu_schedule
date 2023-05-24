@@ -28,6 +28,12 @@ class _StudentsPageState extends State<StudentsPage> {
           if (state is CurrentGroupInitial) {
             final allGroupsState = Modular.get<AllGroupsCubit>().state;
             if (allGroupsState is CourseSelected) {
+
+              ///
+              ///Выбор учебной группы
+              ///
+              ///TODO: П Е Р Е Д Е Л А Т Ь
+              ///
               final group = allGroupsState.linkGroupMap.keys.elementAt(0);
               !allGroupsState.isZo
                   ? Modular.get<CurrentGroupCubit>().loadCurrentGroup(
