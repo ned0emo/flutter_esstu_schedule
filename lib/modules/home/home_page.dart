@@ -28,76 +28,78 @@ class HomePage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(8),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              GridView.count(
-                shrinkWrap: true,
-                primary: false,
-                padding: const EdgeInsets.all(15),
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-                crossAxisCount: 2,
-                children: <Widget>[
-                  Image.asset(
-                    'assets/newlogo.png',
-                    width: 160,
-                    height: 160,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Modular.to.pushNamed(AppRoutes.studentsRoute);
-                    },
-                    //style: _elevatedButtonStyle,
-                    child: _homeElevatedButton(
-                      'Студенты',
-                      FontAwesomeIcons.userGroup,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                GridView.count(
+                  shrinkWrap: true,
+                  primary: false,
+                  padding: const EdgeInsets.all(15),
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                  crossAxisCount: 2,
+                  children: <Widget>[
+                    Image.asset(
+                      'assets/newlogo.png',
+                      width: 160,
+                      height: 160,
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Modular.to.pushNamed(AppRoutes.teachersRoute);
-                    },
-                    //style: _elevatedButtonStyle,
-                    child: _homeElevatedButton(
-                      'Преподаватели',
-                      FontAwesomeIcons.graduationCap,
+                    ElevatedButton(
+                      onPressed: () {
+                        Modular.to.pushNamed(AppRoutes.studentsRoute);
+                      },
+                      //style: _elevatedButtonStyle,
+                      child: _homeElevatedButton(
+                        'Студенты',
+                        FontAwesomeIcons.userGroup,
+                      ),
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO Нажатие кнопки
-                    },
-                    //style: _elevatedButtonStyle,
-                    child: _homeElevatedButton(
-                      'Аудитории',
-                      FontAwesomeIcons.computer,
+                    ElevatedButton(
+                      onPressed: () {
+                        Modular.to.pushNamed(AppRoutes.teachersRoute);
+                      },
+                      //style: _elevatedButtonStyle,
+                      child: _homeElevatedButton(
+                        'Преподаватели',
+                        FontAwesomeIcons.graduationCap,
+                      ),
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO Нажатие кнопки
-                    },
-                    //style: _elevatedButtonStyle,
-                    child: _homeElevatedButton(
-                      'Избранное',
-                      Icons.star,
+                    ElevatedButton(
+                      onPressed: () {
+                        Modular.to.pushNamed(AppRoutes.classesRoute);
+                      },
+                      //style: _elevatedButtonStyle,
+                      child: _homeElevatedButton(
+                        'Аудитории',
+                        FontAwesomeIcons.computer,
+                      ),
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO Нажатие кнопки
-                    },
-                    //style: _elevatedButtonStyle,
-                    child: _homeElevatedButton(
-                      'Поиск',
-                      Icons.search,
+                    ElevatedButton(
+                      onPressed: () {
+                        // TODO Нажатие кнопки
+                      },
+                      //style: _elevatedButtonStyle,
+                      child: _homeElevatedButton(
+                        'Избранное',
+                        Icons.star,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    ElevatedButton(
+                      onPressed: () {
+                        // TODO Нажатие кнопки
+                      },
+                      //style: _elevatedButtonStyle,
+                      child: _homeElevatedButton(
+                        'Поиск',
+                        Icons.search,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

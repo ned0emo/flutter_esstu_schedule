@@ -17,7 +17,12 @@ class StudentsDrawer extends StatelessWidget {
               margin: EdgeInsets.zero,
               child: Row(
                 children: [
-                  Text('meow'),
+                  Expanded(
+                    child: Text(
+                      'Расписание учебных групп',
+                      style: TextStyle(color: Colors.white, fontSize: 32),
+                    ),
+                  ),
                 ],
               ),
             ),

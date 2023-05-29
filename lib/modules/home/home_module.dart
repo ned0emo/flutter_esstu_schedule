@@ -1,5 +1,6 @@
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/app_routes.dart';
+import 'package:schedule/modules/classrooms/classrooms_module.dart';
 import 'package:schedule/modules/favorite/bloc/favorite_bloc.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 import 'package:schedule/modules/home/home_page.dart';
@@ -26,5 +27,6 @@ class HomeModule extends Module {
         ModuleRoute(AppRoutes.studentsRoute, module: StudentsModule()),
         ModuleRoute(AppRoutes.settingsRoute, module: SettingsModule()),
         ModuleRoute(AppRoutes.teachersRoute, module: TeachersModule()),
+        ModuleRoute(AppRoutes.classesRoute, module: ClassroomsModule()),
       ];
 }

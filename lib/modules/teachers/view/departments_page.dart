@@ -31,8 +31,10 @@ class _DepartmentsState extends State<DepartmentsPage> {
                     state.departmentsMap.keys.elementAt(0)]![1]));
             return DefaultTabController(
               length: 2,
+              initialIndex: state.weekNumber,
               child: Scaffold(
-                appBar: AppBar(title: _appBarText(state.abbreviatedFacultyName)),
+                appBar:
+                    AppBar(title: _appBarText(state.abbreviatedFacultyName)),
                 body: Column(
                   children: [
                     _dropDownButton(),
@@ -128,12 +130,16 @@ class _DepartmentsState extends State<DepartmentsPage> {
       children: [
         Container(
           color: Theme.of(context).colorScheme.primary,
-          child: const SafeArea(
+          child: SafeArea(
             child: DrawerHeader(
               margin: EdgeInsets.zero,
               child: Row(
                 children: [
-                  Text('meow'),
+                  Expanded(
+                      child: Text(
+                    facultyState.facultyName,
+                    style: const TextStyle(color: Colors.white, fontSize: 24),
+                  )),
                 ],
               ),
             ),
@@ -144,7 +150,7 @@ class _DepartmentsState extends State<DepartmentsPage> {
             child: Column(
               children: [
                 const Padding(
-                  padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
+                  padding: EdgeInsets.fromLTRB(0, 15, 0, 15),
                   child: Text(
                     'Кафедры',
                     style: TextStyle(

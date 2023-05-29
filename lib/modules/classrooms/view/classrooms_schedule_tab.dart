@@ -1,18 +1,19 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart';
+import 'package:schedule/modules/classrooms/bloc/classrooms_bloc.dart';
 
-class DepartmentScheduleTab extends StatefulWidget {
+class ClassroomScheduleTab extends StatefulWidget {
   final int tabNum;
 
-  const DepartmentScheduleTab({super.key, this.tabNum = 0});
+  const ClassroomScheduleTab({super.key, required this.tabNum});
 
   @override
-  State<StatefulWidget> createState() => _DepartmentScheduleTabState();
+  State<StatefulWidget> createState() => _ClassroomScheduleTabState();
 }
 
-class _DepartmentScheduleTabState extends State<DepartmentScheduleTab> {
+class _ClassroomScheduleTabState extends State<ClassroomScheduleTab> {
   final List<String> lessonTimeList = [
     '9:00\n10:35',
     '10:45\n12:20',
@@ -25,17 +26,9 @@ class _DepartmentScheduleTabState extends State<DepartmentScheduleTab> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DepartmentBloc, DepartmentState>(
+    return BlocBuilder<ClassroomsBloc, ClassroomsState>(
       builder: (context, state) {
-        if (state is DepartmentLoading || state is DepartmentInitial) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (state is DepartmentError) {
-          return Center(child: Text(state.message));
-        }
-
-        if (state is DepartmentLoaded) {
+        if (state is ClassroomsLoadedState) {
           final currentDay = Jiffy().dateTime.weekday - 1;
 
           return ListView.builder(
@@ -47,11 +40,11 @@ class _DepartmentScheduleTabState extends State<DepartmentScheduleTab> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: _dayOfWeekCard(
                   index,
-                  state.teachersScheduleMap[state.currentTeacher]![
-                      index + widget.tabNum * 6],
+                  state.scheduleMap[state.currentBuildingName]![
+                      state.currentClassroom]![index + widget.tabNum * 6],
                   index == currentDay,
                   dayOfWeek,
-                  context,
+                  state,
                 ),
               );
             },
@@ -64,21 +57,15 @@ class _DepartmentScheduleTabState extends State<DepartmentScheduleTab> {
     );
   }
 
-  Widget _dayOfWeekCard(int currentCardIndex, List<String> scheduleList,
-      bool isCurrentDay, String dayOfWeek, BuildContext context) {
+  Widget _dayOfWeekCard(int dayOfWeekIndex, List<String> scheduleList,
+      bool isCurrentDay, String dayOfWeek, ClassroomsLoadedState state) {
     /// номер пары. начинается с -1 потому что в цикле добавления пары
     /// в карточку первым действием он плюсуется. Так как это значение
     /// также используется как индекс массива
     int lessonNumber = -1;
 
-    int currentLesson = -1;
-    bool isCurrentDayOpened = false;
-
-    final currentState = BlocProvider.of<DepartmentBloc>(context).state;
-    if (currentState is DepartmentLoaded) {
-      isCurrentDayOpened = currentState.openedDayIndex == currentCardIndex;
-      currentLesson = currentState.currentLesson;
-    }
+    final currentLesson = state.currentLesson;
+    bool isCurrentDayOpened = state.openedDayIndex == dayOfWeekIndex;
 
     /// Карточка дня недели с расписанием
     ///
@@ -94,8 +81,8 @@ class _DepartmentScheduleTabState extends State<DepartmentScheduleTab> {
         children: [
           OutlinedButton(
             onPressed: () {
-              BlocProvider.of<DepartmentBloc>(context)
-                  .add(ChangeOpenedDay(currentCardIndex));
+              BlocProvider.of<ClassroomsBloc>(context)
+                  .add(ChangeOpenedDay(dayOfWeekIndex));
             },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(

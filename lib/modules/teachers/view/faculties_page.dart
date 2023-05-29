@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -22,57 +23,42 @@ class _FacultiesState extends State<FacultiesPage> {
               create: (context) =>
                   Modular.get<FacultyBloc>()..add(LoadFaculties())),
         ],
-        child: SingleChildScrollView(
-          child: BlocListener<FacultyBloc, FacultyState>(
-            listener: (context, state) {
-              if (state is CurrentFacultyState) {
-                Modular.to.pushReplacementNamed(
-                    AppRoutes.teachersRoute + AppRoutes.departmentsRoute);
-              }
-            },
-            child: BlocBuilder<FacultyBloc, FacultyState>(
-              builder: (context, state) {
-                if (state is FacultiesLoadingState) {
-                  return const Center(
-                    child: Column(
-                      children: [
-                        SizedBox(height: 50),
-                        CircularProgressIndicator(),
-                      ],
-                    ),
-                  );
+        child: Center(
+          child: SingleChildScrollView(
+            child: BlocListener<FacultyBloc, FacultyState>(
+              listener: (context, state) {
+                if (state is CurrentFacultyState) {
+                  Modular.to.pushReplacementNamed(
+                      AppRoutes.teachersRoute + AppRoutes.departmentsRoute);
                 }
-
-                if (state is FacultiesLoadedState) {
-                  final map = state.facultyDepartmentLinkMap;
-                  return Center(
-                    child: Column(
-                      children: List.generate(
-                          map.keys.length,
-                          (index) => _facultyButton(map.keys.elementAt(index),
-                              map[map.keys.elementAt(index)]!, context)),
-                    ),
-                  );
-                }
-
-                if (state is FacultiesErrorState) {
-                  return Center(
-                      child: Column(
-                    children: [
-                      const SizedBox(height: 50),
-                      Text(state.message),
-                    ],
-                  ));
-                }
-
-                return const Center(
-                    child: Column(
-                  children: [
-                    SizedBox(height: 50),
-                    Text('Неизвестная ошибка'),
-                  ],
-                ));
               },
+              child: BlocBuilder<FacultyBloc, FacultyState>(
+                builder: (context, state) {
+                  if (state is FacultiesLoadingState) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  if (state is FacultiesLoadedState) {
+                    final map = state.facultyDepartmentLinkMap;
+                    return Center(
+                      child: Column(
+                        children: List.generate(
+                            map.keys.length,
+                            (index) => _facultyButton(map.keys.elementAt(index),
+                                map[map.keys.elementAt(index)]!, context)),
+                      ),
+                    );
+                  }
+
+                  if (state is FacultiesErrorState) {
+                    return Center(child: Text(state.message));
+                  }
+
+                  return const Center(child: Text('Неизвестная ошибка'));
+                },
+              ),
             ),
           ),
         ),

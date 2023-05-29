@@ -36,8 +36,14 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
       LoadDepartment event, Emitter<DepartmentState> emit) async {
     emit(DepartmentLoading());
 
-    final departmentsPages = await _teachersRepository
-        .loadDepartmentPages(event.link1, link2: event.link2);
+    List<String> departmentsPages = [];
+    try {
+      departmentsPages = await _teachersRepository
+          .loadDepartmentPages(event.link1, link2: event.link2);
+    } catch (e) {
+      emit(DepartmentError(message: e.runtimeType.toString()));
+      return;
+    }
 
     final Map<String, List<List<String>>> teachersScheduleMap = {};
 
@@ -46,55 +52,57 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
           page.replaceAll(' COLOR="#0000ff"', '').split('ff00ff">').skip(1);
 
       for (String teacherSection in splittedPage) {
-        final teacherName = teacherSection.substring(
-            teacherSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
-            teacherSection.indexOf('</P>'));
-
-        bool isNewTeacher = false;
-        if (teachersScheduleMap[teacherName] == null) {
-          teachersScheduleMap[teacherName] = [];
-          isNewTeacher = true;
+        String teacherName = '';
+        try {
+          teacherName = teacherSection.substring(
+              teacherSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
+              teacherSection.indexOf('</P>'));
+        } catch (e) {
+          teacherName = e.runtimeType.toString();
         }
 
-        final daysOfWeek =
+        if (teachersScheduleMap[teacherName] == null) {
+          teachersScheduleMap[teacherName] = [
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+            ['', '', '', '', '', ''],
+          ];
+        }
+
+        final daysOfWeekFromPage =
             teacherSection.split('SIZE=2><P ALIGN="CENTER">').skip(1);
 
         int j = 0;
-        for (String dayOfWeek in daysOfWeek) {
-          int i = 0;
+        for (String dayOfWeek in daysOfWeekFromPage) {
+          if(j == 12) break;
 
           final lessons = dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
 
-          if (isNewTeacher) {
-            final List<String> clearLessons = [];
+          int i = 0;
+          for (String lessonSection in lessons) {
+            final lesson = lessonSection
+                .substring(0, lessonSection.indexOf('</FONT>'))
+                .trim();
 
-            for (String lessonSection in lessons) {
-              clearLessons.add(lessonSection
-                  .substring(0, lessonSection.indexOf('</FONT>'))
-                  .trim());
-              i++;
-              if (i > 5) {
-                break;
-              }
+            if (teachersScheduleMap[teacherName]![j][i].length <
+                lesson.length) {
+              teachersScheduleMap[teacherName]![j][i] = lesson;
             }
-
-            teachersScheduleMap[teacherName]!.add(clearLessons);
-          } else {
-            for (String lessonSection in lessons) {
-              final lesson = lessonSection
-                  .substring(0, lessonSection.indexOf('</FONT>'))
-                  .trim();
-
-              if (teachersScheduleMap[teacherName]![j][i].length <
-                  lesson.length) {
-                teachersScheduleMap[teacherName]![j][i] = lesson;
-              }
-              i++;
-              if (i > 5) {
-                break;
-              }
+            i++;
+            if (i > 5) {
+              break;
             }
           }
+
           j++;
         }
       }
