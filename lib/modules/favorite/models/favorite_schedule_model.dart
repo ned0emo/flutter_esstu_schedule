@@ -14,34 +14,49 @@ import 'dart:convert';
 /// [daysOfWeekList] - лист дней недели для заочников
 ///
 class FavoriteScheduleModel {
-  final String? name;
+  final String name;
+  final String scheduleType;
+  final List<List<String>> scheduleList;
   final String? link1;
   final String? link2;
-  final List<List<String>>? scheduleList;
   final List<String>? daysOfWeekList;
 
   FavoriteScheduleModel({
     required this.name,
+    required this.scheduleType,
+    required this.scheduleList,
     this.link1,
     this.link2,
-    required this.scheduleList,
     this.daysOfWeekList,
   });
 
   static fromJson(Map<String, dynamic> json) => FavoriteScheduleModel(
         name: json['name'],
+        scheduleType: json['scheduleType'],
+        scheduleList: _listConvert(json['scheduleList']),
         link1: json['link1'],
         link2: json['link2'],
-        scheduleList: json['scheduleList'],
+        daysOfWeekList: json['daysOfWeekList'],
       );
 
   static fromString(String str) => fromJson(jsonDecode(str));
 
+  static List<List<String>> _listConvert(List<dynamic> list){
+    List<List<String>> newList = [];
+    for(dynamic it in list){
+      newList.add(List<String>.from(it));
+    }
+
+    return newList;
+  }
+
   Map<String, dynamic> toJson() => {
         'name': name,
+        'scheduleType': scheduleType,
+        'scheduleList': scheduleList,
         'link1': link1,
         'link2': link2,
-        'scheduleList': scheduleList
+        'daysOfWeekList': daysOfWeekList,
       };
 
   @override

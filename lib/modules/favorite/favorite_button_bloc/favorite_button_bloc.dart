@@ -5,33 +5,28 @@ import 'package:meta/meta.dart';
 import 'package:schedule/modules/favorite/models/favorite_schedule_model.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
-part 'favorite_event.dart';
+part 'favorite_button_event.dart';
 
-part 'favorite_state.dart';
+part 'favorite_button_state.dart';
 
-class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
+class FavoriteButtonBloc extends Bloc<FavoriteButtonEvent, FavoriteButtonState> {
   final FavoriteRepository _favoriteRepository;
 
-  FavoriteBloc(FavoriteRepository repository)
+  FavoriteButtonBloc(FavoriteRepository repository)
       : _favoriteRepository = repository,
         super(FavoriteInitial()) {
-    on<LoadFavoriteList>(_loadFavoriteList);
     on<SaveSchedule>(_saveSchedule);
     on<CheckSchedule>(_checkSchedule);
     on<DeleteSchedule>(_deleteSchedule);
   }
 
-  Future<void> _loadFavoriteList(
-      LoadFavoriteList event, Emitter<FavoriteState> emit) async {
-    //emit(FavoriteListLoading());
-  }
-
   Future<void> _saveSchedule(
-      SaveSchedule event, Emitter<FavoriteState> emit) async {
+      SaveSchedule event, Emitter<FavoriteButtonState> emit) async {
     await _favoriteRepository.saveSchedule(
         event.name,
         FavoriteScheduleModel(
           name: event.name,
+          scheduleType: event.scheduleType,
           link1: event.link1,
           link2: event.link2,
           scheduleList: event.scheduleList,
@@ -46,7 +41,7 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
   }
 
   Future<void> _deleteSchedule(
-      DeleteSchedule event, Emitter<FavoriteState> emit) async {
+      DeleteSchedule event, Emitter<FavoriteButtonState> emit) async {
     await _favoriteRepository.deleteSchedule(event.name);
 
     if (await _favoriteRepository.checkSchedule(event.name)) {
@@ -57,7 +52,7 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
   }
 
   Future<void> _checkSchedule(
-      CheckSchedule event, Emitter<FavoriteState> emit) async {
+      CheckSchedule event, Emitter<FavoriteButtonState> emit) async {
     if (await _favoriteRepository.checkSchedule(event.name)) {
       emit(FavoriteExist(isNeedSnackBar: false));
     } else {

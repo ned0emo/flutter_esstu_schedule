@@ -78,7 +78,7 @@ class HomePage extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // TODO Нажатие кнопки
+                        Modular.to.pushNamed(AppRoutes.favoriteListRoute);
                       },
                       //style: _elevatedButtonStyle,
                       child: _homeElevatedButton(

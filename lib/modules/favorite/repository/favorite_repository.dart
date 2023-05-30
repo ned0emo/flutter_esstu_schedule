@@ -4,12 +4,10 @@ import 'package:schedule/modules/favorite/models/favorite_schedule_model.dart';
 class FavoriteRepository {
   final _storage = const FlutterSecureStorage();
 
-  FavoriteRepository();
-
   Future<List<String>> getFavoriteList() async {
     final list = await _storage.readAll();
 
-    list.removeWhere((key, value) => !key.contains('schedule'));
+    list.removeWhere((key, value) => key.contains('service'));
 
     return list.keys.toList();
   }

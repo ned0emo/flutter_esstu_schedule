@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:schedule/modules/favorite/bloc/favorite_bloc.dart';
+import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/students/all_groups_bloc/all_groups_cubit.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_cubit.dart';
 import 'package:schedule/modules/students/views/students_drawer.dart';
@@ -21,7 +21,7 @@ class _StudentsPageState extends State<StudentsPage> {
       providers: [
         BlocProvider(create: (context) => Modular.get<AllGroupsCubit>()),
         BlocProvider(create: (context) => Modular.get<CurrentGroupCubit>()),
-        BlocProvider(create: (context) => Modular.get<FavoriteBloc>()),
+        BlocProvider(create: (context) => Modular.get<FavoriteButtonBloc>()),
       ],
       child: BlocListener<CurrentGroupCubit, CurrentGroupState>(
         listener: (context, state) {
@@ -32,9 +32,11 @@ class _StudentsPageState extends State<StudentsPage> {
               ///
               ///Выбор учебной группы
               ///
-              ///TODO: П Е Р Е Д Е Л А Т Ь
+              ///TODO: П Е Р Е Д Е Л А Т Ь ???
               ///
               final group = allGroupsState.linkGroupMap.keys.elementAt(0);
+              Modular.get<FavoriteButtonBloc>().add(CheckSchedule(name: group));
+
               !allGroupsState.isZo
                   ? Modular.get<CurrentGroupCubit>().loadCurrentGroup(
                       allGroupsState.typeLink1 +
@@ -101,12 +103,13 @@ class _StudentsPageState extends State<StudentsPage> {
                 ///
                 ///Выбор учебной группы
                 ///
-                ///TODO: П Е Р Е Д Е Л А Т Ь
+                ///TODO: П Е Р Е Д Е Л А Т Ь ???
                 ///
                 onChanged: (value) {
                   if (value == null) return;
 
                   Modular.get<AllGroupsCubit>().selectGroup(value);
+                  Modular.get<FavoriteButtonBloc>().add(CheckSchedule(name: value));
 
                   !state.isZo
                       ? Modular.get<CurrentGroupCubit>().loadCurrentGroup(
@@ -114,8 +117,6 @@ class _StudentsPageState extends State<StudentsPage> {
                           value)
                       : Modular.get<CurrentGroupCubit>().loadCurrentGroup(
                           (state.linkGroupMap[value] ?? ''), value);
-
-                  Modular.get<FavoriteBloc>().add(CheckSchedule(name: value));
                 },
               ),
             ),

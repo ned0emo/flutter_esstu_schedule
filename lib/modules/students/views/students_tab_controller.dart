@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:schedule/modules/favorite/bloc/favorite_bloc.dart';
+import 'package:schedule/core/schedule_type.dart';
+import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_cubit.dart';
 import 'package:schedule/modules/students/views/students_schedule_tab.dart';
 
@@ -32,7 +33,7 @@ class _StudentsTabControllerState extends State<StudentsTabController> {
                       ),
                     ),
                     floatingActionButton:
-                        BlocListener<FavoriteBloc, FavoriteState>(
+                        BlocListener<FavoriteButtonBloc, FavoriteButtonState>(
                       listener: (context, state) {
                         if (state is FavoriteExist && state.isNeedSnackBar) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -55,22 +56,25 @@ class _StudentsTabControllerState extends State<StudentsTabController> {
                           return;
                         }
                       },
-                      child: BlocBuilder<FavoriteBloc, FavoriteState>(
+                      child: BlocBuilder<FavoriteButtonBloc, FavoriteButtonState>(
                         builder: (context, state) {
                           return FloatingActionButton(
                             onPressed: () {
                               if (state is FavoriteExist) {
-                                Modular.get<FavoriteBloc>().add(DeleteSchedule(
+                                Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
                                     name: currentGroupState.name));
                                 return;
                               }
 
                               if (state is FavoriteDoesNotExist) {
-                                Modular.get<FavoriteBloc>().add(SaveSchedule(
-                                    name: currentGroupState.name,
-                                    link1: currentGroupState.scheduleFullLink,
-                                    scheduleList:
-                                        currentGroupState.currentScheduleList));
+                                Modular.get<FavoriteButtonBloc>().add(SaveSchedule(
+                                  name: currentGroupState.name,
+                                  scheduleType: ScheduleType.student,
+                                  scheduleList:
+                                      currentGroupState.currentScheduleList,
+                                  link1: currentGroupState.scheduleFullLink,
+                                  daysOfWeekList: currentGroupState.daysOfWeekList,
+                                ));
                               }
                             },
                             child: state is FavoriteExist
