@@ -33,21 +33,25 @@ class FavoriteScheduleModel {
   static fromJson(Map<String, dynamic> json) => FavoriteScheduleModel(
         name: json['name'],
         scheduleType: json['scheduleType'],
-        scheduleList: _listConvert(json['scheduleList']),
+        scheduleList: _scheduleListConvert(json['scheduleList']),
         link1: json['link1'],
         link2: json['link2'],
-        daysOfWeekList: json['daysOfWeekList'],
+        daysOfWeekList: _daysOfWeekListConvert(json['daysOfWeekList']),
       );
 
   static fromString(String str) => fromJson(jsonDecode(str));
 
-  static List<List<String>> _listConvert(List<dynamic> list){
+  static List<List<String>> _scheduleListConvert(List<dynamic> list){
     List<List<String>> newList = [];
     for(dynamic it in list){
       newList.add(List<String>.from(it));
     }
 
     return newList;
+  }
+
+  static List<String>? _daysOfWeekListConvert(List<dynamic>? list){
+    return list != null ? List<String>.from(list) : null;
   }
 
   Map<String, dynamic> toJson() => {

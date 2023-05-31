@@ -50,21 +50,25 @@ class FavoriteScheduleBloc
       }
 
       emit(FavoriteScheduleLoaded(
-          currentScheduleName: scheduleModel.name,
-          scheduleList: scheduleModel.scheduleList,
-          openedDayIndex: Jiffy().dateTime.weekday - 1,
-          currentLesson: currentLesson,
-          weekNumber: (Jiffy().week + 1) % 2));
+        currentScheduleName: scheduleModel.name,
+        scheduleList: scheduleModel.scheduleList,
+        openedDayIndex: Jiffy().dateTime.weekday - 1,
+        currentLesson: currentLesson,
+        weekNumber: (Jiffy().week + 1) % 2,
+        customDaysOfWeek: scheduleModel.daysOfWeekList,
+      ));
     } on TypeError catch (e) {
-      emit(FavoriteScheduleError('${e.runtimeType.toString()}\n${e.stackTrace}'));
-    }catch (e) {
+      emit(FavoriteScheduleError(
+          '${e.runtimeType.toString()}\n${e.stackTrace}'));
+    } catch (e) {
       emit(FavoriteScheduleError(e.runtimeType.toString()));
     }
   }
 
-  Future<void> _changeOpenedDay(ChangeOpenedDay event, Emitter<FavoriteScheduleState> emit) async{
+  Future<void> _changeOpenedDay(
+      ChangeOpenedDay event, Emitter<FavoriteScheduleState> emit) async {
     final currentState = state;
-    if(currentState is FavoriteScheduleLoaded){
+    if (currentState is FavoriteScheduleLoaded) {
       emit(currentState.copyWith(openedDayIndex: event.dayIndex));
     }
   }

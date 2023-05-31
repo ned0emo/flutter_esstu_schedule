@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:schedule/core/schedule_type.dart';
+import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart';
 import 'package:schedule/modules/teachers/faculties_bloc/faculty_bloc.dart';
 import 'package:schedule/modules/teachers/view/department_schedule_tab.dart';
@@ -19,6 +21,7 @@ class _DepartmentsState extends State<DepartmentsPage> {
       providers: [
         BlocProvider(create: (context) => Modular.get<FacultyBloc>()),
         BlocProvider(create: (context) => Modular.get<DepartmentBloc>()),
+        BlocProvider(create: (context) => Modular.get<FavoriteButtonBloc>()),
       ],
       child: BlocBuilder<FacultyBloc, FacultyState>(
         builder: (context, state) {
@@ -66,6 +69,7 @@ class _DepartmentsState extends State<DepartmentsPage> {
                   labelStyle: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w500),
                 ),
+                floatingActionButton: _floatingActionButton(),
               ),
             );
           }
@@ -197,6 +201,69 @@ class _DepartmentsState extends State<DepartmentsPage> {
 
         return Text(facultyName);
       },
+    );
+  }
+
+  Widget _floatingActionButton() {
+    return BlocListener<FavoriteButtonBloc, FavoriteButtonState>(
+      listener: (context, state) {
+        if (state is FavoriteExist && state.isNeedSnackBar) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Добавлено в избранное'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+          return;
+        }
+
+        if (state is FavoriteDoesNotExist && state.isNeedSnackBar) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Удалено из избранного'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+          return;
+        }
+      },
+      child: BlocBuilder<DepartmentBloc, DepartmentState>(
+        builder: (context, departmentState) {
+          return BlocBuilder<FavoriteButtonBloc, FavoriteButtonState>(
+            builder: (context, state) {
+              return FloatingActionButton(
+                onPressed: departmentState is DepartmentLoaded
+                    ? () {
+                        if (departmentState.currentTeacher == null) {
+                          return;
+                        }
+
+                        if (state is FavoriteExist) {
+                          Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
+                              name: departmentState.currentTeacher!));
+                          return;
+                        }
+
+                        if (state is FavoriteDoesNotExist) {
+                          Modular.get<FavoriteButtonBloc>().add(SaveSchedule(
+                            name: departmentState.currentTeacher!,
+                            scheduleType: ScheduleType.teacher,
+                            scheduleList: departmentState.teachersScheduleMap[
+                                departmentState.currentTeacher!]!,
+                            link1: departmentState.link1,
+                            link2: departmentState.link2,
+                          ));
+                        }
+                      }
+                    : null,
+                child: state is FavoriteExist
+                    ? const Icon(Icons.star)
+                    : const Icon(Icons.star_border),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

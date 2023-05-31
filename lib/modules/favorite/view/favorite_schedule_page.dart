@@ -34,19 +34,21 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage> {
 
           if (state is FavoriteScheduleLoaded) {
             return DefaultTabController(
-              length: 2,
+              length: state.numOfWeeks,
               initialIndex: state.weekNumber,
               child: Scaffold(
                 appBar: AppBar(title: Text(state.currentScheduleName)),
-                body: const TabBarView(children: [
-                  FavoriteScheduleTab(tabNum: 0),
-                  FavoriteScheduleTab(tabNum: 1),
-                ]),
+                body: TabBarView(
+                    children: List.generate(
+                  state.numOfWeeks,
+                  (index) => FavoriteScheduleTab(tabNum: index),
+                )),
                 bottomNavigationBar: TabBar(
                   tabs: List.generate(
-                    2,
+                    state.numOfWeeks,
                     (index) {
-                      final star = index == state.weekNumber ? ' ★' : '';
+                      final star =
+                          !state.isZo && index == state.weekNumber ? ' ★' : '';
                       return Tab(
                         child: Text(
                           '${index + 1} неделя$star',

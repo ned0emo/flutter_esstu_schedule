@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 
@@ -42,21 +40,23 @@ class _FavoriteScheduleTabState extends State<FavoriteScheduleTab> {
 
           return ListView.builder(
             itemBuilder: (context, index) {
-              String? dayOfWeek;
-              dayOfWeek = state.daysOfWeek[index];
+              String dayOfWeek = state.customDaysOfWeek == null
+                  ? state.daysOfWeek[index]
+                  : state.customDaysOfWeek![index];
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: _dayOfWeekCard(
                   index,
-                  state.scheduleList[index + widget.tabNum * 6],
+                  state.scheduleList[index + widget.tabNum * state.numOfDays],
                   index == currentDay,
                   dayOfWeek,
                   state,
+                  context,
                 ),
               );
             },
-            itemCount: 6,
+            itemCount: state.numOfDays,
           );
         }
 
@@ -65,8 +65,14 @@ class _FavoriteScheduleTabState extends State<FavoriteScheduleTab> {
     );
   }
 
-  Widget _dayOfWeekCard(int currentCardIndex, List<String> scheduleList,
-      bool isCurrentDay, String dayOfWeek, FavoriteScheduleLoaded state) {
+  Widget _dayOfWeekCard(
+    int currentCardIndex,
+    List<String> scheduleList,
+    bool isCurrentDay,
+    String dayOfWeek,
+    FavoriteScheduleLoaded state,
+    BuildContext context,
+  ) {
     /// номер пары. начинается с -1 потому что в цикле добавления пары
     /// в карточку первым действием он плюсуется. Так как это значение
     /// также используется как индекс массива
@@ -89,7 +95,7 @@ class _FavoriteScheduleTabState extends State<FavoriteScheduleTab> {
         children: [
           OutlinedButton(
             onPressed: () {
-              Modular.get<FavoriteScheduleBloc>()
+              BlocProvider.of<FavoriteScheduleBloc>(context)
                   .add(ChangeOpenedDay(currentCardIndex));
             },
             style: OutlinedButton.styleFrom(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart';
 
 class DepartmentScheduleTab extends StatefulWidget {
@@ -36,6 +38,11 @@ class _DepartmentScheduleTabState extends State<DepartmentScheduleTab> {
         }
 
         if (state is DepartmentLoaded) {
+          if (state.currentTeacher != null) {
+            Modular.get<FavoriteButtonBloc>()
+                .add(CheckSchedule(name: state.currentTeacher!));
+          }
+          
           final currentDay = Jiffy().dateTime.weekday - 1;
 
           return ListView.builder(

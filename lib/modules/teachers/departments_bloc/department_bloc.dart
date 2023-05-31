@@ -127,6 +127,8 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
     emit(DepartmentLoaded(
       departmentName: event.departmentName,
       teachersScheduleMap: teachersScheduleMap,
+      link1: event.link1,
+      link2: event.link2,
       currentLesson: currentLesson,
       openedDayIndex: Jiffy().dateTime.weekday - 1,
       currentTeacher: teachersScheduleMap.keys.elementAt(0),
