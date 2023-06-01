@@ -240,7 +240,8 @@ class _DepartmentsState extends State<DepartmentsPage> {
 
                         if (state is FavoriteExist) {
                           Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
-                              name: departmentState.currentTeacher!));
+                              name: departmentState.currentTeacher!,
+                              scheduleType: ScheduleType.teacher));
                           return;
                         }
 

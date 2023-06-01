@@ -2,32 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_cubit.dart';
 
 class StudentsScheduleTab extends StatelessWidget {
-  StudentsScheduleTab({super.key, required this.tabNum});
+  const StudentsScheduleTab({super.key, required this.tabNum});
 
   final int tabNum;
-
-  final daysOfWeekList = [
-    'Понедельник',
-    'Вторник',
-    'Среда',
-    'Четверг',
-    'Пятница',
-    'Суббота',
-    'Воскресенье',
-  ];
-
-  final List<String> lessonTimeList = [
-    '9:00\n10:35',
-    '10:45\n12:20',
-    '13:00\n14:35',
-    '14:45\n16:20',
-    '16:25\n18:00',
-    '18:05\n19:40',
-    '19:45\n21:20',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +20,11 @@ class StudentsScheduleTab extends StatelessWidget {
 
       return ListView.builder(
         itemBuilder: (context, index) {
-          String? dayOfWeek;
+          String dayOfWeek;
           try {
-            dayOfWeek = currentState.daysOfWeekList?[index + tabNum * 7];
+            dayOfWeek = currentState.daysOfWeekList?[index + tabNum * 7] ?? ScheduleTimeData.daysOfWeek[index];
           } catch (e) {
-            dayOfWeek = daysOfWeekList[index];
+            dayOfWeek = ScheduleTimeData.daysOfWeek[index];
           }
 
           return Padding(
@@ -52,7 +33,7 @@ class StudentsScheduleTab extends StatelessWidget {
               index,
               currentState.currentScheduleList[index + tabNum * numOfDays],
               index == currentDay,
-              dayOfWeek ?? daysOfWeekList[index],
+              dayOfWeek,
               context,
             ),
           );
@@ -112,7 +93,7 @@ class StudentsScheduleTab extends StatelessWidget {
           /// Если день открыт и лист расписания не переполнен,
           /// то создаем виджеты для предметов
           isCurrentDayOpened
-              ? scheduleList.length <= lessonTimeList.length
+              ? scheduleList.length <= ScheduleTimeData.lessonTimeList.length
                   ? Column(
                       children: scheduleList.map(
                             (String lesson) {
@@ -120,7 +101,7 @@ class StudentsScheduleTab extends StatelessWidget {
 
                               return _lessonSection(
                                 lessonNumber + 1,
-                                lessonTimeList[lessonNumber],
+                                ScheduleTimeData.lessonTimeList[lessonNumber],
                                 lesson,
                                 isCurrentDay && lessonNumber == currentLesson,
                               );

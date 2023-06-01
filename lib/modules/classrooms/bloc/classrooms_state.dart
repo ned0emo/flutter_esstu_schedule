@@ -1,16 +1,7 @@
 part of 'classrooms_bloc.dart';
 
 @immutable
-abstract class ClassroomsState {
-  final daysOfWeek = [
-    'Понедельник',
-    'Вторник',
-    'Среда',
-    'Четверг',
-    'Пятница',
-    'Суббота',
-  ];
-}
+abstract class ClassroomsState {}
 
 class ClassroomsInitial extends ClassroomsState {}
 

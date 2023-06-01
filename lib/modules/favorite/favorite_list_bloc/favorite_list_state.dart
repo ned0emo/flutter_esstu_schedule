@@ -8,9 +8,9 @@ class FavoriteListInitial extends FavoriteListState {}
 class FavoriteListLoading extends FavoriteListState {}
 
 class FavoriteListLoaded extends FavoriteListState {
-  final List<String> favoriteList;
+  final Map<String, List<String>> favoriteListMap;
 
-  FavoriteListLoaded(this.favoriteList);
+  FavoriteListLoaded(this.favoriteListMap);
 }
 
 class FavoriteListError extends FavoriteListState {

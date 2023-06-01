@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/students/all_groups_bloc/all_groups_cubit.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_cubit.dart';
@@ -28,14 +29,16 @@ class _StudentsPageState extends State<StudentsPage> {
           if (state is CurrentGroupInitial) {
             final allGroupsState = Modular.get<AllGroupsCubit>().state;
             if (allGroupsState is CourseSelected) {
-
               ///
               ///Выбор учебной группы
               ///
               ///TODO: П Е Р Е Д Е Л А Т Ь ???
               ///
               final group = allGroupsState.linkGroupMap.keys.elementAt(0);
-              Modular.get<FavoriteButtonBloc>().add(CheckSchedule(name: group));
+              Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
+                name: group,
+                scheduleType: ScheduleType.student,
+              ));
 
               !allGroupsState.isZo
                   ? Modular.get<CurrentGroupCubit>().loadCurrentGroup(
@@ -109,7 +112,10 @@ class _StudentsPageState extends State<StudentsPage> {
                   if (value == null) return;
 
                   Modular.get<AllGroupsCubit>().selectGroup(value);
-                  Modular.get<FavoriteButtonBloc>().add(CheckSchedule(name: value));
+                  Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
+                    name: value,
+                    scheduleType: ScheduleType.student,
+                  ));
 
                   !state.isZo
                       ? Modular.get<CurrentGroupCubit>().loadCurrentGroup(

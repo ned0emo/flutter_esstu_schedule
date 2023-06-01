@@ -2,14 +2,6 @@ part of 'department_bloc.dart';
 
 @immutable
 abstract class DepartmentState {
-  final daysOfWeek = [
-    'Понедельник',
-    'Вторник',
-    'Среда',
-    'Четверг',
-    'Пятница',
-    'Суббота',
-  ];
 }
 
 class DepartmentInitial extends DepartmentState {}

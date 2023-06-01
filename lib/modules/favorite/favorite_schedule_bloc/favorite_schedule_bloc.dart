@@ -52,9 +52,12 @@ class FavoriteScheduleBloc
       emit(FavoriteScheduleLoaded(
         currentScheduleName: scheduleModel.name,
         scheduleList: scheduleModel.scheduleList,
+        scheduleType: scheduleModel.scheduleType,
         openedDayIndex: Jiffy().dateTime.weekday - 1,
         currentLesson: currentLesson,
         weekNumber: (Jiffy().week + 1) % 2,
+        link1: scheduleModel.link1,
+        link2: scheduleModel.link2,
         customDaysOfWeek: scheduleModel.daysOfWeekList,
       ));
     } on TypeError catch (e) {

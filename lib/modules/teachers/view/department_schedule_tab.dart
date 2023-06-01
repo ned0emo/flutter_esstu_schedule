@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:schedule/core/schedule_time_data.dart';
+import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart';
 
@@ -15,16 +17,6 @@ class DepartmentScheduleTab extends StatefulWidget {
 }
 
 class _DepartmentScheduleTabState extends State<DepartmentScheduleTab> {
-  final List<String> lessonTimeList = [
-    '9:00\n10:35',
-    '10:45\n12:20',
-    '13:00\n14:35',
-    '14:45\n16:20',
-    '16:25\n18:00',
-    '18:05\n19:40',
-    '19:45\n21:20',
-  ];
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DepartmentBloc, DepartmentState>(
@@ -39,16 +31,18 @@ class _DepartmentScheduleTabState extends State<DepartmentScheduleTab> {
 
         if (state is DepartmentLoaded) {
           if (state.currentTeacher != null) {
-            Modular.get<FavoriteButtonBloc>()
-                .add(CheckSchedule(name: state.currentTeacher!));
+            Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
+              name: state.currentTeacher!,
+              scheduleType: ScheduleType.teacher,
+            ));
           }
-          
+
           final currentDay = Jiffy().dateTime.weekday - 1;
 
           return ListView.builder(
             itemBuilder: (context, index) {
               String? dayOfWeek;
-              dayOfWeek = state.daysOfWeek[index];
+              dayOfWeek = ScheduleTimeData.daysOfWeek[index];
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -119,7 +113,7 @@ class _DepartmentScheduleTabState extends State<DepartmentScheduleTab> {
           /// Если день открыт и лист расписания не переполнен,
           /// то создаем виджеты для предметов
           isCurrentDayOpened
-              ? scheduleList.length <= lessonTimeList.length
+              ? scheduleList.length <= ScheduleTimeData.lessonTimeList.length
                   ? Column(
                       children: scheduleList.map(
                             (String lesson) {
@@ -127,7 +121,7 @@ class _DepartmentScheduleTabState extends State<DepartmentScheduleTab> {
 
                               return _lessonSection(
                                 lessonNumber + 1,
-                                lessonTimeList[lessonNumber],
+                                ScheduleTimeData.lessonTimeList[lessonNumber],
                                 lesson,
                                 isCurrentDay && lessonNumber == currentLesson,
                               );

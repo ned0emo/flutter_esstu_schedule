@@ -22,13 +22,15 @@ class SaveSchedule extends FavoriteButtonEvent {
 }
 
 class DeleteSchedule extends FavoriteButtonEvent {
+  final String scheduleType;
   final String name;
 
-  DeleteSchedule({required this.name});
+  DeleteSchedule({required this.scheduleType, required this.name});
 }
 
 class CheckSchedule extends FavoriteButtonEvent {
+  final String scheduleType;
   final String name;
 
-  CheckSchedule({required this.name});
+  CheckSchedule({required this.scheduleType, required this.name});
 }

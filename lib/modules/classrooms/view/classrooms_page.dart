@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/modules/classrooms/bloc/classrooms_bloc.dart';
 import 'package:schedule/modules/classrooms/view/classrooms_schedule_tab.dart';
+import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 
 class ClassroomsPage extends StatefulWidget {
   const ClassroomsPage({super.key});
@@ -17,6 +19,7 @@ class _ClassroomState extends State<ClassroomsPage> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => Modular.get<ClassroomsBloc>()),
+        BlocProvider(create: (context) => Modular.get<FavoriteButtonBloc>()),
       ],
       child: BlocBuilder<ClassroomsBloc, ClassroomsState>(
         builder: (context, state) {
@@ -57,6 +60,7 @@ class _ClassroomState extends State<ClassroomsPage> {
                   labelStyle: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w500),
                 ),
+                floatingActionButton: _floatingActionButton(),
               ),
             );
           }
@@ -171,9 +175,10 @@ class _ClassroomState extends State<ClassroomsPage> {
                       onTap: () {
                         final building =
                             state.scheduleMap.keys.elementAt(index);
-                        final classroom = state.scheduleMap[building]!.keys.first;
-                        BlocProvider.of<ClassroomsBloc>(context)
-                            .add(ChangeBuilding(building, classroom: classroom));
+                        final classroom =
+                            state.scheduleMap[building]!.keys.first;
+                        BlocProvider.of<ClassroomsBloc>(context).add(
+                            ChangeBuilding(building, classroom: classroom));
                         Navigator.pop(context);
                       },
                     ),
@@ -193,5 +198,64 @@ class _ClassroomState extends State<ClassroomsPage> {
     }
 
     return const Text('Аудитории');
+  }
+
+  Widget _floatingActionButton() {
+    return BlocListener<FavoriteButtonBloc, FavoriteButtonState>(
+      listener: (context, state) {
+        if (state is FavoriteExist && state.isNeedSnackBar) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Добавлено в избранное'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+          return;
+        }
+
+        if (state is FavoriteDoesNotExist && state.isNeedSnackBar) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Удалено из избранного'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+          return;
+        }
+      },
+      child: BlocBuilder<ClassroomsBloc, ClassroomsState>(
+        builder: (context, classroomState) {
+          return BlocBuilder<FavoriteButtonBloc, FavoriteButtonState>(
+            builder: (context, state) {
+              return FloatingActionButton(
+                onPressed: classroomState is ClassroomsLoadedState
+                    ? () {
+                        if (state is FavoriteExist) {
+                          Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
+                              name: classroomState.currentClassroom,
+                              scheduleType: ScheduleType.classroom));
+                          return;
+                        }
+
+                        if (state is FavoriteDoesNotExist) {
+                          Modular.get<FavoriteButtonBloc>().add(SaveSchedule(
+                            name: classroomState.currentClassroom,
+                            scheduleType: ScheduleType.classroom,
+                            scheduleList: classroomState.scheduleMap[
+                                    classroomState.currentBuildingName]![
+                                classroomState.currentClassroom]!,
+                          ));
+                        }
+                      }
+                    : null,
+                child: state is FavoriteExist
+                    ? const Icon(Icons.star)
+                    : const Icon(Icons.star_border),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 }

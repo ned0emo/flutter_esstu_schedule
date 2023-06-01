@@ -23,7 +23,7 @@ class FavoriteButtonBloc extends Bloc<FavoriteButtonEvent, FavoriteButtonState> 
   Future<void> _saveSchedule(
       SaveSchedule event, Emitter<FavoriteButtonState> emit) async {
     await _favoriteRepository.saveSchedule(
-        event.name,
+        '${event.scheduleType}|${event.name}',
         FavoriteScheduleModel(
           name: event.name,
           scheduleType: event.scheduleType,
@@ -33,7 +33,7 @@ class FavoriteButtonBloc extends Bloc<FavoriteButtonEvent, FavoriteButtonState> 
           daysOfWeekList: event.daysOfWeekList,
         ).toString());
 
-    if (await _favoriteRepository.checkSchedule(event.name)) {
+    if (await _favoriteRepository.checkSchedule('${event.scheduleType}|${event.name}')) {
       emit(FavoriteExist());
     } else {
       emit(FavoriteDoesNotExist());
@@ -42,9 +42,9 @@ class FavoriteButtonBloc extends Bloc<FavoriteButtonEvent, FavoriteButtonState> 
 
   Future<void> _deleteSchedule(
       DeleteSchedule event, Emitter<FavoriteButtonState> emit) async {
-    await _favoriteRepository.deleteSchedule(event.name);
+    await _favoriteRepository.deleteSchedule('${event.scheduleType}|${event.name}');
 
-    if (await _favoriteRepository.checkSchedule(event.name)) {
+    if (await _favoriteRepository.checkSchedule('${event.scheduleType}|${event.name}')) {
       emit(FavoriteExist());
     } else {
       emit(FavoriteDoesNotExist());
@@ -53,7 +53,7 @@ class FavoriteButtonBloc extends Bloc<FavoriteButtonEvent, FavoriteButtonState> 
 
   Future<void> _checkSchedule(
       CheckSchedule event, Emitter<FavoriteButtonState> emit) async {
-    if (await _favoriteRepository.checkSchedule(event.name)) {
+    if (await _favoriteRepository.checkSchedule('${event.scheduleType}|${event.name}')) {
       emit(FavoriteExist(isNeedSnackBar: false));
     } else {
       emit(FavoriteDoesNotExist(isNeedSnackBar: false));

@@ -1,6 +1,13 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:schedule/modules/favorite/models/favorite_schedule_model.dart';
 
+///
+/// Название ключа расписания для сохранения должно выглядеть:
+///
+/// "<тип расписания>|<название расписания>"
+///
+/// Название ключа для настроек должно содержать слово service
+///
 class FavoriteRepository {
   final _storage = const FlutterSecureStorage();
 
@@ -31,4 +38,11 @@ class FavoriteRepository {
 
   Future<bool> checkSchedule(String key) async =>
       (await _storage.readAll()).keys.contains(key);
+
+  Future<void> clearSchedule() async {
+    final list = await getFavoriteList();
+    for (String key in list) {
+      await _storage.delete(key: key);
+    }
+  }
 }

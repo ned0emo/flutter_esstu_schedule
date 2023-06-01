@@ -56,24 +56,30 @@ class _StudentsTabControllerState extends State<StudentsTabController> {
                           return;
                         }
                       },
-                      child: BlocBuilder<FavoriteButtonBloc, FavoriteButtonState>(
+                      child:
+                          BlocBuilder<FavoriteButtonBloc, FavoriteButtonState>(
                         builder: (context, state) {
                           return FloatingActionButton(
                             onPressed: () {
                               if (state is FavoriteExist) {
-                                Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
-                                    name: currentGroupState.name));
+                                Modular.get<FavoriteButtonBloc>()
+                                    .add(DeleteSchedule(
+                                  name: currentGroupState.name,
+                                  scheduleType: ScheduleType.student,
+                                ));
                                 return;
                               }
 
                               if (state is FavoriteDoesNotExist) {
-                                Modular.get<FavoriteButtonBloc>().add(SaveSchedule(
+                                Modular.get<FavoriteButtonBloc>()
+                                    .add(SaveSchedule(
                                   name: currentGroupState.name,
                                   scheduleType: ScheduleType.student,
                                   scheduleList:
                                       currentGroupState.currentScheduleList,
                                   link1: currentGroupState.scheduleFullLink,
-                                  daysOfWeekList: currentGroupState.daysOfWeekList,
+                                  daysOfWeekList:
+                                      currentGroupState.daysOfWeekList,
                                 ));
                               }
                             },
