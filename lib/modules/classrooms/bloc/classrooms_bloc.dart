@@ -12,6 +12,35 @@ part 'classrooms_state.dart';
 class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
   final String facultyLinkBak = 'bakalavriat/craspisanEdt.htm';
   final String facultyLinkMag = 'spezialitet/craspisanEdt.htm';
+  final int threadCount = 6;
+
+  final Map<String, SplayTreeMap<String, List<List<String>>>>
+      _buildingsScheduleMap = {
+    '1 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '2 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '3 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '4 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '5 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '6 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '7 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '8 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '9 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '10 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '11 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '12 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '13 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '14 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '15 корпус': SplayTreeMap<String, List<List<String>>>(),
+    //'16 корпус': SplayTreeMap<String, List<List<String>>>(),
+    //'17 корпус': SplayTreeMap<String, List<List<String>>>(),
+    //'18 корпус': SplayTreeMap<String, List<List<String>>>(),
+    //'19 корпус': SplayTreeMap<String, List<List<String>>>(),
+    //'20 корпус': SplayTreeMap<String, List<List<String>>>(),
+    //'21 корпус': SplayTreeMap<String, List<List<String>>>(),
+    //'22 корпус': SplayTreeMap<String, List<List<String>>>(),
+    //'23 корпус': SplayTreeMap<String, List<List<String>>>(),
+    //'24 корпус': SplayTreeMap<String, List<List<String>>>(),
+  };
 
   final ClassroomsRepository _classroomsRepository;
 
@@ -58,174 +87,198 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
       LoadClassroomsSchedule event, Emitter<ClassroomsState> emit) async {
     emit(ClassroomsLoadingState());
 
-    final facultyPages = await _classroomsRepository
-        .loadFacultiesPages(facultyLinkBak, link2: facultyLinkMag);
-    final Map<String, SplayTreeMap<String, List<List<String>>>>
-        buildingsScheduleMap = {
-      '1 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '2 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '3 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '4 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '5 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '6 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '7 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '8 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '9 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '10 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '11 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '12 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '13 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '14 корпус': SplayTreeMap<String, List<List<String>>>(),
-      '15 корпус': SplayTreeMap<String, List<List<String>>>(),
-      //'16 корпус': SplayTreeMap<String, List<List<String>>>(),
-      //'17 корпус': SplayTreeMap<String, List<List<String>>>(),
-      //'18 корпус': SplayTreeMap<String, List<List<String>>>(),
-      //'19 корпус': SplayTreeMap<String, List<List<String>>>(),
-      //'20 корпус': SplayTreeMap<String, List<List<String>>>(),
-      //'21 корпус': SplayTreeMap<String, List<List<String>>>(),
-      //'22 корпус': SplayTreeMap<String, List<List<String>>>(),
-      //'23 корпус': SplayTreeMap<String, List<List<String>>>(),
-      //'24 корпус': SplayTreeMap<String, List<List<String>>>(),
-    };
-
-    ///Создания списка ссылок на кафедры
-    final List<String> departmentLinks = [];
-    final List<String> linksList = ['bakalavriat/', 'spezialitet/'];
-    int i = 0;
-    for (String facultyPage in facultyPages) {
-      Iterable<String> splittedFacultyPage = [];
-      if (facultyPage.contains('faculty')) {
-        splittedFacultyPage = facultyPage
-            .replaceAll(RegExp(r"<!--.*-->"), '')
-            .split('href="')
-            .skip(1);
-      }
-
-      for (String linkSection in splittedFacultyPage) {
-        departmentLinks.add(
-            '${linksList[i]}${linkSection.substring(0, linkSection.indexOf('"'))}');
-      }
-      i++;
-    }
-
-    ///Загрузка и обработка всех страниц с кафедрами
     int progress = 0;
     int errorCount = 0;
-    for (String link in departmentLinks) {
-      try {
-        final splittedDepartmentPage =
-            (await _classroomsRepository.loadDepartmentPage(link))
-                .replaceAll(' COLOR="#0000ff"', '')
-                .split('ff00ff">')
-                .skip(1);
+    int loadedPagesByThreads = 0;
+    int linksCount = 0;
 
-        for (String teacherSection in splittedDepartmentPage) {
-          String teacherName = '';
-          try {
-            teacherName = teacherSection.substring(
-                teacherSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
-                teacherSection.indexOf('</P>'));
-          } catch (e) {
-            teacherName = e.runtimeType.toString();
-          }
+    Future<void> loadDepartmentPages(List<String> depLinks) async {
+      ///Загрузка и обработка всех страниц с кафедрами
+      for (String link in depLinks) {
+        try {
+          final splittedDepartmentPage =
+              (await _classroomsRepository.loadDepartmentPage(link))
+                  .replaceAll(' COLOR="#0000ff"', '')
+                  .split('ff00ff">')
+                  .skip(1);
 
-          final daysOfWeekFromPage =
-              teacherSection.split('SIZE=2><P ALIGN="CENTER">').skip(1);
+          for (String teacherSection in splittedDepartmentPage) {
+            String teacherName = '';
+            try {
+              teacherName = teacherSection.substring(
+                  teacherSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
+                  teacherSection.indexOf('</P>'));
+            } catch (e) {
+              teacherName = e.runtimeType.toString();
+            }
 
-          int j = 0;
-          for (String dayOfWeek in daysOfWeekFromPage) {
-            if (j == 12) break;
+            final daysOfWeekFromPage =
+                teacherSection.split('SIZE=2><P ALIGN="CENTER">').skip(1);
 
-            final lessons =
-                dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
+            int j = 0;
+            for (String dayOfWeek in daysOfWeekFromPage) {
+              if (j == 12) break;
 
-            int i = 0;
-            for (String lessonSection in lessons) {
-              if (!lessonSection.contains('а.')) {
-                i++;
-                continue;
-              }
-              final fullLesson = lessonSection
-                  .substring(0, lessonSection.indexOf('</FONT>'))
-                  .trim();
-              final lesson = fullLesson
-                  .substring(fullLesson.indexOf('а.') + 2)
-                  .trim()
-                  .replaceAll('и/д', '')
-                  .replaceAll('пр.', '')
-                  .replaceAll('пр', '')
-                  .replaceAll('д/кл', '')
-                  .replaceAll('д/к', '');
+              final lessons =
+                  dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
 
-              final classroom = lesson.contains(' ')
-                  ? lesson.substring(0, lesson.indexOf(' '))
-                  : lesson;
+              int i = 0;
+              for (String lessonSection in lessons) {
+                if (!lessonSection.contains('а.')) {
+                  i++;
+                  continue;
+                }
+                final fullLesson = lessonSection
+                    .substring(0, lessonSection.indexOf('</FONT>'))
+                    .trim();
+                final lesson = fullLesson
+                    .substring(fullLesson.indexOf('а.') + 2)
+                    .trim()
+                    .replaceAll('и/д', '')
+                    .replaceAll('пр.', '')
+                    .replaceAll('пр', '')
+                    .replaceAll('д/кл', '')
+                    .replaceAll('д/к', '');
 
-              if (!classroom.contains(RegExp(r"[0-9]"))) {
-                i++;
-                continue;
-              }
+                final classroom = lesson.contains(' ')
+                    ? lesson.substring(0, lesson.indexOf(' '))
+                    : lesson;
 
-              final building = '${_getBuildingByClassroom(classroom)} корпус';
-              if (buildingsScheduleMap[building]![classroom] == null) {
-                buildingsScheduleMap[building]![classroom] = [
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                ];
-              }
+                if (!classroom.contains(RegExp(r"[0-9]"))) {
+                  i++;
+                  continue;
+                }
 
-              if (buildingsScheduleMap[building]![classroom]![j][i].length <
-                  '$teacherName ${fullLesson.replaceFirst(classroom, '')}'
-                      .length) {
-                buildingsScheduleMap[building]![classroom]![j][i] =
-                    '$teacherName ${fullLesson.replaceFirst(classroom, '')}';
-              }
+                final building = '${_getBuildingByClassroom(classroom)} корпус';
+                if (_buildingsScheduleMap[building]![classroom] == null) {
+                  _buildingsScheduleMap[building]![classroom] = [
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['', '', '', '', '', ''],
+                  ];
+                }
 
-              /*if (classroomsMap[classroom] == null) {
+                if (_buildingsScheduleMap[building]![classroom]![j][i].length <
+                    '$teacherName ${fullLesson.replaceFirst(classroom, '')}'
+                        .length) {
+                  _buildingsScheduleMap[building]![classroom]![j][i] =
+                      '$teacherName ${fullLesson.replaceFirst(classroom, '')}';
+                }
+
+                /*if (classroomsMap[classroom] == null) {
                 classroomsMap[classroom] = 1;
               } else {
                 classroomsMap[classroom] = classroomsMap[classroom]! + 1;
               }*/
 
-              i++;
-              if (i > 5) {
-                break;
+                i++;
+                if (i > 5) {
+                  break;
+                }
               }
-            }
 
-            j++;
+              j++;
+            }
           }
+
+          progress++;
+        } on RangeError catch (e) {
+          print(e.message);
+          print(e.stackTrace);
+        } catch (e) {
+          print(e.runtimeType);
+          errorCount++;
         }
 
-        progress++;
-      } on RangeError catch (e) {
-        print(e.message);
-        print(e.stackTrace);
-      } catch (e) {
-        print(e.runtimeType);
-        errorCount++;
+        if (errorCount > 4) {
+          loadedPagesByThreads++;
+          return;
+        }
       }
 
-      if (errorCount > 4) {
-        emit(ClassroomsErrorState('Ошибка загрузки страниц расписания кафедр'));
-        return;
-      }
-
-      emit(ClassroomsLoadingState(
-          percents: (progress / departmentLinks.length * 100).toInt()));
+      loadedPagesByThreads++;
+      return;
     }
 
-    buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
+    final facultyPages = await _classroomsRepository
+        .loadFacultiesPages(facultyLinkBak, link2: facultyLinkMag);
+
+    ///Создания списка ссылок на кафедры
+    ///
+    /// Список содержит [threadCount] списков ссылок, которые потом параллельно
+    /// (ну типо) загружаются и формируют мэп по корпусам
+    final List<List<String>> departmentLinks =
+        List.generate(threadCount, (index) => []);
+    final List<String> linksList = ['bakalavriat/', 'spezialitet/'];
+    int i = 0;
+    for (String facultyPage in facultyPages) {
+      List<String> splittedFacultyPage = [];
+      if (facultyPage.contains('faculty')) {
+        splittedFacultyPage = facultyPage
+            .replaceAll(RegExp(r"<!--.*-->"), '')
+            .split('href="')
+            .skip(1)
+            .toList();
+      }
+
+      int j = 0;
+      for (String linkSection in splittedFacultyPage) {
+        departmentLinks[j % threadCount].add(
+          '${linksList[i]}${linkSection.substring(0, linkSection.indexOf('"'))}',
+        );
+        j++;
+      }
+      linksCount += j;
+      i++;
+    }
+
+    /// Собственно [threadCount] асинзронных потоков по загрузке страниц. Далее
+    /// ождиание окончания их работы с отображением прогресса.
+    ///
+    /// Если прогресс слишком долго не идет (капитализм как-никак), то выводится
+    /// сообщение об этом. Проверяется зависание счетчиком сравнения предыдущего
+    /// прогресса с нынешним
+    int freezeCount = 0;
+    int oldProgress = progress;
+    for (int i = 0; i < threadCount; i++) {
+      loadDepartmentPages(departmentLinks[i]);
+    }
+    do {
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      if (oldProgress == progress) {
+        freezeCount++;
+        if (freezeCount > 20) {
+          emit(ClassroomsLoadingState(
+            percents: (progress / linksCount * 100).toInt(),
+            message:
+                'Загрузка длится слишком долго. Возможно, что-то пошло не так...',
+          ));
+        }
+        continue;
+      } else {
+        oldProgress = progress;
+        freezeCount = 0;
+      }
+      emit(ClassroomsLoadingState(
+          percents: (progress / linksCount * 100).toInt()));
+    } while (loadedPagesByThreads < threadCount);
+
+    if (errorCount > 8) {
+      emit(ClassroomsErrorState('Ошибка загрузки страниц расписания кафедр'));
+      return;
+    }
+
+    _buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
 
     int currentLesson = -1;
     final currentTime = Jiffy().dateTime.minute + Jiffy().dateTime.hour * 60;
@@ -245,10 +298,10 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
 
     emit(ClassroomsLoadedState(
       weekNumber: (Jiffy().week + 1) % 2,
-      currentBuildingName: buildingsScheduleMap.keys.first,
-      scheduleMap: buildingsScheduleMap,
+      currentBuildingName: _buildingsScheduleMap.keys.first,
+      scheduleMap: _buildingsScheduleMap,
       currentClassroom:
-          buildingsScheduleMap[buildingsScheduleMap.keys.first]!.keys.first,
+          _buildingsScheduleMap[_buildingsScheduleMap.keys.first]!.keys.first,
       openedDayIndex: Jiffy().dateTime.weekday - 1,
       currentLesson: currentLesson,
     ));

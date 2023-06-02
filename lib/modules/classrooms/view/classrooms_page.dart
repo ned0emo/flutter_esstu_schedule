@@ -82,6 +82,7 @@ class _ClassroomState extends State<ClassroomsPage> {
                   const CircularProgressIndicator(),
                   const SizedBox(height: 15),
                   Text('${state.percents}%'),
+                  Text(state.message, textAlign: TextAlign.center),
                 ],
               )),
             );

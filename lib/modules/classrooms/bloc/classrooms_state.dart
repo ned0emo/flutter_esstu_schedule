@@ -13,8 +13,9 @@ class ClassroomsErrorState extends ClassroomsState {
 
 class ClassroomsLoadingState extends ClassroomsState {
   final int percents;
+  final String message;
 
-  ClassroomsLoadingState({this.percents = 0});
+  ClassroomsLoadingState({this.percents = 0, this.message = ''});
 }
 
 class ClassroomsLoadedState extends ClassroomsState {
