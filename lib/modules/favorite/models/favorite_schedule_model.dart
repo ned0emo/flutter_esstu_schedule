@@ -41,16 +41,16 @@ class FavoriteScheduleModel {
 
   static fromString(String str) => fromJson(jsonDecode(str));
 
-  static List<List<String>> _scheduleListConvert(List<dynamic> list){
+  static List<List<String>> _scheduleListConvert(List<dynamic> list) {
     List<List<String>> newList = [];
-    for(dynamic it in list){
+    for (dynamic it in list) {
       newList.add(List<String>.from(it));
     }
 
     return newList;
   }
 
-  static List<String>? _daysOfWeekListConvert(List<dynamic>? list){
+  static List<String>? _daysOfWeekListConvert(List<dynamic>? list) {
     return list != null ? List<String>.from(list) : null;
   }
 
@@ -65,4 +65,22 @@ class FavoriteScheduleModel {
 
   @override
   toString() => jsonEncode(toJson());
+
+  FavoriteScheduleModel copyWith({
+    String? name,
+    String? scheduleType,
+    List<List<String>>? scheduleList,
+    String? link1,
+    String? link2,
+    List<String>? daysOfWeekList,
+  }) {
+    return FavoriteScheduleModel(
+      name: name ?? this.name,
+      scheduleType: scheduleType ?? this.scheduleType,
+      scheduleList: scheduleList ?? this.scheduleList,
+      link1: link1 ?? this.link1,
+      link2: link2 ?? this.link2,
+      daysOfWeekList: daysOfWeekList ?? this.daysOfWeekList,
+    );
+  }
 }

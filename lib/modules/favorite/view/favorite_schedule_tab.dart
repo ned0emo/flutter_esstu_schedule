@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:schedule/core/schedule_time_data.dart';
-import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 
 class FavoriteScheduleTab extends StatefulWidget {
@@ -28,11 +27,6 @@ class _FavoriteScheduleTabState extends State<FavoriteScheduleTab> {
         }
 
         if (state is FavoriteScheduleLoaded) {
-          BlocProvider.of<FavoriteButtonBloc>(context).add(CheckSchedule(
-            scheduleType: state.scheduleType,
-            name: state.currentScheduleName,
-          ));
-
           final currentDay = Jiffy().dateTime.weekday - 1;
 
           return ListView.builder(

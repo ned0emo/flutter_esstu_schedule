@@ -14,7 +14,7 @@ class FavoriteScheduleError extends FavoriteScheduleState {
 class FavoriteScheduleLoading extends FavoriteScheduleState {}
 
 class FavoriteScheduleLoaded extends FavoriteScheduleState {
-  final String currentScheduleName;
+  final String scheduleName;
   final List<List<String>> scheduleList;
   final String scheduleType;
   final int openedDayIndex;
@@ -25,8 +25,10 @@ class FavoriteScheduleLoaded extends FavoriteScheduleState {
   final String? link2;
   final List<String>? customDaysOfWeek;
 
+  final bool isNeedUpdate;
+
   FavoriteScheduleLoaded({
-    required this.currentScheduleName,
+    required this.scheduleName,
     required this.scheduleList,
     required this.scheduleType,
     required this.openedDayIndex,
@@ -35,10 +37,11 @@ class FavoriteScheduleLoaded extends FavoriteScheduleState {
     this.link1,
     this.link2,
     this.customDaysOfWeek,
+    this.isNeedUpdate = false,
   });
 
   FavoriteScheduleLoaded copyWith({
-    String? currentScheduleName,
+    String? scheduleName,
     List<List<String>>? scheduleList,
     String? scheduleType,
     int? openedDayIndex,
@@ -47,9 +50,10 @@ class FavoriteScheduleLoaded extends FavoriteScheduleState {
     String? link1,
     String? link2,
     List<String>? customDaysOfWeek,
+    bool? isNeedUpdate,
   }) {
     return FavoriteScheduleLoaded(
-      currentScheduleName: currentScheduleName ?? this.currentScheduleName,
+      scheduleName: scheduleName ?? this.scheduleName,
       scheduleList: scheduleList ?? this.scheduleList,
       scheduleType: scheduleType ?? this.scheduleType,
       openedDayIndex: openedDayIndex ?? this.openedDayIndex,
@@ -58,6 +62,7 @@ class FavoriteScheduleLoaded extends FavoriteScheduleState {
       link1: link1 ?? this.link1,
       link2: link2 ?? this.link2,
       customDaysOfWeek: customDaysOfWeek ?? this.customDaysOfWeek,
+      isNeedUpdate: isNeedUpdate ?? false,
     );
   }
 
@@ -67,4 +72,6 @@ class FavoriteScheduleLoaded extends FavoriteScheduleState {
   int get numOfDays => scheduleList.length == 12 ? 6 : 7;
 
   bool get isZo => scheduleList.length == 12 ? false : true;
+
+  String get getFileName => '$scheduleType|$scheduleName';
 }

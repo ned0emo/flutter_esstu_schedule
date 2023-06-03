@@ -26,7 +26,7 @@ class FavoriteScheduleBloc
 
     try {
       final scheduleModel =
-          await _favoriteRepository.getScheduleModel(event.scheduleName);
+          await _favoriteRepository.getScheduleModel(event.scheduleFileName);
       if (scheduleModel == null) {
         emit(FavoriteScheduleError(
             'Ошибка загрузки расписания\nscheduleModel == null'));
@@ -50,7 +50,7 @@ class FavoriteScheduleBloc
       }
 
       emit(FavoriteScheduleLoaded(
-        currentScheduleName: scheduleModel.name,
+        scheduleName: scheduleModel.name,
         scheduleList: scheduleModel.scheduleList,
         scheduleType: scheduleModel.scheduleType,
         openedDayIndex: Jiffy().dateTime.weekday - 1,
@@ -59,6 +59,7 @@ class FavoriteScheduleBloc
         link1: scheduleModel.link1,
         link2: scheduleModel.link2,
         customDaysOfWeek: scheduleModel.daysOfWeekList,
+        isNeedUpdate: event.isNeedUpdate,
       ));
     } on TypeError catch (e) {
       emit(FavoriteScheduleError(

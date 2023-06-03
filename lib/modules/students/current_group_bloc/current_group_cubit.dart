@@ -84,7 +84,7 @@ class CurrentGroupCubit extends Cubit<CurrentGroupState> {
 
             if (currentDayOfWeekStrSplit.length > 1) {
               daysOfWeekList.add(currentDayOfWeekStrSplit[1]
-                  .substring(0, currentDayOfWeekStrSplit[1].indexOf('</B>')));
+                  .substring(0, currentDayOfWeekStrSplit[1].indexOf('</B>')).trim());
             } else {
               daysOfWeekList.add(classicDaysOfWeekList[k % 7]);
             }
@@ -95,7 +95,7 @@ class CurrentGroupCubit extends Cubit<CurrentGroupState> {
           ///Расписание
           for (int j = i + 1; j < i + numOfLessons; j++) {
             dayScheduleList.add(
-                splittedPage[j].substring(0, splittedPage[j].indexOf('<')));
+                splittedPage[j].substring(0, splittedPage[j].indexOf('<')).trim());
           }
 
           currentScheduleList.add(dayScheduleList);
@@ -113,7 +113,7 @@ class CurrentGroupCubit extends Cubit<CurrentGroupState> {
 
           for (int j = i; j < i + numOfLessons; j++) {
             dayScheduleList.add(
-                splittedPage[j].substring(0, splittedPage[j].indexOf('<')));
+                splittedPage[j].substring(0, splittedPage[j].indexOf('<')).trim());
           }
 
           currentScheduleList.add(dayScheduleList);

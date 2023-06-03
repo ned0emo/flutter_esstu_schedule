@@ -5,7 +5,6 @@ import 'package:schedule/core/app_routes.dart';
 import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_list_bloc/favorite_list_bloc.dart';
-import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 
 class FavoriteListPage extends StatefulWidget {
   const FavoriteListPage({super.key});
@@ -99,9 +98,7 @@ class _FavoriteListState extends State<FavoriteListPage> {
                     Modular.to.pushNamed(
                         AppRoutes.favoriteListRoute +
                             AppRoutes.favoriteScheduleRoute,
-                        arguments: scheduleType.isEmpty
-                            ? [scheduleName]
-                            : ['$scheduleType|$scheduleName']);
+                        arguments: [scheduleName, scheduleType]);
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),

@@ -4,9 +4,10 @@ part of 'favorite_schedule_bloc.dart';
 abstract class FavoriteScheduleEvent {}
 
 class LoadFavoriteSchedule extends FavoriteScheduleEvent {
-  final String scheduleName;
+  final String scheduleFileName;
+  final bool isNeedUpdate;
 
-  LoadFavoriteSchedule(this.scheduleName);
+  LoadFavoriteSchedule(this.scheduleFileName, {this.isNeedUpdate = false});
 }
 
 class ChangeOpenedDay extends FavoriteScheduleEvent {
