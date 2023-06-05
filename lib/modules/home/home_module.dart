@@ -5,6 +5,7 @@ import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_b
 import 'package:schedule/modules/favorite/favorite_module.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 import 'package:schedule/modules/home/home_page.dart';
+import 'package:schedule/modules/search/search_module.dart';
 import 'package:schedule/modules/settings/bloc/settings_cubit.dart';
 import 'package:schedule/modules/settings/bloc/settings_repository.dart';
 import 'package:schedule/modules/settings/settings_module.dart';
@@ -24,11 +25,12 @@ class HomeModule extends Module {
 
   @override
   List<ModularRoute> get routes => [
-        ChildRoute('/', child: (context, args) => HomePage()),
+        ChildRoute('/', child: (context, args) => const HomePage()),
         ModuleRoute(AppRoutes.studentsRoute, module: StudentsModule()),
         ModuleRoute(AppRoutes.settingsRoute, module: SettingsModule()),
         ModuleRoute(AppRoutes.teachersRoute, module: TeachersModule()),
         ModuleRoute(AppRoutes.classesRoute, module: ClassroomsModule()),
         ModuleRoute(AppRoutes.favoriteListRoute, module: FavoriteModule()),
+        ModuleRoute(AppRoutes.searchRoute, module: SearchModule()),
       ];
 }

@@ -7,4 +7,5 @@ class AppRoutes{
   static const favoriteScheduleRoute = '/favoriteSchedule';
   static const settingsRoute = '/settings';
   static const classesRoute = '/classes';
+  static const searchRoute = '/search';
 }

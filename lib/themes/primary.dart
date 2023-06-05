@@ -33,5 +33,10 @@ class PrimaryTheme extends ThemeTemplate {
         ),
       ),
     ),
+    //textButtonTheme: TextButtonThemeData(
+    //  style: TextButton.styleFrom(
+    //    foregroundColor: Colors.black87
+    //  )
+    //)
   );
 }

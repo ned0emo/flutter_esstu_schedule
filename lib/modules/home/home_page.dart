@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:schedule/core/app_routes.dart';
+import 'package:schedule/core/schedule_type.dart';
 
 class HomePage extends StatelessWidget {
-  HomePage({super.key});
+  const HomePage({super.key});
 
   /*final _elevatedButtonStyle = ElevatedButton.styleFrom(
     backgroundColor: Colors.white,
@@ -88,7 +89,48 @@ class HomePage extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // TODO Нажатие кнопки
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Поиск расписания'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                        onPressed: () {
+                                          Modular.to.popAndPushNamed(
+                                            AppRoutes.searchRoute,
+                                            arguments: [ScheduleType.student],
+                                          );
+                                        },
+                                        child: const Text(
+                                          'Учебная группа',
+                                          style: TextStyle(fontSize: 20),
+                                        )),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                        onPressed: () {
+                                          Modular.to.popAndPushNamed(
+                                            AppRoutes.searchRoute,
+                                            arguments: [ScheduleType.teacher],
+                                          );
+                                        },
+                                        child: const Text(
+                                          'Преподаватель',
+                                          style: TextStyle(fontSize: 20),
+                                        )),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
                       },
                       //style: _elevatedButtonStyle,
                       child: _homeElevatedButton(

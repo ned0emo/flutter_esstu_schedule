@@ -89,10 +89,11 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
 
     int progress = 0;
     int errorCount = 0;
-    int loadedPagesByThreads = 0;
+    int completedThreads = 0;
     int linksCount = 0;
 
     Future<void> loadDepartmentPages(List<String> depLinks) async {
+      int localErrorCount = 0;
       ///Загрузка и обработка всех страниц с кафедрами
       for (String link in depLinks) {
         try {
@@ -194,19 +195,20 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
         } on RangeError catch (e) {
           print(e.message);
           print(e.stackTrace);
+          localErrorCount++;
         } catch (e) {
           print(e.runtimeType);
-          errorCount++;
+          localErrorCount++;
         }
 
-        if (errorCount > 4) {
-          loadedPagesByThreads++;
+        if (localErrorCount > 4) {
+          completedThreads++;
+          errorCount += localErrorCount;
           return;
         }
       }
 
-      loadedPagesByThreads++;
-      return;
+      completedThreads++;
     }
 
     final facultyPages = await _classroomsRepository
@@ -271,7 +273,7 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
       }
       emit(ClassroomsLoadingState(
           percents: (progress / linksCount * 100).toInt()));
-    } while (loadedPagesByThreads < threadCount);
+    } while (completedThreads < threadCount);
 
     if (errorCount > 8) {
       emit(ClassroomsErrorState('Ошибка загрузки страниц расписания кафедр'));
