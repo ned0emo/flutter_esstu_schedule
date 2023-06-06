@@ -20,7 +20,7 @@ class TeachersModule extends Module {
         ChildRoute('/', child: (context, args) => const FacultiesPage()),
         ChildRoute(
           AppRoutes.departmentsRoute,
-          child: (context, args) => const DepartmentsPage(),
+          child: (context, args) => DepartmentsPage(facultyState: args.data[0]),
         ),
       ];
 

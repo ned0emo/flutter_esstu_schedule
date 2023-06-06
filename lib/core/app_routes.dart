@@ -8,4 +8,5 @@ class AppRoutes{
   static const settingsRoute = '/settings';
   static const classesRoute = '/classes';
   static const searchRoute = '/search';
+  static const searchingScheduleRoute = '/searchingSchedule';
 }

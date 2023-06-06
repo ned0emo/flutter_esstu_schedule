@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:schedule/core/view/schedule_tab.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_list_bloc/favorite_list_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_update_bloc/favorite_update_bloc.dart';
-import 'package:schedule/modules/favorite/view/favorite_schedule_tab.dart';
 
 class FavoriteSchedulePage extends StatefulWidget {
   final String scheduleType;
@@ -146,7 +146,12 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                   body: TabBarView(
                       children: List.generate(
                     state.numOfWeeks,
-                    (index) => FavoriteScheduleTab(tabNum: index),
+                    (index) => ScheduleTab(
+                      tabNum: index,
+                      scheduleName: state.scheduleName,
+                      scheduleList: state.scheduleList,
+                      customDaysOfWeek: state.customDaysOfWeek,
+                    ),
                   )),
                   bottomNavigationBar: TabBar(
                     tabs: List.generate(

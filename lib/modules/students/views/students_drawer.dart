@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:schedule/modules/students/all_groups_bloc/all_groups_cubit.dart';
-import 'package:schedule/modules/students/current_group_bloc/current_group_cubit.dart';
+import 'package:schedule/core/students_type.dart';
+import 'package:schedule/modules/students/all_groups_bloc/all_groups_bloc.dart';
 
 class StudentsDrawer extends StatelessWidget {
   const StudentsDrawer({super.key});
@@ -44,8 +44,6 @@ class StudentsDrawer extends StatelessWidget {
   }
 
   Widget _bakDrawerSection(BuildContext context) {
-    const firstPartOfLink = '/bakalavriat/';
-
     return Column(
       children: [
         const Padding(
@@ -64,9 +62,9 @@ class StudentsDrawer extends StatelessWidget {
             (index) => ListTile(
               title: Text('${index + 1} курс'),
               onTap: () {
-                BlocProvider.of<CurrentGroupCubit>(context).hideSchedule();
-                BlocProvider.of<AllGroupsCubit>(context)
-                    .selectCourse('${index + 1} курс', 0, firstPartOfLink);
+                BlocProvider.of<AllGroupsBloc>(context).add(SelectCourse(
+                    courseName: '${index + 1} курс',
+                    studType: StudentsType.bak));
                 Navigator.pop(context);
               },
             ),
@@ -78,8 +76,6 @@ class StudentsDrawer extends StatelessWidget {
   }
 
   Widget _magDrawerSection(BuildContext context) {
-    const firstPartOfLink = '/spezialitet/';
-
     return Column(
       children: [
         const Padding(
@@ -98,9 +94,9 @@ class StudentsDrawer extends StatelessWidget {
             (index) => ListTile(
               title: Text('${index + 1} курс'),
               onTap: () {
-                BlocProvider.of<CurrentGroupCubit>(context).hideSchedule();
-                BlocProvider.of<AllGroupsCubit>(context)
-                    .selectCourse('${index + 1} курс', 1, firstPartOfLink);
+                BlocProvider.of<AllGroupsBloc>(context).add(SelectCourse(
+                    courseName: '${index + 1} курс',
+                    studType: StudentsType.col));
                 Navigator.pop(context);
               },
             ),
@@ -123,9 +119,9 @@ class StudentsDrawer extends StatelessWidget {
             (index) => ListTile(
               title: Text('${index + 1} курс'),
               onTap: () {
-                BlocProvider.of<CurrentGroupCubit>(context).hideSchedule();
-                BlocProvider.of<AllGroupsCubit>(context)
-                    .selectCourse('${index + 1} курс', 2, firstPartOfLink);
+                BlocProvider.of<AllGroupsBloc>(context).add(SelectCourse(
+                    courseName: '${index + 1} курс',
+                    studType: StudentsType.mag));
                 Navigator.pop(context);
               },
             ),
@@ -137,8 +133,6 @@ class StudentsDrawer extends StatelessWidget {
   }
 
   Widget _zoDrawerSection(BuildContext context) {
-    const firstPartOfLink1 = '/zo1/';
-
     return Column(
       children: [
         const Padding(
@@ -152,18 +146,14 @@ class StudentsDrawer extends StatelessWidget {
           ),
         ),
         Column(
-          children: List<ListTile>.generate(
+          children: List.generate(
             6,
             (index) => ListTile(
               title: Text('${index + 1} курс'),
               onTap: () {
-                BlocProvider.of<CurrentGroupCubit>(context).hideSchedule();
-                BlocProvider.of<AllGroupsCubit>(context).selectCourse(
-                  '${index + 1} курс',
-                  3,
-                  firstPartOfLink1,
-                  isZo: true,
-                );
+                BlocProvider.of<AllGroupsBloc>(context).add(SelectCourse(
+                    courseName: '${index + 1} курс',
+                    studType: StudentsType.zo1));
                 Navigator.pop(context);
               },
             ),

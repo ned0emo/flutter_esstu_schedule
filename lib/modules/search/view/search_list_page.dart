@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:schedule/core/app_routes.dart';
 import 'package:schedule/core/schedule_type.dart';
-import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/search/search_list_bloc/search_list_bloc.dart';
 
 class SearchListPage extends StatefulWidget {
@@ -20,7 +20,8 @@ class _SearchListPageState extends State<SearchListPage> {
     return MultiBlocProvider(
         providers: [
           BlocProvider(
-              create: (context) => SearchListBloc(Modular.get())
+              create: (context) =>
+              SearchListBloc(Modular.get())
                 ..add(LoadSearchList(widget.scheduleType))),
         ],
         child: Scaffold(
@@ -68,13 +69,21 @@ class _SearchListPageState extends State<SearchListPage> {
               ),
               Expanded(
                   child: SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    (state.searchedList ?? []).length,
-                    (index) => _searchedElement(state.searchedList![index]),
-                  ),
-                ),
-              ))
+                    child: Column(
+                      children: List.generate(
+                        (state.searchedList ?? []).length,
+                            (index) {
+                          final name = state.searchedList![index];
+                          final link1 = state.scheduleLinksMap[name]![0];
+                          final link2 = state.scheduleLinksMap[name]!.length > 1
+                              ? state.scheduleLinksMap[name]![1]
+                              : null;
+
+                          return _searchedElement(name, link1, link2);
+                        },
+                      ),
+                    ),
+                  ))
             ],
           );
         }
@@ -88,10 +97,14 @@ class _SearchListPageState extends State<SearchListPage> {
     );
   }
 
-  Widget _searchedElement(String name) {
+  Widget _searchedElement(String name, String link1, String? link2) {
     return ListTile(
       title: Text(name),
-      onTap: () {},
+      onTap: () {
+        Modular.to.pushNamed(
+            AppRoutes.searchRoute + AppRoutes.searchingScheduleRoute,
+            arguments: [name, widget.scheduleType, link1, link2]);
+      },
     );
   }
 }

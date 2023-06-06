@@ -1,3 +1,5 @@
+import 'package:jiffy/jiffy.dart';
+
 class ScheduleTimeData {
   static final List<String> lessonTimeList = [
     '9:00\n10:35',
@@ -18,4 +20,28 @@ class ScheduleTimeData {
     'Суббота',
     'Воскресенье',
   ];
+
+  static int getCurrentLessonNumber() {
+    int currentLesson = -1;
+    final currentTime = Jiffy().dateTime.minute + Jiffy().dateTime.hour * 60;
+    if (currentTime >= 540 && currentTime <= 635) {
+      currentLesson = 0;
+    } else if (currentTime >= 645 && currentTime <= 740) {
+      currentLesson = 1;
+    } else if (currentTime >= 780 && currentTime <= 875) {
+      currentLesson = 2;
+    } else if (currentTime >= 885 && currentTime <= 980) {
+      currentLesson = 3;
+    } else if (currentTime >= 985 && currentTime <= 1080) {
+      currentLesson = 4;
+    } else if (currentTime >= 1085 && currentTime <= 1180) {
+      currentLesson = 5;
+    }
+
+    return currentLesson;
+  }
+
+  static int getCurrentWeekNumber() => (Jiffy().week + 1) % 2;
+
+  static int getCurrentDayOfWeek() => Jiffy().dateTime.weekday - 1;
 }

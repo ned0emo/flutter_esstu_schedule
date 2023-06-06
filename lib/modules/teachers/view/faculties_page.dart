@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -29,7 +28,7 @@ class _FacultiesState extends State<FacultiesPage> {
               listener: (context, state) {
                 if (state is CurrentFacultyState) {
                   Modular.to.pushReplacementNamed(
-                      AppRoutes.teachersRoute + AppRoutes.departmentsRoute);
+                      AppRoutes.teachersRoute + AppRoutes.departmentsRoute, arguments: [state]);
                 }
               },
               child: BlocBuilder<FacultyBloc, FacultyState>(

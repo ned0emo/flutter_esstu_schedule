@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:jiffy/jiffy.dart';
+import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
 part 'favorite_schedule_event.dart';
-
 part 'favorite_schedule_state.dart';
 
 class FavoriteScheduleBloc
@@ -33,29 +32,13 @@ class FavoriteScheduleBloc
         return;
       }
 
-      int currentLesson = -1;
-      final currentTime = Jiffy().dateTime.minute + Jiffy().dateTime.hour * 60;
-      if (currentTime >= 540 && currentTime <= 635) {
-        currentLesson = 0;
-      } else if (currentTime >= 645 && currentTime <= 740) {
-        currentLesson = 1;
-      } else if (currentTime >= 780 && currentTime <= 875) {
-        currentLesson = 2;
-      } else if (currentTime >= 885 && currentTime <= 980) {
-        currentLesson = 3;
-      } else if (currentTime >= 985 && currentTime <= 1080) {
-        currentLesson = 4;
-      } else if (currentTime >= 1085 && currentTime <= 1180) {
-        currentLesson = 5;
-      }
-
       emit(FavoriteScheduleLoaded(
         scheduleName: scheduleModel.name,
         scheduleList: scheduleModel.scheduleList,
         scheduleType: scheduleModel.scheduleType,
-        openedDayIndex: Jiffy().dateTime.weekday - 1,
-        currentLesson: currentLesson,
-        weekNumber: (Jiffy().week + 1) % 2,
+        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
+        currentLesson: ScheduleTimeData.getCurrentLessonNumber(),
+        weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
         link1: scheduleModel.link1,
         link2: scheduleModel.link2,
         customDaysOfWeek: scheduleModel.daysOfWeekList,

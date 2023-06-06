@@ -22,12 +22,10 @@ class FacultiesErrorState extends FacultyState {
 class CurrentFacultyState extends FacultyState {
   final String facultyName;
   final Map<String, List<String>> departmentsMap;
-  final int weekNumber;
 
   CurrentFacultyState({
     required this.facultyName,
     required this.departmentsMap,
-    required this.weekNumber,
   });
 
   String get abbreviatedFacultyName {

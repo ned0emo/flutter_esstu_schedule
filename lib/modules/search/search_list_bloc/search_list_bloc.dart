@@ -77,7 +77,7 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
               continue;
             }
             final link =
-                '${studentsScheduleLinks[i]}/${groupSection.substring(0, groupSection.indexOf('>'))}';
+                '${studentsScheduleLinks[i]}/${groupSection.substring(0, groupSection.indexOf('">'))}';
 
             if (scheduleLinksMap[name] == null) scheduleLinksMap[name] = [];
             scheduleLinksMap[name]!.add(link);

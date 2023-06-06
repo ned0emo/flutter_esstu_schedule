@@ -10,6 +10,7 @@ class SearchScheduleLoading extends SearchScheduleState {}
 class SearchScheduleLoaded extends SearchScheduleState {
   final String scheduleName;
   final List<List<String>> scheduleList;
+  final String scheduleType;
   final int openedDayIndex;
   final int currentLesson;
   final int weekNumber;
@@ -21,6 +22,7 @@ class SearchScheduleLoaded extends SearchScheduleState {
   SearchScheduleLoaded({
     required this.scheduleName,
     required this.scheduleList,
+    required this.scheduleType,
     required this.openedDayIndex,
     required this.currentLesson,
     required this.weekNumber,
@@ -32,6 +34,7 @@ class SearchScheduleLoaded extends SearchScheduleState {
   SearchScheduleLoaded copyWith({
     String? scheduleName,
     List<List<String>>? scheduleList,
+    String? scheduleType,
     int? openedDayIndex,
     int? currentLesson,
     int? weekNumber,
@@ -42,6 +45,7 @@ class SearchScheduleLoaded extends SearchScheduleState {
     return SearchScheduleLoaded(
       scheduleName: scheduleName ?? this.scheduleName,
       scheduleList: scheduleList ?? this.scheduleList,
+      scheduleType: scheduleType ?? this.scheduleType,
       openedDayIndex: openedDayIndex ?? this.openedDayIndex,
       currentLesson: currentLesson ?? this.currentLesson,
       weekNumber: weekNumber ?? this.weekNumber,
@@ -50,6 +54,12 @@ class SearchScheduleLoaded extends SearchScheduleState {
       customDaysOfWeek: customDaysOfWeek ?? this.customDaysOfWeek,
     );
   }
+
+  int get numOfWeeks => customDaysOfWeek == null ? 2 : customDaysOfWeek!.length ~/ 7;
+
+  bool get isZo => customDaysOfWeek == null ? false : true;
+
+  int get numOfDays => customDaysOfWeek == null ? 6 : 7;
 }
 
 class SearchScheduleError extends SearchScheduleState{

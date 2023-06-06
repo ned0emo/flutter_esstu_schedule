@@ -1,8 +1,9 @@
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:jiffy/jiffy.dart';
+import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/modules/classrooms/repositories/classrooms_repository.dart';
 
 part 'classrooms_event.dart';
@@ -78,7 +79,7 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
     if (currentState is ClassroomsLoadedState) {
       emit(currentState.copyWith(
         currentClassroom: event.classroom,
-        openedDayIndex: Jiffy().dateTime.weekday - 1,
+        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
       ));
     }
   }
@@ -94,6 +95,7 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
 
     Future<void> loadDepartmentPages(List<String> depLinks) async {
       int localErrorCount = 0;
+
       ///Загрузка и обработка всех страниц с кафедрами
       for (String link in depLinks) {
         try {
@@ -211,102 +213,94 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
       completedThreads++;
     }
 
-    final facultyPages = await _classroomsRepository
-        .loadFacultiesPages(facultyLinkBak, link2: facultyLinkMag);
+    try {
+      final facultyPages = await _classroomsRepository
+          .loadFacultiesPages(facultyLinkBak, link2: facultyLinkMag);
 
-    ///Создания списка ссылок на кафедры
-    ///
-    /// Список содержит [threadCount] списков ссылок, которые потом параллельно
-    /// (ну типо) загружаются и формируют мэп по корпусам
-    final List<List<String>> departmentLinks =
-        List.generate(threadCount, (index) => []);
-    final List<String> linksList = ['bakalavriat/', 'spezialitet/'];
-    int i = 0;
-    for (String facultyPage in facultyPages) {
-      List<String> splittedFacultyPage = [];
-      if (facultyPage.contains('faculty')) {
-        splittedFacultyPage = facultyPage
-            .replaceAll(RegExp(r"<!--.*-->"), '')
-            .split('href="')
-            .skip(1)
-            .toList();
-      }
-
-      int j = 0;
-      for (String linkSection in splittedFacultyPage) {
-        departmentLinks[j % threadCount].add(
-          '${linksList[i]}${linkSection.substring(0, linkSection.indexOf('"'))}',
-        );
-        j++;
-      }
-      linksCount += j;
-      i++;
-    }
-
-    /// Собственно [threadCount] асинхронных потоков по загрузке страниц. Далее
-    /// ождиание окончания их работы с отображением прогресса.
-    ///
-    /// Если прогресс слишком долго не идет (капитализм как-никак), то выводится
-    /// сообщение об этом. Проверяется зависание счетчиком сравнения предыдущего
-    /// прогресса с нынешним
-    int freezeCount = 0;
-    int oldProgress = progress;
-    for (int i = 0; i < threadCount; i++) {
-      loadDepartmentPages(departmentLinks[i]);
-    }
-    do {
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      if (oldProgress == progress) {
-        freezeCount++;
-        if (freezeCount > 20) {
-          emit(ClassroomsLoadingState(
-            percents: (progress / linksCount * 100).toInt(),
-            message:
-                'Загрузка длится слишком долго. Возможно, что-то пошло не так...',
-          ));
+      ///Создания списка ссылок на кафедры
+      ///
+      /// Список содержит [threadCount] списков ссылок, которые потом параллельно
+      /// (ну типо) загружаются и формируют мэп по корпусам
+      final List<List<String>> departmentLinks =
+          List.generate(threadCount, (index) => []);
+      final List<String> linksList = ['bakalavriat/', 'spezialitet/'];
+      int i = 0;
+      for (String facultyPage in facultyPages) {
+        List<String> splittedFacultyPage = [];
+        if (facultyPage.contains('faculty')) {
+          splittedFacultyPage = facultyPage
+              .replaceAll(RegExp(r"<!--.*-->"), '')
+              .split('href="')
+              .skip(1)
+              .toList();
         }
-        continue;
-      } else {
-        oldProgress = progress;
-        freezeCount = 0;
+
+        int j = 0;
+        for (String linkSection in splittedFacultyPage) {
+          departmentLinks[j % threadCount].add(
+            '${linksList[i]}${linkSection.substring(0, linkSection.indexOf('"'))}',
+          );
+          j++;
+        }
+        linksCount += j;
+        i++;
       }
-      emit(ClassroomsLoadingState(
-          percents: (progress / linksCount * 100).toInt()));
-    } while (completedThreads < threadCount);
 
-    if (errorCount > 8) {
-      emit(ClassroomsErrorState('Ошибка загрузки страниц расписания кафедр'));
-      return;
+      /// Собственно [threadCount] асинхронных потоков по загрузке страниц. Далее
+      /// ождиание окончания их работы с отображением прогресса.
+      ///
+      /// Если прогресс слишком долго не идет (капитализм как-никак), то выводится
+      /// сообщение об этом. Проверяется зависание счетчиком сравнения предыдущего
+      /// прогресса с нынешним
+      int freezeCount = 0;
+      int oldProgress = progress;
+      for (int i = 0; i < threadCount; i++) {
+        loadDepartmentPages(departmentLinks[i]);
+      }
+      do {
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        if (oldProgress == progress) {
+          freezeCount++;
+          if (freezeCount > 20) {
+            emit(ClassroomsLoadingState(
+              percents: (progress / linksCount * 100).toInt(),
+              message:
+                  'Загрузка длится слишком долго. Возможно, что-то пошло не так...',
+            ));
+          }
+          continue;
+        } else {
+          oldProgress = progress;
+          freezeCount = 0;
+        }
+        emit(ClassroomsLoadingState(
+            percents: (progress / linksCount * 100).toInt()));
+      } while (completedThreads < threadCount);
+
+      if (errorCount > 8) {
+        emit(ClassroomsErrorState('Ошибка загрузки страниц расписания кафедр'));
+        return;
+      }
+
+      _buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
+
+      emit(ClassroomsLoadedState(
+        weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
+        currentBuildingName: _buildingsScheduleMap.keys.first,
+        scheduleMap: _buildingsScheduleMap,
+        currentClassroom:
+            _buildingsScheduleMap[_buildingsScheduleMap.keys.first]!.keys.first,
+        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
+        currentLesson: ScheduleTimeData.getCurrentLessonNumber(),
+      ));
+    } on SocketException catch (e) {
+      emit(ClassroomsErrorState(
+          'Ошибка загрузки страниц расписания кафедр\n${e.message}'));
+    } catch (e) {
+      emit(ClassroomsErrorState(
+          'Ошибка загрузки страниц расписания кафедр\n${e.runtimeType}'));
     }
-
-    _buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
-
-    int currentLesson = -1;
-    final currentTime = Jiffy().dateTime.minute + Jiffy().dateTime.hour * 60;
-    if (currentTime >= 540 && currentTime <= 635) {
-      currentLesson = 0;
-    } else if (currentTime >= 645 && currentTime <= 740) {
-      currentLesson = 1;
-    } else if (currentTime >= 780 && currentTime <= 875) {
-      currentLesson = 2;
-    } else if (currentTime >= 885 && currentTime <= 980) {
-      currentLesson = 3;
-    } else if (currentTime >= 985 && currentTime <= 1080) {
-      currentLesson = 4;
-    } else if (currentTime >= 1085 && currentTime <= 1180) {
-      currentLesson = 5;
-    }
-
-    emit(ClassroomsLoadedState(
-      weekNumber: (Jiffy().week + 1) % 2,
-      currentBuildingName: _buildingsScheduleMap.keys.first,
-      scheduleMap: _buildingsScheduleMap,
-      currentClassroom:
-          _buildingsScheduleMap[_buildingsScheduleMap.keys.first]!.keys.first,
-      openedDayIndex: Jiffy().dateTime.weekday - 1,
-      currentLesson: currentLesson,
-    ));
   }
 
   int _getBuildingByClassroom(String classroom) {

@@ -15,7 +15,8 @@ class DepartmentLoaded extends DepartmentState {
   final String? link2;
   final int openedDayIndex;
   final int currentLesson;
-  final String? currentTeacher;
+  final String currentTeacher;
+  final int weekNumber;
 
   DepartmentLoaded({
     required this.departmentName,
@@ -24,7 +25,8 @@ class DepartmentLoaded extends DepartmentState {
     this.link2,
     required this.openedDayIndex,
     required this.currentLesson,
-    this.currentTeacher,
+    required this.currentTeacher,
+    required this.weekNumber,
   });
 
   DepartmentLoaded copyWith({
@@ -34,8 +36,8 @@ class DepartmentLoaded extends DepartmentState {
     String? link2,
     int? openedDayIndex,
     int? currentLesson,
-    int? weekNumber,
     String? currentTeacher,
+    int? weekNumber,
   }) {
     return DepartmentLoaded(
       departmentName: departmentName ?? this.departmentName,
@@ -45,25 +47,8 @@ class DepartmentLoaded extends DepartmentState {
       openedDayIndex: openedDayIndex ?? this.openedDayIndex,
       currentLesson: currentLesson ?? this.currentLesson,
       currentTeacher: currentTeacher ?? this.currentTeacher,
+      weekNumber: weekNumber ?? this.weekNumber,
     );
-  }
-
-  String get abbreviatedDepartmentName {
-    if (departmentName.length < 26) {
-      return departmentName;
-    }
-
-    String newStr = departmentName[0];
-
-    for (int i = 0; i < departmentName.length - 1; i++) {
-      if (departmentName[i] == ' ' || departmentName[i] == '-' || departmentName[i] == '.') {
-        newStr += departmentName[i + 2] == ' '
-            ? departmentName[i + 1]
-            : departmentName[i + 1].toUpperCase();
-      }
-    }
-
-    return newStr;
   }
 }
 

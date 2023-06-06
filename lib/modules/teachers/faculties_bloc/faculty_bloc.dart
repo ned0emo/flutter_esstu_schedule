@@ -1,12 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'faculty_event.dart';
-
 part 'faculty_state.dart';
 
 class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
@@ -39,9 +38,12 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
           facultyDepartmentLinkMap: facultyDepartmentLinkMap));
     } on RangeError catch (exception) {
       emit(
-          FacultiesErrorState('${exception.message}\n${exception.stackTrace}'));
+          FacultiesErrorState('Ошибка обработки списка факультетов\n${exception.message}\n${exception.stackTrace}'));
+    }on SocketException catch (exception) {
+      emit(
+          FacultiesErrorState('Ошибка загрузки списка факультетов\n${exception.message}'));
     } catch (exception) {
-      emit(FacultiesErrorState(exception.runtimeType.toString()));
+      emit(FacultiesErrorState('Ошибка загрузки списка факультетов\n${exception.runtimeType}'));
     }
   }
 
@@ -128,8 +130,8 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
   Future<void> _chooseFaculty(
       ChooseFaculty event, Emitter<FacultyState> emit) async {
     emit(CurrentFacultyState(
-        facultyName: event.facultyName,
-        departmentsMap: event.departmentsMap,
-        weekNumber: (Jiffy().week + 1) % 2));
+      facultyName: event.facultyName,
+      departmentsMap: event.departmentsMap,
+    ));
   }
 }

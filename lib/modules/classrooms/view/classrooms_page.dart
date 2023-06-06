@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/schedule_type.dart';
+import 'package:schedule/core/view/schedule_tab.dart';
 import 'package:schedule/modules/classrooms/bloc/classrooms_bloc.dart';
-import 'package:schedule/modules/classrooms/view/classrooms_schedule_tab.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 
 class ClassroomsPage extends StatefulWidget {
@@ -24,6 +24,11 @@ class _ClassroomState extends State<ClassroomsPage> {
       child: BlocBuilder<ClassroomsBloc, ClassroomsState>(
         builder: (context, state) {
           if (state is ClassroomsLoadedState) {
+            Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
+              scheduleType: ScheduleType.classroom,
+              name: state.currentClassroom,
+            ));
+
             return DefaultTabController(
               length: 2,
               initialIndex: state.weekNumber,
@@ -32,10 +37,20 @@ class _ClassroomState extends State<ClassroomsPage> {
                 body: Column(
                   children: [
                     _dropDownButton(state, context),
-                    const Expanded(
+                    Expanded(
                       child: TabBarView(children: [
-                        ClassroomScheduleTab(tabNum: 0),
-                        ClassroomScheduleTab(tabNum: 1),
+                        ScheduleTab(
+                            tabNum: 0,
+                            scheduleName: state.currentClassroom,
+                            scheduleList:
+                                state.scheduleMap[state.currentBuildingName]![
+                                    state.currentClassroom]!),
+                        ScheduleTab(
+                            tabNum: 1,
+                            scheduleName: state.currentClassroom,
+                            scheduleList:
+                                state.scheduleMap[state.currentBuildingName]![
+                                    state.currentClassroom]!),
                       ]),
                     ),
                   ],
@@ -76,15 +91,16 @@ class _ClassroomState extends State<ClassroomsPage> {
             return Scaffold(
               appBar: AppBar(title: const Text('Аудитории')),
               body: Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 15),
-                  Text('${state.percents}%'),
-                  Text(state.message, textAlign: TextAlign.center),
-                ],
-              )),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 15),
+                    Text('${state.percents}%'),
+                    Text(state.message, textAlign: TextAlign.center),
+                  ],
+                ),
+              ),
             );
           }
 
