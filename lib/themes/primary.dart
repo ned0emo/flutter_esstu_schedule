@@ -7,12 +7,13 @@ import 'package:schedule/themes/theme.dart';
 class PrimaryTheme extends ThemeTemplate {
   @override
   ThemeData get data => ThemeData(
-    switchTheme: SwitchThemeData(
-      //TODO: Серый цвет выключенного свича
-      thumbColor: MaterialStateProperty.all<Color>(const Color(0xFF6EB5C0)),
-      trackColor: MaterialStateProperty.all<Color>(const Color(0xFFA2E0F4)),
-      //overlayColor: MaterialStateProperty.all<Color>(const Color(0xFFA2E8E4)),
-    ),
+    //switchTheme: SwitchThemeData(
+    //  //TODO: Серый цвет выключенного свича
+    //  thumbColor: MaterialStateProperty.all<Color>(const Color(0xFF6EB5C0)),
+    //  trackColor: MaterialStateProperty.all<Color>(const Color(0xFFA2E0F4)),
+    //  //trackOutlineColor: MaterialStateProperty.all<Color>(Colors.grey),
+    //  //overlayColor: MaterialStateProperty.all<Color>(const Color(0xFFA2E8E4)),
+    //),
     colorScheme: const ColorScheme.light(
       background: Colors.white,
       primary: Color(0xFF006C84),
@@ -33,6 +34,12 @@ class PrimaryTheme extends ThemeTemplate {
         ),
       ),
     ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.black87,
+      ),
+    ),
+    tabBarTheme: const TabBarTheme(labelColor: Colors.black87),
     //textButtonTheme: TextButtonThemeData(
     //  style: TextButton.styleFrom(
     //    foregroundColor: Colors.black87

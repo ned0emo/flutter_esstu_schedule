@@ -291,7 +291,6 @@ class _DepartmentsState extends State<DepartmentsPage> {
                 );
               },
             ),
-            labelColor: Colors.black87,
             labelStyle:
                 const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           );

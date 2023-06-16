@@ -71,7 +71,6 @@ class _ClassroomState extends State<ClassroomsPage> {
                       );
                     },
                   ),
-                  labelColor: Colors.black87,
                   labelStyle: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w500),
                 ),

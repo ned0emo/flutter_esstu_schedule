@@ -6,6 +6,7 @@ class AppRoutes{
   static const favoriteListRoute = '/favorite';
   static const favoriteScheduleRoute = '/favoriteSchedule';
   static const settingsRoute = '/settings';
+  static const debugRoute = '/debug';
   static const classesRoute = '/classes';
   static const searchRoute = '/search';
   static const searchingScheduleRoute = '/searchingSchedule';

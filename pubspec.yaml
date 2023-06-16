@@ -42,6 +42,7 @@ dependencies:
   jiffy: ^5.0.0
   flutter_modular: ^5.0.3
   collection: ^1.17.1
+  intl: ^0.18.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

@@ -15,7 +15,10 @@ class FavoriteModule extends Module {
         ChildRoute(
           AppRoutes.favoriteScheduleRoute,
           child: (context, args) => FavoriteSchedulePage(
-              scheduleName: args.data[0], scheduleType: args.data[1]),
+            scheduleName: args.data[0],
+            scheduleType: args.data[1],
+            isAutoUpdateEnabled: args.data[2],
+          ),
         ),
       ];
 

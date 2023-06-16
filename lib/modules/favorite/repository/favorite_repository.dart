@@ -17,7 +17,7 @@ class FavoriteRepository {
   Future<List<String>> getFavoriteList() async {
     final list = await _storage.readAll();
 
-    list.removeWhere((key, value) => key.contains('service'));
+    list.removeWhere((key, value) => key.contains('Service'));
 
     return list.keys.toList();
   }

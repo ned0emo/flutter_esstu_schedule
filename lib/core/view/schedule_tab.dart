@@ -122,7 +122,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
             ),
             child: Text(
               dayOfWeek,
-              style: const TextStyle(fontSize: 24, color: Colors.black87),
+              style: const TextStyle(fontSize: 24),
             ),
           ),
 

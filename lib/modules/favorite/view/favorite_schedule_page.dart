@@ -10,9 +10,14 @@ import 'package:schedule/modules/favorite/favorite_update_bloc/favorite_update_b
 class FavoriteSchedulePage extends StatefulWidget {
   final String scheduleType;
   final String scheduleName;
+  final bool isAutoUpdateEnabled;
 
-  const FavoriteSchedulePage(
-      {super.key, required this.scheduleName, required this.scheduleType});
+  const FavoriteSchedulePage({
+    super.key,
+    required this.scheduleName,
+    required this.scheduleType,
+    required this.isAutoUpdateEnabled,
+  });
 
   @override
   State<StatefulWidget> createState() => _FavoriteScheduleState();
@@ -46,7 +51,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
         // TODO: isNeedUpdate прописать в настройках
         BlocProvider(
             create: (context) => FavoriteScheduleBloc(Modular.get())
-              ..add(LoadFavoriteSchedule(widget.fileName, isNeedUpdate: true))),
+              ..add(LoadFavoriteSchedule(widget.fileName, isNeedUpdate: widget.isAutoUpdateEnabled))),
         BlocProvider(
             create: (context) => FavoriteButtonBloc(Modular.get())
               ..add(CheckSchedule(

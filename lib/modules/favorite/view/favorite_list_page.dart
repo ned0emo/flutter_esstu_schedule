@@ -5,6 +5,8 @@ import 'package:schedule/core/app_routes.dart';
 import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_list_bloc/favorite_list_bloc.dart';
+import 'package:schedule/modules/settings/settings_repository.dart';
+import 'package:schedule/core/settings_types.dart';
 
 class FavoriteListPage extends StatefulWidget {
   const FavoriteListPage({super.key});
@@ -94,11 +96,17 @@ class _FavoriteListState extends State<FavoriteListPage> {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     Modular.to.pushNamed(
                         AppRoutes.favoriteListRoute +
                             AppRoutes.favoriteScheduleRoute,
-                        arguments: [scheduleName, scheduleType]);
+                        arguments: [
+                          scheduleName,
+                          scheduleType,
+                          (await RepositoryProvider.of<SettingsRepository>(context)
+                                  .loadSettings())[SettingsTypes.autoUpdate] ==
+                              'true'
+                        ]);
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -112,7 +120,11 @@ class _FavoriteListState extends State<FavoriteListPage> {
                     Modular.get<FavoriteListBloc>().add(
                         DeleteScheduleFromList(scheduleName, scheduleType));
                   },
-                  icon: const Icon(Icons.delete))
+                  icon: Icon(
+                    Icons.delete,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.black87,
+                  ))
             ],
           ),
         ),

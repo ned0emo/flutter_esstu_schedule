@@ -218,7 +218,6 @@ class _StudentsPageState extends State<StudentsPage> {
                       );
                     },
                   ),
-                  labelColor: Colors.black87,
                   labelStyle: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w500),
                 ),
