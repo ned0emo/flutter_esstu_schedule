@@ -34,3 +34,10 @@ class CheckSchedule extends FavoriteButtonEvent {
 
   CheckSchedule({required this.scheduleType, required this.name});
 }
+
+class AddFavoriteToMainPage extends FavoriteButtonEvent {
+  final String name;
+  final String scheduleType;
+
+  AddFavoriteToMainPage({required this.scheduleType, required this.name});
+}

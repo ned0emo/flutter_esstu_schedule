@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/schedule_type.dart';
+import 'package:schedule/core/settings_types.dart';
 import 'package:schedule/core/view/schedule_tab.dart';
 import 'package:schedule/modules/classrooms/bloc/classrooms_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
+import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 
 class ClassroomsPage extends StatefulWidget {
   const ClassroomsPage({super.key});
@@ -18,8 +20,8 @@ class _ClassroomState extends State<ClassroomsPage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => Modular.get<ClassroomsBloc>()),
-        BlocProvider(create: (context) => Modular.get<FavoriteButtonBloc>()),
+        BlocProvider.value(value: Modular.get<ClassroomsBloc>()),
+        BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
       ],
       child: BlocBuilder<ClassroomsBloc, ClassroomsState>(
         builder: (context, state) {
@@ -95,7 +97,7 @@ class _ClassroomState extends State<ClassroomsPage> {
                   children: [
                     const CircularProgressIndicator(),
                     const SizedBox(height: 15),
-                    Text('${state.percents}%'),
+                    if(state.percents > 0) Text('${state.percents}%'),
                     Text(state.message, textAlign: TextAlign.center),
                   ],
                 ),
@@ -137,9 +139,7 @@ class _ClassroomState extends State<ClassroomsPage> {
               onChanged: (value) {
                 if (value == null) return;
 
-                BlocProvider.of<ClassroomsBloc>(context)
-                    .add(ChangeClassroom(value));
-                //Modular.get<FavoriteBloc>().add(CheckSchedule(name: value));
+                Modular.get<ClassroomsBloc>().add(ChangeClassroom(value));
               },
             ),
           ),
@@ -193,7 +193,7 @@ class _ClassroomState extends State<ClassroomsPage> {
                             state.scheduleMap.keys.elementAt(index);
                         final classroom =
                             state.scheduleMap[building]!.keys.first;
-                        BlocProvider.of<ClassroomsBloc>(context).add(
+                        Modular.get<ClassroomsBloc>().add(
                             ChangeBuilding(building, classroom: classroom));
                         Navigator.pop(context);
                       },
@@ -261,6 +261,8 @@ class _ClassroomState extends State<ClassroomsPage> {
                                     classroomState.currentBuildingName]![
                                 classroomState.currentClassroom]!,
                           ));
+
+                          _noUpdateDialog();
                         }
                       }
                     : null,
@@ -273,5 +275,36 @@ class _ClassroomState extends State<ClassroomsPage> {
         },
       ),
     );
+  }
+
+  Future<void> _noUpdateDialog() async {
+    final state = BlocProvider.of<SettingsBloc>(context).state;
+    if (state is SettingsLoaded && !state.noUpdateClassroom) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Внимание'),
+            content: const Text(
+                'Расписание аудиторий не имеет возможности обновления из избранного'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
+                        settingType: SettingsTypes.noUpdateClassroom,
+                        value: 'true'));
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Больше не показывать')),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Ок')),
+            ],
+          );
+        },
+      );
+    }
   }
 }

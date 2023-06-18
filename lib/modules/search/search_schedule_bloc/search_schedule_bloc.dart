@@ -1,8 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart';
+import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/modules/home/main_repository.dart';
@@ -101,10 +102,42 @@ class SearchScheduleBloc
         link2: event.link2,
         customDaysOfWeek: customDaysOfWeek,
       ));
-    } on ClientException catch (e) {
+    } on SocketException catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки расписания',
+        'Отсутствие интернета или недоступность сайта:'
+            '\n${e.address}\n${e.message}',
+      );
+
       emit(SearchScheduleError(
-          'Ошибка загрузки расписания:\n${e.uri}\n${e.message}'));
+          'Ошибка загрузки расписания:\n${e.address}\n${e.message}'));
+    } on RangeError catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки расписания',
+        'Имя аргумента: ${e.name}'
+            '\nМинимально допустимое значение: ${e.start}'
+            '\nМаксимально допустимое значение: ${e.end}'
+            '\nТекущее значение: ${e.invalidValue}'
+            '\n${e.message}'
+            '\n${e.stackTrace}',
+      );
+
+      emit(SearchScheduleError(
+        'Ошибка загрузки расписания:\nИмя аргумента: ${e.name}'
+        '\nМинимально допустимое значение: ${e.start}'
+        '\nМаксимально допустимое значение: ${e.end}'
+        '\nТекущее значение: ${e.invalidValue}'
+        '\n${e.message}',
+      ));
     } catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки расписания',
+        'Неизвестная ошибка. Тип: ${e.runtimeType}',
+      );
+
       emit(SearchScheduleError('Ошибка загрузки расписания: ${e.runtimeType}'));
     }
   }

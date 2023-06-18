@@ -6,8 +6,12 @@ class SettingsRepository {
 
   Future<Map<String, String>> loadSettings() async {
     final Map<String, String> settingsMap = {
-      SettingsTypes.autoUpdate: await _storage.read(key: SettingsTypes.autoUpdate) ?? 'true',
-      SettingsTypes.darkTheme: await _storage.read(key: SettingsTypes.darkTheme) ?? 'false',
+      SettingsTypes.autoUpdate:
+          await _storage.read(key: SettingsTypes.autoUpdate) ?? 'true',
+      SettingsTypes.darkTheme:
+          await _storage.read(key: SettingsTypes.darkTheme) ?? 'false',
+      SettingsTypes.noUpdateClassroom:
+          await _storage.read(key: SettingsTypes.noUpdateClassroom) ?? 'false',
     };
 
     return settingsMap;
@@ -17,5 +21,9 @@ class SettingsRepository {
     await _storage.write(key: type, value: value);
 
     return await loadSettings();
+  }
+
+  Future<void> clearAll() async {
+    await _storage.deleteAll();
   }
 }

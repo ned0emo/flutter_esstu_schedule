@@ -6,8 +6,13 @@ abstract class FavoriteScheduleEvent {}
 class LoadFavoriteSchedule extends FavoriteScheduleEvent {
   final String scheduleFileName;
   final bool isNeedUpdate;
+  final bool isFromMainPage;
 
-  LoadFavoriteSchedule(this.scheduleFileName, {this.isNeedUpdate = false});
+  LoadFavoriteSchedule(
+    this.scheduleFileName, {
+    this.isNeedUpdate = false,
+    this.isFromMainPage = false,
+  });
 }
 
 class ChangeOpenedDay extends FavoriteScheduleEvent {
@@ -15,3 +20,5 @@ class ChangeOpenedDay extends FavoriteScheduleEvent {
 
   ChangeOpenedDay(this.dayIndex);
 }
+
+class OpenMainFavSchedule extends FavoriteScheduleEvent {}

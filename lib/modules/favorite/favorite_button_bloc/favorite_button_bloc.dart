@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:schedule/modules/favorite/models/favorite_schedule_model.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
@@ -18,6 +18,7 @@ class FavoriteButtonBloc extends Bloc<FavoriteButtonEvent, FavoriteButtonState> 
     on<SaveSchedule>(_saveSchedule);
     on<CheckSchedule>(_checkSchedule);
     on<DeleteSchedule>(_deleteSchedule);
+    on<AddFavoriteToMainPage>(_addFavoriteToMainPage);
   }
 
   Future<void> _saveSchedule(
@@ -58,5 +59,9 @@ class FavoriteButtonBloc extends Bloc<FavoriteButtonEvent, FavoriteButtonState> 
     } else {
       emit(FavoriteDoesNotExist(isNeedSnackBar: false));
     }
+  }
+
+  Future<void> _addFavoriteToMainPage(AddFavoriteToMainPage event, Emitter<FavoriteButtonState> emit) async{
+    await _favoriteRepository.addToMainPage('${event.scheduleType}|${event.name}');
   }
 }

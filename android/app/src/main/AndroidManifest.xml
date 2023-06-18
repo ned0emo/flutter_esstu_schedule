@@ -3,9 +3,10 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
    <application
-        android:label="schedule"
+        android:label="Расписание ВСГУТУ"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/iconesstuv7"
+        android:roundIcon="@mipmap/roundiconesstuv7">
         <activity
             android:name=".MainActivity"
             android:exported="true"

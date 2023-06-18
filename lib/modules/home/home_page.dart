@@ -1,59 +1,72 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:schedule/core/app_routes.dart';
 import 'package:schedule/core/schedule_type.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:schedule/core/settings_types.dart';
+import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
+import 'package:schedule/modules/settings/settings_repository.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  /*final _elevatedButtonStyle = ElevatedButton.styleFrom(
-    backgroundColor: Colors.white,
-    foregroundColor: Colors.black87,
-  );*/
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Расписание ВСГУТУ'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Modular.to.pushNamed(AppRoutes.settingsRoute);
-            },
-            icon: const Icon(Icons.settings),
+    return BlocProvider.value(
+      value: Modular.get<FavoriteScheduleBloc>()..add(OpenMainFavSchedule()),
+      child: BlocListener<FavoriteScheduleBloc, FavoriteScheduleState>(
+        listener: (context, state) async {
+          if (state is FavoriteScheduleLoaded && state.isFromMainPage) {
+            Modular.to.pushNamed(
+              AppRoutes.favoriteListRoute + AppRoutes.favoriteScheduleRoute,
+              arguments: [
+                state.scheduleName,
+                state.scheduleType,
+                (await RepositoryProvider.of<SettingsRepository>(context)
+                        .loadSettings())[SettingsTypes.autoUpdate] ==
+                    'true',
+              ],
+            );
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Расписание ВСГУТУ'),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  Modular.to.pushNamed(AppRoutes.settingsRoute);
+                },
+                icon: const Icon(Icons.settings),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Center(
-          child: SingleChildScrollView(
+          body: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
+              children: [
+                const SizedBox(height: 30),
+                Image.asset(
+                  'assets/newlogo.png',
+                  width: 180,
+                  height: 180,
+                ),
+                const SizedBox(height: 20),
                 GridView.count(
-                  shrinkWrap: true,
-                  primary: false,
                   padding: const EdgeInsets.all(15),
                   crossAxisSpacing: 15,
                   mainAxisSpacing: 15,
                   crossAxisCount: 2,
-                  children: <Widget>[
-                    Image.asset(
-                      'assets/newlogo.png',
-                      width: 160,
-                      height: 160,
-                    ),
+                  shrinkWrap: true,
+                  primary: false,
+                  children: [
                     ElevatedButton(
                       onPressed: () {
                         Modular.to.pushNamed(AppRoutes.studentsRoute);
                       },
-                      //style: _elevatedButtonStyle,
-                      child: _homeElevatedButton(
-                        'Студенты',
+                      child: _homeElevatedButtonContent(
+                        'Учебные группы',
                         FontAwesomeIcons.userGroup,
                       ),
                     ),
@@ -61,8 +74,7 @@ class HomePage extends StatelessWidget {
                       onPressed: () {
                         Modular.to.pushNamed(AppRoutes.teachersRoute);
                       },
-                      //style: _elevatedButtonStyle,
-                      child: _homeElevatedButton(
+                      child: _homeElevatedButtonContent(
                         'Преподаватели',
                         FontAwesomeIcons.graduationCap,
                       ),
@@ -71,71 +83,18 @@ class HomePage extends StatelessWidget {
                       onPressed: () {
                         Modular.to.pushNamed(AppRoutes.classesRoute);
                       },
-                      //style: _elevatedButtonStyle,
-                      child: _homeElevatedButton(
+                      child: _homeElevatedButtonContent(
                         'Аудитории',
-                        FontAwesomeIcons.computer,
+                        FontAwesomeIcons.bookOpen,
                       ),
                     ),
                     ElevatedButton(
                       onPressed: () {
                         Modular.to.pushNamed(AppRoutes.favoriteListRoute);
                       },
-                      //style: _elevatedButtonStyle,
-                      child: _homeElevatedButton(
+                      child: _homeElevatedButtonContent(
                         'Избранное',
-                        Icons.star,
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Поиск расписания'),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                        onPressed: () {
-                                          Modular.to.popAndPushNamed(
-                                            AppRoutes.searchRoute,
-                                            arguments: [ScheduleType.student],
-                                          );
-                                        },
-                                        child: const Text(
-                                          'Учебная группа',
-                                          style: TextStyle(fontSize: 20),
-                                        )),
-                                  ),
-                                  const SizedBox(height: 15),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                        onPressed: () {
-                                          Modular.to.popAndPushNamed(
-                                            AppRoutes.searchRoute,
-                                            arguments: [ScheduleType.teacher],
-                                          );
-                                        },
-                                        child: const Text(
-                                          'Преподаватель',
-                                          style: TextStyle(fontSize: 20),
-                                        )),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      //style: _elevatedButtonStyle,
-                      child: _homeElevatedButton(
-                        'Поиск',
-                        Icons.search,
+                        FontAwesomeIcons.solidStar,
                       ),
                     ),
                   ],
@@ -143,29 +102,74 @@ class HomePage extends StatelessWidget {
               ],
             ),
           ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Поиск расписания'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                              onPressed: () {
+                                Modular.to.popAndPushNamed(
+                                  AppRoutes.searchRoute,
+                                  arguments: [ScheduleType.student],
+                                );
+                              },
+                              child: const Text(
+                                'Учебная группа',
+                                style: TextStyle(fontSize: 20),
+                              )),
+                        ),
+                        const SizedBox(height: 15),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                              onPressed: () {
+                                Modular.to.popAndPushNamed(
+                                  AppRoutes.searchRoute,
+                                  arguments: [ScheduleType.teacher],
+                                );
+                              },
+                              child: const Text(
+                                'Преподаватель',
+                                style: TextStyle(fontSize: 20),
+                              )),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            child: const Icon(Icons.search),
+          ),
         ),
       ),
     );
   }
 
-  Widget _homeElevatedButton(String label, IconData iconData) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FaIcon(
-            iconData,
-            size: 70,
+  Widget _homeElevatedButtonContent(String text, IconData icon) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 30),
+        FaIcon(icon, size: 70),
+        Expanded(
+          child: Center(
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
           ),
-          const SizedBox(
-            height: 15,
-          ),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 18),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

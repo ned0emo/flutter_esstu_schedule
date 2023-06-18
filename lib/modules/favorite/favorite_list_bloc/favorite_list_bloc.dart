@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
@@ -55,7 +56,13 @@ class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
       favoriteListMap.removeWhere((key, value) => value.isEmpty);
       emit(FavoriteListLoaded(favoriteListMap));
     } catch (e) {
-      emit(FavoriteListError(e.runtimeType.toString()));
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки списка избранного',
+        'Неизвестная ошибка. Тип: ${e.runtimeType}',
+      );
+
+      emit(FavoriteListError('Ошибка загрузки списка избранного\n${e.runtimeType}'));
     }
   }
 

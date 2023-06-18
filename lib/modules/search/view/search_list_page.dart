@@ -19,9 +19,8 @@ class _SearchListPageState extends State<SearchListPage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
         providers: [
-          BlocProvider(
-              create: (context) =>
-              SearchListBloc(Modular.get())
+          BlocProvider.value(
+              value: Modular.get<SearchListBloc>()
                 ..add(LoadSearchList(widget.scheduleType))),
         ],
         child: Scaffold(
@@ -37,13 +36,14 @@ class _SearchListPageState extends State<SearchListPage> {
     return BlocBuilder<SearchListBloc, SearchListState>(
       builder: (context, state) {
         if (state is SearchListLoading) {
-          return Center(child: Column(
+          return Center(
+              child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const CircularProgressIndicator(),
               const SizedBox(height: 15),
-              if(state.percents != null) Text('${state.percents}%'),
-              if(state.message != null) Text(state.message!),
+              if (state.percents != null) Text('${state.percents}%'),
+              if (state.message != null) Text(state.message!),
             ],
           ));
         }
@@ -56,34 +56,33 @@ class _SearchListPageState extends State<SearchListPage> {
                   scheduleType == ScheduleType.student
                       ? 'Введите название группы:'
                       : 'Введите фамилию преподавателя:',
-                  style: (TextStyle(fontSize: 20))),
+                  style: (const TextStyle(fontSize: 20))),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   autofocus: true,
                   onChanged: (value) {
-                    BlocProvider.of<SearchListBloc>(context)
-                        .add(SearchInList(value));
+                    Modular.get<SearchListBloc>().add(SearchInList(value));
                   },
                 ),
               ),
               Expanded(
                   child: SingleChildScrollView(
-                    child: Column(
-                      children: List.generate(
-                        (state.searchedList ?? []).length,
-                            (index) {
-                          final name = state.searchedList![index];
-                          final link1 = state.scheduleLinksMap[name]![0];
-                          final link2 = state.scheduleLinksMap[name]!.length > 1
-                              ? state.scheduleLinksMap[name]![1]
-                              : null;
+                child: Column(
+                  children: List.generate(
+                    (state.searchedList ?? []).length,
+                    (index) {
+                      final name = state.searchedList![index];
+                      final link1 = state.scheduleLinksMap[name]![0];
+                      final link2 = state.scheduleLinksMap[name]!.length > 1
+                          ? state.scheduleLinksMap[name]![1]
+                          : null;
 
-                          return _searchedElement(name, link1, link2);
-                        },
-                      ),
-                    ),
-                  ))
+                      return _searchedElement(name, link1, link2);
+                    },
+                  ),
+                ),
+              ))
             ],
           );
         }

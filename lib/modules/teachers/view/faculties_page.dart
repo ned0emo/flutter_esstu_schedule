@@ -18,9 +18,8 @@ class _FacultiesState extends State<FacultiesPage> {
       appBar: AppBar(title: const Text('Факультет')),
       body: MultiBlocProvider(
         providers: [
-          BlocProvider(
-              create: (context) =>
-                  Modular.get<FacultyBloc>()..add(LoadFaculties())),
+          BlocProvider.value(
+              value: Modular.get<FacultyBloc>()..add(LoadFaculties())),
         ],
         child: Center(
           child: SingleChildScrollView(
@@ -28,7 +27,8 @@ class _FacultiesState extends State<FacultiesPage> {
               listener: (context, state) {
                 if (state is CurrentFacultyState) {
                   Modular.to.pushReplacementNamed(
-                      AppRoutes.teachersRoute + AppRoutes.departmentsRoute, arguments: [state]);
+                      AppRoutes.teachersRoute + AppRoutes.departmentsRoute,
+                      arguments: [state]);
                 }
               },
               child: BlocBuilder<FacultyBloc, FacultyState>(
@@ -42,11 +42,19 @@ class _FacultiesState extends State<FacultiesPage> {
                   if (state is FacultiesLoadedState) {
                     final map = state.facultyDepartmentLinkMap;
                     return Center(
-                      child: Column(
-                        children: List.generate(
-                            map.keys.length,
-                            (index) => _facultyButton(map.keys.elementAt(index),
-                                map[map.keys.elementAt(index)]!, context)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 0,
+                        ),
+                        child: Column(
+                          children: List.generate(
+                              map.keys.length,
+                              (index) => _facultyButton(
+                                  map.keys.elementAt(index),
+                                  map[map.keys.elementAt(index)]!,
+                                  context)),
+                        ),
                       ),
                     );
                   }
@@ -70,17 +78,24 @@ class _FacultiesState extends State<FacultiesPage> {
     return Column(
       children: [
         const SizedBox(height: 8),
-        ElevatedButton(
-          onPressed: () {
-            BlocProvider.of<FacultyBloc>(context).add(ChooseFaculty(
-                facultyName: facultyName, departmentsMap: departmentsMap));
-          },
-          style: ElevatedButton.styleFrom(
-              minimumSize: const Size(350, 50),
-              maximumSize: const Size(350, double.infinity)),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(facultyName, textAlign: TextAlign.center),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Modular.get<FacultyBloc>().add(ChooseFaculty(
+                        facultyName: facultyName,
+                        departmentsMap: departmentsMap));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(facultyName, textAlign: TextAlign.center),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 8),

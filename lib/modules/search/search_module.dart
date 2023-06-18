@@ -3,6 +3,7 @@ import 'package:schedule/core/app_routes.dart';
 import 'package:schedule/modules/home/home_module.dart';
 import 'package:schedule/modules/search/search_list_bloc/search_list_bloc.dart';
 import 'package:schedule/modules/search/search_repository.dart';
+import 'package:schedule/modules/search/search_schedule_bloc/search_schedule_bloc.dart';
 import 'package:schedule/modules/search/view/search_list_page.dart';
 import 'package:schedule/modules/search/view/search_schedule_page.dart';
 
@@ -11,6 +12,7 @@ class SearchModule extends Module {
   List<Bind<Object>> get binds => [
         Bind((i) => SearchRepository()),
         Bind((i) => SearchListBloc(i.get())),
+        Bind((i) => SearchScheduleBloc(i.get())),
       ];
 
   @override

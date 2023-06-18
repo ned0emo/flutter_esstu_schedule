@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
@@ -17,6 +18,7 @@ class FavoriteScheduleBloc
         super(FavoriteScheduleInitial()) {
     on<LoadFavoriteSchedule>(_loadFavoriteSchedule);
     on<ChangeOpenedDay>(_changeOpenedDay);
+    on<OpenMainFavSchedule>(_openMainFavSchedule);
   }
 
   Future<void> _loadFavoriteSchedule(
@@ -27,6 +29,12 @@ class FavoriteScheduleBloc
       final scheduleModel =
           await _favoriteRepository.getScheduleModel(event.scheduleFileName);
       if (scheduleModel == null) {
+        Logger.addLog(
+          Logger.error,
+          'Ошибка загрузки избранного расписания',
+          'scheduleModel == null',
+        );
+
         emit(FavoriteScheduleError(
             'Ошибка загрузки расписания\nscheduleModel == null'));
         return;
@@ -43,6 +51,7 @@ class FavoriteScheduleBloc
         link2: scheduleModel.link2,
         customDaysOfWeek: scheduleModel.daysOfWeekList,
         isNeedUpdate: event.isNeedUpdate,
+        isFromMainPage: event.isFromMainPage,
       ));
     } on TypeError catch (e) {
       emit(FavoriteScheduleError(
@@ -58,5 +67,12 @@ class FavoriteScheduleBloc
     if (currentState is FavoriteScheduleLoaded) {
       emit(currentState.copyWith(openedDayIndex: event.dayIndex));
     }
+  }
+
+  Future<void> _openMainFavSchedule(OpenMainFavSchedule event, Emitter<FavoriteScheduleState> emit) async{
+    final scheduleName = await _favoriteRepository.getMainFavScheduleName();
+    if(scheduleName == null) return;
+
+    add(LoadFavoriteSchedule(scheduleName, isFromMainPage: true));
   }
 }

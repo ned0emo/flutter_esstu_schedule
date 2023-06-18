@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
 part 'favorite_update_event.dart';
+
 part 'favorite_update_state.dart';
 
 class FavoriteUpdateBloc
@@ -33,6 +35,12 @@ class FavoriteUpdateBloc
       pagesList.removeWhere((element) => !element.contains(event.scheduleName));
 
       if (pagesList.isEmpty) {
+        Logger.addLog(
+          Logger.warning,
+          'Ошибка обновления расписания',
+          'Расписание не найдено по сохраненной ссылке',
+        );
+
         emit(FavoriteScheduleUpdateError(
             'Ошибка обновления. Расписание не найдено по сохраненной ссылке'));
         return;
@@ -65,8 +73,18 @@ class FavoriteUpdateBloc
             try {
               customDaysOfWeek.add(
                   dayOfWeek.substring(0, dayOfWeek.indexOf('</B>')).trim());
-            } catch (e) {
-              print(e);
+            } on RangeError catch (e) {
+              Logger.addLog(
+                Logger.warning,
+                'Ошибка определения дня недели',
+                'Имя аргумента: ${e.name}'
+                    '\nМинимально допустимое значение: ${e.start}'
+                    '\nМаксимально допустимое значение: ${e.end}'
+                    '\nТекущее значение: ${e.invalidValue}'
+                    '\n${e.message}'
+                    '\n${e.stackTrace}',
+              );
+
               customDaysOfWeek.add(
                   ScheduleTimeData.daysOfWeek[customDaysOfWeek.length % 7]);
             }
@@ -99,6 +117,13 @@ class FavoriteUpdateBloc
             await _favoriteRepository.getScheduleModel(event.fileName);
 
         if (currentScheduleFavoriteModel == null) {
+          Logger.addLog(
+            Logger.error,
+            'Ошибка обновления расписания',
+            'Расписание не найдено в хранилище'
+                '\ncurrentScheduleModel == null',
+          );
+
           emit(FavoriteScheduleUpdateError(
               'Ошибка обновления расписания: расписание не найдено'));
           return;
@@ -120,13 +145,18 @@ class FavoriteUpdateBloc
         return;
       }
 
-      if(event.isAutoUpdate) {
+      if (event.isAutoUpdate) {
         emit(FavoriteUpdateInitial());
-      }
-      else{
+      } else {
         emit(FavoriteUpdateInitial(message: 'Расписание обновлено'));
       }
     } catch (e) {
+      Logger.addLog(
+        Logger.warning,
+        'Ошибка обновления расписания',
+        'Неизвестная ошибка. Тип: ${e.runtimeType}',
+      );
+
       emit(FavoriteScheduleUpdateError(
           'Ошибка обновления расписания: ${e.runtimeType}'));
     }

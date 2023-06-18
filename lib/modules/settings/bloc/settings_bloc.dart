@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:schedule/core/logger.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
 import 'package:schedule/core/settings_types.dart';
 
@@ -15,6 +16,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         super(SettingsState()) {
     on<LoadSettings>(_loadSettings);
     on<ChangeSetting>(_changeSetting);
+    on<ClearAll>(_clearAll);
   }
 
   Future<void> _loadSettings(
@@ -27,6 +29,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         SettingsLoaded(
           darkTheme: stringSettingsValues[SettingsTypes.darkTheme] == 'true',
           autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
+          noUpdateClassroom:
+              stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
         ),
       );
     } catch (e) {
@@ -43,9 +47,41 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         SettingsLoaded(
           darkTheme: stringSettingsValues[SettingsTypes.darkTheme] == 'true',
           autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
+          noUpdateClassroom:
+              stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
         ),
       );
     } catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки настроек',
+        'Неизвестная ошибка. Тип: ${e.runtimeType}',
+      );
+      emit(SettingsError(e.runtimeType.toString()));
+    }
+  }
+
+  Future<void> _clearAll(ClearAll event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoading());
+    await _settingsRepository.clearAll();
+
+    try {
+      final stringSettingsValues = await _settingsRepository.loadSettings();
+
+      emit(
+        SettingsLoaded(
+          darkTheme: stringSettingsValues[SettingsTypes.darkTheme] == 'true',
+          autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
+          noUpdateClassroom:
+              stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
+        ),
+      );
+    } catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки настроек',
+        'Неизвестная ошибка. Тип: ${e.runtimeType}',
+      );
       emit(SettingsError(e.runtimeType.toString()));
     }
   }

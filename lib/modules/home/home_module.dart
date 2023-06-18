@@ -1,9 +1,10 @@
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/app_routes.dart';
-import 'package:schedule/core/logger/logger.dart';
+import 'package:schedule/core/logger.dart';
 import 'package:schedule/modules/classrooms/classrooms_module.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_module.dart';
+import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 import 'package:schedule/modules/home/home_page.dart';
 import 'package:schedule/modules/home/main_repository.dart';
@@ -18,6 +19,7 @@ class HomeModule extends Module {
         Bind.singleton((i) => FavoriteRepository()),
         Bind.singleton((i) => FavoriteButtonBloc(i.get<FavoriteRepository>()),
             export: true),
+        Bind.singleton((i) => FavoriteScheduleBloc(i.get())),
         Bind.singleton((i) => MainRepository()),
         Bind.singleton((i) => Logger()),
       ];

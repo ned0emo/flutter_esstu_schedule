@@ -20,11 +20,10 @@ class _StudentsPageState extends State<StudentsPage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-            create: (context) =>
-                Modular.get<AllGroupsBloc>()..add(LoadAllGroups())),
-        BlocProvider(create: (context) => Modular.get<CurrentGroupBloc>()),
-        BlocProvider(create: (context) => Modular.get<FavoriteButtonBloc>()),
+        BlocProvider.value(
+            value: Modular.get<AllGroupsBloc>()..add(LoadAllGroups())),
+        BlocProvider.value(value: Modular.get<CurrentGroupBloc>()),
+        BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
       ],
       child: BlocListener<AllGroupsBloc, AllGroupsState>(
         listener: (context, state) {
@@ -61,7 +60,22 @@ class _StudentsPageState extends State<StudentsPage> {
 
                   if (state is AllGroupsLoaded) {
                     return state.warningMessage != null
-                        ? Center(child: Text(state.warningMessage!))
+                        ? Center(
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/hmmm.png',
+                                width: 180,
+                                height: 180,
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                state.warningMessage!,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ))
                         : Column(
                             children: [
                               _dropDownButton(state),
@@ -191,6 +205,8 @@ class _StudentsPageState extends State<StudentsPage> {
                                   daysOfWeekList:
                                       currentGroupState.daysOfWeekList,
                                 ));
+
+                                _addToMainDialog(currentGroupState);
                               }
                             },
                             child: state is FavoriteExist
@@ -239,6 +255,33 @@ class _StudentsPageState extends State<StudentsPage> {
         }
 
         return const Center(child: Text('Неизвестная ошибка'));
+      },
+    );
+  }
+
+  Future<void> _addToMainDialog(CurrentGroupLoaded state) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Открывать при запуске приложения?'),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Нет')),
+            TextButton(
+                onPressed: () {
+                  Modular.get<FavoriteButtonBloc>().add(AddFavoriteToMainPage(
+                    scheduleType: ScheduleType.student,
+                    name: state.name,
+                  ));
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Да')),
+          ],
+        );
       },
     );
   }

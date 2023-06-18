@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/modules/search/search_repository.dart';
 
@@ -11,16 +12,16 @@ part 'search_list_state.dart';
 
 class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
   final SearchRepository _searchRepository;
-  final int threadCount = 6;
+  final int _threadCount = 6;
 
-  final List<String> studentsLinks = [
+  final List<String> _studentsLinks = [
     '/bakalavriat/raspisan.htm',
     '/spezialitet/raspisan.htm',
     '/zo1/raspisan.htm',
     '/zo2/raspisan.htm',
   ];
 
-  final List<String> studentsScheduleLinks = [
+  final List<String> _studentsScheduleLinks = [
     '/bakalavriat',
     '/spezialitet',
     '/zo1',
@@ -32,16 +33,16 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
     "/bakalavriat/craspisanEdt.htm",
   ];
 
-  final List<String> teachersScheduleLinks = [
+  final List<String> _teachersScheduleLinks = [
     "/spezialitet",
     "/bakalavriat",
   ];
 
   ///Маги, колледж
-  final magLink = "/spezialitet/craspisanEdt.htm";
+  //final magLink = "/spezialitet/craspisanEdt.htm";
 
   ///Баки, специалитет
-  final bakLink = "/bakalavriat/craspisanEdt.htm";
+  //final bakLink = "/bakalavriat/craspisanEdt.htm";
 
   SearchListBloc(SearchRepository repository)
       : _searchRepository = repository,
@@ -60,7 +61,7 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
     if (event.scheduleType == ScheduleType.student) {
       final schedulePages = [];
 
-      for (String link in studentsLinks) {
+      for (String link in _studentsLinks) {
         schedulePages.add(await _searchRepository.loadPage(link));
       }
 
@@ -77,19 +78,30 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
               continue;
             }
             final link =
-                '${studentsScheduleLinks[i]}/${groupSection.substring(0, groupSection.indexOf('">'))}';
+                '${_studentsScheduleLinks[i]}/${groupSection.substring(0, groupSection.indexOf('">'))}';
 
             if (scheduleLinksMap[name] == null) scheduleLinksMap[name] = [];
             scheduleLinksMap[name]!.add(link);
           }
           i++;
         }
-      } catch (e) {
+      } on RangeError catch (e) {
+        Logger.addLog(
+          Logger.error,
+          'Ошибка загрузки списка учебных групп',
+          'Имя аргумента: ${e.name}'
+              '\nМинимально допустимое значение: ${e.start}'
+              '\nМаксимально допустимое значение: ${e.end}'
+              '\nТекущее значение: ${e.invalidValue}'
+              '\n${e.message}'
+              '\n${e.stackTrace}',
+        );
         emit(SearchingError(
             'Ошибка загрузки списка учебных групп:\n${e.runtimeType}'));
         return;
       }
     }
+
     ///Препода
     else {
       final facultiesPages = [];
@@ -121,8 +133,17 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
               }
               scheduleLinksMap[teacherName]!.add(link);
             }
-          } catch (e) {
-            print(e.runtimeType);
+          } on RangeError catch (e) {
+            Logger.addLog(
+              Logger.warning,
+              'Ошибка загрузки страницы кафедры',
+              'Имя аргумента: ${e.name}'
+                  '\nМинимально допустимое значение: ${e.start}'
+                  '\nМаксимально допустимое значение: ${e.end}'
+                  '\nТекущее значение: ${e.invalidValue}'
+                  '\n${e.message}'
+                  '\n${e.stackTrace}',
+            );
             localErrorCount++;
           }
 
@@ -138,7 +159,7 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
       }
 
       final List<List<String>> departmentLinks =
-          List.generate(threadCount, (index) => []);
+          List.generate(_threadCount, (index) => []);
 
       int i = 0;
       for (String page in facultiesPages) {
@@ -148,8 +169,8 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
         int j = 0;
         for (String departmentSection in splittedPage) {
           final link =
-              '${teachersScheduleLinks[i]}/${departmentSection.substring(0, departmentSection.indexOf('">'))}';
-          departmentLinks[j % threadCount].add(link);
+              '${_teachersScheduleLinks[i]}/${departmentSection.substring(0, departmentSection.indexOf('">'))}';
+          departmentLinks[j % _threadCount].add(link);
           j++;
         }
         linksCount += j;
@@ -158,13 +179,19 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
       }
 
       if (linksCount == 0) {
+        Logger.addLog(
+          Logger.error,
+          'Ошибка загрузки списка преподавателей',
+          'linksCount == 0',
+        );
+
         emit(SearchingError('Ошибка загрузки списка преподавателей'));
         return;
       }
 
       int freezeCount = 0;
       int oldProgress = progress;
-      for (int i = 0; i < threadCount; i++) {
+      for (int i = 0; i < _threadCount; i++) {
         loadDepartmentPages(departmentLinks[i]);
       }
       do {
@@ -186,9 +213,15 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
         }
         emit(
             SearchListLoading(percents: (progress / linksCount * 100).toInt()));
-      } while (completedThreads < threadCount);
+      } while (completedThreads < _threadCount);
 
       if (errorCount > 8) {
+        Logger.addLog(
+          Logger.error,
+          'Ошибка загрузки страниц расписания кафедр',
+          'errorCount > 8',
+        );
+
         emit(SearchingError('Ошибка загрузки страниц расписания кафедр'));
         return;
       }
@@ -209,6 +242,12 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
         emit(currentState.copyWith(
             namesList: namesList.take(10).toList()..sort()));
       } catch (e) {
+        Logger.addLog(
+          Logger.error,
+          'Ошибка поиска',
+          'Неизвестная ошибка. Тип: ${e.runtimeType}',
+        );
+
         emit(SearchingError('Ошибка поиска:\n${e.runtimeType}'));
       }
     }

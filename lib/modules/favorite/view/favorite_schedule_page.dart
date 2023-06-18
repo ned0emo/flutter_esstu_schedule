@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/core/view/schedule_tab.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_list_bloc/favorite_list_bloc.dart';
@@ -48,17 +49,17 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // TODO: isNeedUpdate прописать в настройках
-        BlocProvider(
-            create: (context) => FavoriteScheduleBloc(Modular.get())
-              ..add(LoadFavoriteSchedule(widget.fileName, isNeedUpdate: widget.isAutoUpdateEnabled))),
-        BlocProvider(
-            create: (context) => FavoriteButtonBloc(Modular.get())
+        BlocProvider.value(
+            value: Modular.get<FavoriteScheduleBloc>()
+              ..add(LoadFavoriteSchedule(widget.fileName,
+                  isNeedUpdate: widget.isAutoUpdateEnabled))),
+        BlocProvider.value(
+            value: Modular.get<FavoriteButtonBloc>()
               ..add(CheckSchedule(
                 scheduleType: widget.scheduleType,
                 name: widget.scheduleName,
               ))),
-        BlocProvider(create: (context) => FavoriteUpdateBloc(Modular.get())),
+        BlocProvider.value(value: Modular.get<FavoriteUpdateBloc>()),
       ],
       child: BlocListener<FavoriteUpdateBloc, FavoriteUpdateState>(
         listener: (context, state) {
@@ -79,7 +80,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
           }
 
           if (state is FavoriteScheduleUpdated) {
-            BlocProvider.of<FavoriteScheduleBloc>(context)
+            Modular.get<FavoriteScheduleBloc>()
                 .add(LoadFavoriteSchedule(state.fileName));
 
             _controller.reset();
@@ -107,7 +108,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
 
             if (state is FavoriteScheduleLoaded) {
               if (state.isNeedUpdate) {
-                BlocProvider.of<FavoriteUpdateBloc>(context).add(UpdateSchedule(
+                Modular.get<FavoriteUpdateBloc>().add(UpdateSchedule(
                   scheduleName: state.scheduleName,
                   scheduleList: state.scheduleList,
                   scheduleType: state.scheduleType,
@@ -129,7 +130,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                         : [
                             IconButton(
                               onPressed: () {
-                                BlocProvider.of<FavoriteUpdateBloc>(context)
+                                Modular.get<FavoriteUpdateBloc>()
                                     .add(UpdateSchedule(
                                   scheduleName: state.scheduleName,
                                   scheduleList: state.scheduleList,
@@ -173,7 +174,6 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                         );
                       },
                     ),
-                    labelColor: Colors.black87,
                     labelStyle: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w500),
                   ),
@@ -231,8 +231,8 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                         : favoriteScheduleState is FavoriteScheduleLoaded
                             ? () {
                                 if (state is FavoriteExist) {
-                                  BlocProvider.of<FavoriteButtonBloc>(context)
-                                      .add(DeleteSchedule(
+                                  Modular.get<FavoriteButtonBloc>().add(
+                                      DeleteSchedule(
                                           name: favoriteScheduleState
                                               .scheduleName,
                                           scheduleType: favoriteScheduleState
@@ -241,7 +241,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                                 }
 
                                 if (state is FavoriteDoesNotExist) {
-                                  BlocProvider.of<FavoriteButtonBloc>(context)
+                                  Modular.get<FavoriteButtonBloc>()
                                       .add(SaveSchedule(
                                     name: favoriteScheduleState.scheduleName,
                                     scheduleType:
@@ -253,6 +253,8 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                                     daysOfWeekList:
                                         favoriteScheduleState.customDaysOfWeek,
                                   ));
+
+                                  _addToMainDialog();
                                 }
                               }
                             : null,
@@ -266,6 +268,35 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
           );
         },
       ),
+    );
+  }
+
+  Future<void> _addToMainDialog() async {
+    if(widget.scheduleType == ScheduleType.classroom) return;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Открывать при запуске приложения?'),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Нет')),
+            TextButton(
+                onPressed: () {
+                  Modular.get<FavoriteButtonBloc>().add(AddFavoriteToMainPage(
+                    scheduleType: widget.scheduleType,
+                    name: widget.scheduleName,
+                  ));
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Да')),
+          ],
+        );
+      },
     );
   }
 }

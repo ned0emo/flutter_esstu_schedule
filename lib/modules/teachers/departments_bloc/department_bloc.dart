@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
@@ -26,6 +27,9 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
       ChooseTeacher event, Emitter<DepartmentState> emit) async {
     final currentState = state;
     if (currentState is DepartmentLoaded) {
+      emit(DepartmentLoading());
+      await Future.delayed(const Duration(milliseconds: 300));
+
       emit(currentState.copyWith(
         currentTeacher: event.teacherName,
         openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
@@ -42,10 +46,20 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
       departmentsPages = await _teachersRepository
           .loadDepartmentPages(event.link1, link2: event.link2);
     } on SocketException catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки страницы кафедры',
+        'Отсутствие интернета или недоступность сайта: ${e.message}',
+      );
       emit(DepartmentError(
           message: 'Ошибка загрузки страницы кафедры\n${e.message}'));
       return;
     } catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки страницы кафедры',
+        'Неизвестная ошибка. Тип: ${e.runtimeType}',
+      );
       emit(DepartmentError(
           message: 'Ошибка загрузки страницы кафедры\n${e.runtimeType}'));
       return;
@@ -122,6 +136,11 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
         weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
       ));
     } catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка обработки страницы кафедры',
+        'Неизвестная ошибка. Тип: ${e.runtimeType}',
+      );
       emit(DepartmentError(
           message: 'Ошибка обработки страницы кафедры\n${e.runtimeType}'));
       return;

@@ -15,17 +15,28 @@ class AppWidget extends StatelessWidget {
       create: (context) => SettingsRepository(),
       child: BlocProvider<SettingsBloc>(
         create: (context) =>
-        SettingsBloc(RepositoryProvider.of(context))
-          ..add(LoadSettings()),
+            SettingsBloc(RepositoryProvider.of(context))..add(LoadSettings()),
         child: BlocBuilder<SettingsBloc, SettingsState>(
           builder: (context, state) {
-            return MaterialApp.router(
-              title: 'Расписание ВСГУТУ',
-              routeInformationParser: Modular.routeInformationParser,
-              routerDelegate: Modular.routerDelegate,
-              theme: state is SettingsLoaded && state.darkTheme ? DarkTheme()
-                  .data : PrimaryTheme().data,
-            );
+            if (state is SettingsLoaded) {
+              return MaterialApp.router(
+                title: 'Расписание ВСГУТУ',
+                routeInformationParser: Modular.routeInformationParser,
+                routerDelegate: Modular.routerDelegate,
+                theme: state.darkTheme ? DarkTheme().data : PrimaryTheme().data,
+              );
+            }
+
+            if (state is SettingsError) {
+              MaterialApp.router(
+                title: 'Расписание ВСГУТУ',
+                routeInformationParser: Modular.routeInformationParser,
+                routerDelegate: Modular.routerDelegate,
+                theme: PrimaryTheme().data,
+              );
+            }
+
+            return const Center(child: CircularProgressIndicator());
           },
         ),
       ),

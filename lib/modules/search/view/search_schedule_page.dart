@@ -30,16 +30,16 @@ class _SearchSchedulePageState extends State<SearchSchedulePage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-            create: (context) => SearchScheduleBloc(Modular.get())
+        BlocProvider.value(
+            value: Modular.get<SearchScheduleBloc>()
               ..add(LoadSearchingSchedule(
                 scheduleName: widget.scheduleName,
                 link1: widget.scheduleLink1,
                 link2: widget.scheduleLink2,
                 scheduleType: widget.scheduleType,
               ))),
-        BlocProvider(
-            create: (context) => FavoriteButtonBloc(Modular.get())
+        BlocProvider.value(
+            value: Modular.get<FavoriteButtonBloc>()
               ..add(CheckSchedule(
                 scheduleType: widget.scheduleType,
                 name: widget.scheduleName,
@@ -134,17 +134,14 @@ class _SearchSchedulePageState extends State<SearchSchedulePage> {
                 onPressed: searchScheduleState is SearchScheduleLoaded
                     ? () {
                         if (state is FavoriteExist) {
-                          BlocProvider.of<FavoriteButtonBloc>(context).add(
-                              DeleteSchedule(
-                                  name: searchScheduleState.scheduleName,
-                                  scheduleType:
-                                      searchScheduleState.scheduleType));
+                          Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
+                              name: searchScheduleState.scheduleName,
+                              scheduleType: searchScheduleState.scheduleType));
                           return;
                         }
 
                         if (state is FavoriteDoesNotExist) {
-                          BlocProvider.of<FavoriteButtonBloc>(context)
-                              .add(SaveSchedule(
+                          Modular.get<FavoriteButtonBloc>().add(SaveSchedule(
                             name: searchScheduleState.scheduleName,
                             scheduleType: searchScheduleState.scheduleType,
                             scheduleList: searchScheduleState.scheduleList,
@@ -153,6 +150,8 @@ class _SearchSchedulePageState extends State<SearchSchedulePage> {
                             daysOfWeekList:
                                 searchScheduleState.customDaysOfWeek,
                           ));
+
+                          _addToMainDialog();
                         }
                       }
                     : null,
@@ -164,6 +163,33 @@ class _SearchSchedulePageState extends State<SearchSchedulePage> {
           );
         },
       ),
+    );
+  }
+
+  Future<void> _addToMainDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Открывать при запуске приложения?'),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Нет')),
+            TextButton(
+                onPressed: () {
+                  Modular.get<FavoriteButtonBloc>().add(AddFavoriteToMainPage(
+                    scheduleType: widget.scheduleType,
+                    name: widget.scheduleName,
+                  ));
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Да')),
+          ],
+        );
+      },
     );
   }
 }

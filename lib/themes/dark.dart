@@ -71,6 +71,9 @@ class DarkTheme extends ThemeTemplate {
             foregroundColor: Colors.white,
           ),
         ),
+        textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(
+          foregroundColor: Colors.white
+        )),
         snackBarTheme: SnackBarThemeData(
           backgroundColor: Colors.grey[800],
         ),

@@ -10,10 +10,7 @@ import 'package:schedule/modules/teachers/faculties_bloc/faculty_bloc.dart';
 class DepartmentsPage extends StatefulWidget {
   final CurrentFacultyState facultyState;
 
-  const DepartmentsPage({
-    super.key,
-    required this.facultyState
-  });
+  const DepartmentsPage({super.key, required this.facultyState});
 
   @override
   State<StatefulWidget> createState() => _DepartmentsState();
@@ -24,9 +21,9 @@ class _DepartmentsState extends State<DepartmentsPage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
         providers: [
-          BlocProvider(create: (context) => Modular.get<FacultyBloc>()),
-          BlocProvider(
-              create: (context) => Modular.get<DepartmentBloc>()
+          BlocProvider.value(value: Modular.get<FacultyBloc>()),
+          BlocProvider.value(
+              value: Modular.get<DepartmentBloc>()
                 ..add(LoadDepartment(
                   departmentName:
                       widget.facultyState.departmentsMap.keys.elementAt(0),
@@ -40,7 +37,7 @@ class _DepartmentsState extends State<DepartmentsPage> {
                           .elementAt(0)[1]
                       : null,
                 ))),
-          BlocProvider(create: (context) => Modular.get<FavoriteButtonBloc>()),
+          BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
         ],
         child: DefaultTabController(
           length: 2,
@@ -61,7 +58,7 @@ class _DepartmentsState extends State<DepartmentsPage> {
           return Text(state.departmentName);
         }
 
-        final facultyState = BlocProvider.of<FacultyBloc>(context).state;
+        final facultyState = Modular.get<FacultyBloc>().state;
         return Text(facultyState is CurrentFacultyState
             ? facultyState.facultyName
             : 'Преподаватели');
@@ -260,6 +257,8 @@ class _DepartmentsState extends State<DepartmentsPage> {
                             link1: departmentState.link1,
                             link2: departmentState.link2,
                           ));
+
+                          _addToMainDialog(departmentState);
                         }
                       }
                     : null,
@@ -297,6 +296,33 @@ class _DepartmentsState extends State<DepartmentsPage> {
         }
 
         return const SizedBox();
+      },
+    );
+  }
+
+  Future<void> _addToMainDialog(DepartmentLoaded state) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Открывать при запуске приложения?'),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Нет')),
+            TextButton(
+                onPressed: () {
+                  Modular.get<FavoriteButtonBloc>().add(AddFavoriteToMainPage(
+                    scheduleType: ScheduleType.teacher,
+                    name: state.currentTeacher,
+                  ));
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Да')),
+          ],
+        );
       },
     );
   }

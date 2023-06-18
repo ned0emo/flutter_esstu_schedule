@@ -11,3 +11,5 @@ class ChangeSetting extends SettingsEvent {
 
   ChangeSetting({required this.settingType, required this.value});
 }
+
+class ClearAll extends SettingsEvent{}

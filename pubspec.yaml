@@ -76,9 +76,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/newlogo.png
-    - assets/arrowToCourses.png
-    - assets/arrowToGroups.png
-    - assets/arrowToFloatButton.png
+    - assets/hmmm.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

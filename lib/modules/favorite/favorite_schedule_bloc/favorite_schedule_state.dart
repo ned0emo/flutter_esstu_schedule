@@ -26,6 +26,7 @@ class FavoriteScheduleLoaded extends FavoriteScheduleState {
   final List<String>? customDaysOfWeek;
 
   final bool isNeedUpdate;
+  final bool isFromMainPage;
 
   FavoriteScheduleLoaded({
     required this.scheduleName,
@@ -38,6 +39,7 @@ class FavoriteScheduleLoaded extends FavoriteScheduleState {
     this.link2,
     this.customDaysOfWeek,
     this.isNeedUpdate = false,
+    this.isFromMainPage = false,
   });
 
   FavoriteScheduleLoaded copyWith({
@@ -51,6 +53,7 @@ class FavoriteScheduleLoaded extends FavoriteScheduleState {
     String? link2,
     List<String>? customDaysOfWeek,
     bool? isNeedUpdate,
+    bool? isFromMainPage,
   }) {
     return FavoriteScheduleLoaded(
       scheduleName: scheduleName ?? this.scheduleName,
@@ -63,6 +66,7 @@ class FavoriteScheduleLoaded extends FavoriteScheduleState {
       link2: link2 ?? this.link2,
       customDaysOfWeek: customDaysOfWeek ?? this.customDaysOfWeek,
       isNeedUpdate: isNeedUpdate ?? false,
+      isFromMainPage: isFromMainPage ?? this.isFromMainPage,
     );
   }
 

@@ -36,6 +36,7 @@ class FavoriteRepository {
   }
 
   Future<void> deleteSchedule(String key) async {
+    await _removeOldMainFav(key);
     await _storage.delete(key: key);
   }
 
@@ -57,5 +58,30 @@ class FavoriteRepository {
 
     final pageText2 = await http.readBytes(Uri.https('portal.esstu.ru', link2));
     return [_codec.decode(pageText1), _codec.decode(pageText2)];
+  }
+
+  Future<void> addToMainPage(String key) async {
+    await _removeOldMainFav(key);
+    await _storage.write(key: '${key}MainFavService', value: '');
+  }
+
+  Future<void> _removeOldMainFav(String key) async {
+    final storageMap = (await _storage.readAll());
+    storageMap.removeWhere((key, value) => !key.contains('MainFav'));
+
+    for (String oldMainFav in storageMap.keys) {
+      await _storage.delete(key: oldMainFav);
+    }
+  }
+
+  Future<String?> getMainFavScheduleName() async {
+    final storageMap = await _storage.readAll();
+    storageMap.removeWhere((key, value) => !key.contains('MainFav'));
+
+    if (storageMap.isEmpty) {
+      return null;
+    }
+
+    return storageMap.keys.first.replaceAll('MainFavService', '');
   }
 }

@@ -20,10 +20,9 @@ class _FavoriteListState extends State<FavoriteListPage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-            create: (context) =>
-                Modular.get<FavoriteListBloc>()..add(LoadFavoriteList())),
-        BlocProvider(create: (context) => Modular.get<FavoriteButtonBloc>())
+        BlocProvider.value(
+            value: Modular.get<FavoriteListBloc>()..add(LoadFavoriteList())),
+        BlocProvider.value(value: Modular.get<FavoriteButtonBloc>())
       ],
       child: Scaffold(
         appBar: AppBar(title: const Text('Избранное')),
@@ -103,7 +102,8 @@ class _FavoriteListState extends State<FavoriteListPage> {
                         arguments: [
                           scheduleName,
                           scheduleType,
-                          (await RepositoryProvider.of<SettingsRepository>(context)
+                          (await RepositoryProvider.of<SettingsRepository>(
+                                      context)
                                   .loadSettings())[SettingsTypes.autoUpdate] ==
                               'true'
                         ]);

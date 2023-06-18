@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/modules/classrooms/repositories/classrooms_repository.dart';
 
@@ -77,6 +78,9 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
       ChangeClassroom event, Emitter<ClassroomsState> emit) async {
     final currentState = state;
     if (currentState is ClassroomsLoadedState) {
+      emit(ClassroomsLoadingState());
+      await Future.delayed(const Duration(milliseconds: 300));
+
       emit(currentState.copyWith(
         currentClassroom: event.classroom,
         openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
@@ -111,7 +115,18 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
               teacherName = teacherSection.substring(
                   teacherSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
                   teacherSection.indexOf('</P>'));
-            } catch (e) {
+            } on RangeError catch (e) {
+              Logger.addLog(
+                Logger.warning,
+                'Ошибка определения ФИО преподавателя',
+                'Имя аргумента: ${e.name}'
+                    '\nМинимально допустимое значение: ${e.start}'
+                    '\nМаксимально допустимое значение: ${e.end}'
+                    '\nТекущее значение: ${e.invalidValue}'
+                    '\n${e.message}'
+                    '\n${e.stackTrace}',
+              );
+
               teacherName = e.runtimeType.toString();
             }
 
@@ -195,11 +210,25 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
 
           progress++;
         } on RangeError catch (e) {
-          print(e.message);
-          print(e.stackTrace);
+          Logger.addLog(
+            Logger.warning,
+            'Ошибка обработки страницы кафедры',
+            'Имя аргумента: ${e.name}'
+                '\nМинимально допустимое значение: ${e.start}'
+                '\nМаксимально допустимое значение: ${e.end}'
+                '\nТекущее значение: ${e.invalidValue}'
+                '\n${e.message}'
+                '\n${e.stackTrace}',
+          );
+
           localErrorCount++;
         } catch (e) {
-          print(e.runtimeType);
+          Logger.addLog(
+            Logger.warning,
+            'Ошибка обработки страницы кафедры',
+            'Неизвестная ошибка. Тип: ${e.runtimeType}',
+          );
+
           localErrorCount++;
         }
 
@@ -279,6 +308,12 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
       } while (completedThreads < threadCount);
 
       if (errorCount > 8) {
+        Logger.addLog(
+          Logger.error,
+          'Ошибка загрузки страниц кафедр',
+          'errorCount > 8',
+        );
+
         emit(ClassroomsErrorState('Ошибка загрузки страниц расписания кафедр'));
         return;
       }
@@ -295,9 +330,20 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
         currentLesson: ScheduleTimeData.getCurrentLessonNumber(),
       ));
     } on SocketException catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки страниц расписания кафедр',
+        'Отсутствие интернета или недоступность сайта:\n${e.message}',
+      );
       emit(ClassroomsErrorState(
           'Ошибка загрузки страниц расписания кафедр\n${e.message}'));
     } catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки страниц расписания кафедр',
+        'Неизвестная ошибка. Тип: ${e.runtimeType}',
+      );
+
       emit(ClassroomsErrorState(
           'Ошибка загрузки страниц расписания кафедр\n${e.runtimeType}'));
     }

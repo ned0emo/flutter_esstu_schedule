@@ -40,14 +40,12 @@ class SettingsPage extends StatelessWidget {
                           value: value.toString()));
                     },
                     trackColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.selected)) {
-                              return Theme.of(context)
-                                  .colorScheme
-                                  .primary;
-                            }
-                            return Colors.grey;
-                          }),
+                        (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.selected)) {
+                        return Theme.of(context).colorScheme.primary;
+                      }
+                      return Colors.grey;
+                    }),
                   ),
                   const SizedBox(height: 8),
                   SwitchListTile(
@@ -60,20 +58,54 @@ class SettingsPage extends StatelessWidget {
                           value: value.toString()));
                     },
                     trackColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.selected)) {
-                              return Theme.of(context)
-                                  .colorScheme
-                                  .primary;
-                            }
-                            return Colors.grey;
-                          }),
+                        (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.selected)) {
+                        return Theme.of(context).colorScheme.primary;
+                      }
+                      return Colors.grey;
+                    }),
+                  ),
+                  const ListTile(
+                      title: Text(
+                    'Отладка',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+                  ListTile(
+                    title: const Text('Логи'),
+                    onTap: () {
+                      Modular.to.pushNamed(
+                          AppRoutes.settingsRoute + AppRoutes.debugRoute);
+                    },
                   ),
                   const SizedBox(height: 8),
                   ListTile(
-                    title: const Text('Отладка'),
+                    title: const Text('Очистить данные'),
                     onTap: () {
-                      Modular.to.pushNamed(AppRoutes.settingsRoute + AppRoutes.debugRoute);
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Очистить данные?'),
+                            content: const Text(
+                                'Избранное и логи будут удалены.'
+                                ' Настройки приложения вернутся к значениям по умолчанию.'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Нет')),
+                              TextButton(
+                                  onPressed: () {
+                                    BlocProvider.of<SettingsBloc>(context)
+                                        .add(ClearAll());
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Да'))
+                            ],
+                          );
+                        },
+                      );
                     },
                   ),
                   const ListTile(
@@ -85,12 +117,14 @@ class SettingsPage extends StatelessWidget {
                     title: Text('Версия 3.0.0'),
                     subtitle: Text('\nРазработчик: Александр Суворов'
                         '\nКафедра "Программная инженерия и искусственный интеллект"'
-                        '\nВСГУТУ, 2022'
+                        '\nВСГУТУ, 2023'
                         '\n\nСвязь с разработчиком:'
                         '\nAlexandr42suv@mail.ru'
                         '\n\nЗначок приложения основан на иконке от SmashIcons:'
-                        '\nwww.flaticon.com/authors/smashicons'
-                        '\n\nСоциализм или варварство'),
+                        '\nhttps://www.flaticon.com/authors/smashicons'
+                        '\n\nИконки на главной странице от FontAwesome:'
+                        '\nhttps://fontawesome.com/v4/icons/'
+                        '\n\nСоциализм или варварство\n\n'),
                   ),
                 ],
               );

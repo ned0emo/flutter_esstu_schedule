@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger.dart';
 import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'faculty_event.dart';
+
 part 'faculty_state.dart';
 
 class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
@@ -36,14 +38,35 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
 
       emit(FacultiesLoadedState(
           facultyDepartmentLinkMap: facultyDepartmentLinkMap));
-    } on RangeError catch (exception) {
-      emit(
-          FacultiesErrorState('Ошибка обработки списка факультетов\n${exception.message}\n${exception.stackTrace}'));
-    }on SocketException catch (exception) {
-      emit(
-          FacultiesErrorState('Ошибка загрузки списка факультетов\n${exception.message}'));
-    } catch (exception) {
-      emit(FacultiesErrorState('Ошибка загрузки списка факультетов\n${exception.runtimeType}'));
+    } on RangeError catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки страницы факультетов',
+        'Имя аргумента: ${e.name}'
+            '\nМинимально допустимое значение: ${e.start}'
+            '\nМаксимально допустимое значение: ${e.end}'
+            '\nТекущее значение: ${e.invalidValue}'
+            '\n${e.message}'
+            '\n${e.stackTrace}',
+      );
+      emit(FacultiesErrorState(
+          'Ошибка обработки списка факультетов\n${e.message}\n${e.stackTrace}'));
+    } on SocketException catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки страницы факультетов',
+        'Отсутствие интернета или недоступность сайта: ${e.message}',
+      );
+      emit(FacultiesErrorState(
+          'Ошибка загрузки списка факультетов\n${e.message}'));
+    } catch (e) {
+      Logger.addLog(
+        Logger.error,
+        'Ошибка загрузки страницы факультетов',
+        'Неизвестная ошибка. Тип: ${e.runtimeType}',
+      );
+      emit(FacultiesErrorState(
+          'Ошибка загрузки списка факультетов\n${e.runtimeType}'));
     }
   }
 
@@ -71,6 +94,12 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
     }
 
     if (facultyWordExistingCheck > 1) {
+      Logger.addLog(
+        Logger.error,
+        'Не удалось найти ключевое слово на странице факультетов',
+        'Отсутствие интернета или недоступность сайта\nfacultyWordExistingCheck = 2',
+      );
+
       return {};
     }
 
@@ -88,6 +117,12 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
               : 'Прочее';
         } catch (e) {
           facultyName = 'Не удалось распознать название факультета';
+
+          Logger.addLog(
+            Logger.warning,
+            'Не удалось распознать название факультета',
+            'Cсылка: $linkName\nТип: ${e.runtimeType}',
+          );
         }
 
         final Map<String, List<String>> departmentMap =
@@ -109,6 +144,12 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
             link = '/$linkName/0.htm';
             departmentName =
                 'Не удалось распознать ссылку и/или название кафедры';
+
+            Logger.addLog(
+              Logger.warning,
+              'Не удалось распознать ссылку и/или название кафедры',
+              'Cсылка: $link\nТип: ${e.runtimeType}',
+            );
           }
 
           if (!departmentMap.keys.contains(departmentName)) {
