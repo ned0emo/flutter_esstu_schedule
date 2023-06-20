@@ -43,7 +43,11 @@ class _SearchListPageState extends State<SearchListPage> {
               const CircularProgressIndicator(),
               const SizedBox(height: 15),
               if (state.percents != null) Text('${state.percents}%'),
-              if (state.message != null) Text(state.message!),
+              if (state.message != null)
+                Text(
+                  state.message!,
+                  textAlign: TextAlign.center,
+                ),
             ],
           ));
         }
@@ -88,7 +92,11 @@ class _SearchListPageState extends State<SearchListPage> {
         }
 
         if (state is SearchingError) {
-          return Center(child: Text('Ошибка загрзуки:\n${state.message}'));
+          return Center(
+              child: Text(
+            'Ошибка загрзуки:\n${state.message}',
+            textAlign: TextAlign.center,
+          ));
         }
 
         return const Center(child: Text('Неизвестная ошибка'));

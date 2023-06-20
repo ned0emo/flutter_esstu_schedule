@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
 import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'faculty_event.dart';
-
 part 'faculty_state.dart';
 
 class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
@@ -38,35 +37,12 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
 
       emit(FacultiesLoadedState(
           facultyDepartmentLinkMap: facultyDepartmentLinkMap));
-    } on RangeError catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки страницы факультетов',
-        'Имя аргумента: ${e.name}'
-            '\nМинимально допустимое значение: ${e.start}'
-            '\nМаксимально допустимое значение: ${e.end}'
-            '\nТекущее значение: ${e.invalidValue}'
-            '\n${e.message}'
-            '\n${e.stackTrace}',
-      );
-      emit(FacultiesErrorState(
-          'Ошибка обработки списка факультетов\n${e.message}\n${e.stackTrace}'));
-    } on SocketException catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки страницы факультетов',
-        'Отсутствие интернета или недоступность сайта: ${e.message}',
-      );
-      emit(FacultiesErrorState(
-          'Ошибка загрузки списка факультетов\n${e.message}'));
-    } catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки страницы факультетов',
-        'Неизвестная ошибка. Тип: ${e.runtimeType}',
-      );
-      emit(FacultiesErrorState(
-          'Ошибка загрузки списка факультетов\n${e.runtimeType}'));
+    } catch (e, stack) {
+      emit(FacultiesErrorState(Logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      )));
     }
   }
 
@@ -94,10 +70,10 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
     }
 
     if (facultyWordExistingCheck > 1) {
-      Logger.addLog(
-        Logger.error,
-        'Не удалось найти ключевое слово на странице факультетов',
-        'Отсутствие интернета или недоступность сайта\nfacultyWordExistingCheck = 2',
+      Logger.error(
+        title: Errors.pageParsingError,
+        exception:
+            'Возможно, проблемы с доступом к сайту\nfacultyWordExistingCheck = 2',
       );
 
       return {};
@@ -107,7 +83,7 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
 
     void fillMapByOneSiteText(Iterable<String> siteList, String linkName) {
       for (String facultySection in siteList) {
-        String facultyName;
+        String facultyName = 'Не удалось распознать название факультета';
 
         try {
           facultyName = facultySection.contains('id')
@@ -115,13 +91,11 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
                   facultySection.indexOf(RegExp(r"[а-я]|[А-Я]")),
                   facultySection.indexOf('</h2>'))
               : 'Прочее';
-        } catch (e) {
-          facultyName = 'Не удалось распознать название факультета';
-
-          Logger.addLog(
-            Logger.warning,
-            'Не удалось распознать название факультета',
-            'Cсылка: $linkName\nТип: ${e.runtimeType}',
+        } catch (e, stack) {
+          Logger.warning(
+            title: Errors.pageParsingError,
+            exception: e,
+            stack: stack,
           );
         }
 
@@ -131,8 +105,9 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
         final departmentsList = facultySection.split('href="').skip(1);
 
         for (String departmentSection in departmentsList) {
-          String link;
-          String departmentName;
+          String link = '/$linkName/0.htm';
+          String departmentName =
+              'Не удалось распознать ссылку и/или название кафедры';
 
           try {
             link =
@@ -140,15 +115,11 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
             departmentName = departmentSection.substring(
                 departmentSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
                 departmentSection.indexOf('<'));
-          } catch (e) {
-            link = '/$linkName/0.htm';
-            departmentName =
-                'Не удалось распознать ссылку и/или название кафедры';
-
-            Logger.addLog(
-              Logger.warning,
-              'Не удалось распознать ссылку и/или название кафедры',
-              'Cсылка: $link\nТип: ${e.runtimeType}',
+          } catch (e, stack) {
+            Logger.warning(
+              title: Errors.pageParsingError,
+              exception: e,
+              stack: stack,
             );
           }
 

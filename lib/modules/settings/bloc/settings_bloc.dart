@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
 import 'package:schedule/core/settings_types.dart';
@@ -33,8 +34,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
         ),
       );
-    } catch (e) {
-      emit(SettingsError(e.runtimeType.toString()));
+    } catch (e, stack) {
+      emit(SettingsError(Logger.error(
+        title: Errors.settingsError,
+        exception: e,
+        stack: stack,
+      )));
     }
   }
 
@@ -51,13 +56,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
         ),
       );
-    } catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки настроек',
-        'Неизвестная ошибка. Тип: ${e.runtimeType}',
-      );
-      emit(SettingsError(e.runtimeType.toString()));
+    } catch (e, stack) {
+      emit(SettingsError(Logger.error(
+        title: Errors.settingsError,
+        exception: e,
+        stack: stack,
+      )));
     }
   }
 
@@ -76,13 +80,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
         ),
       );
-    } catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки настроек',
-        'Неизвестная ошибка. Тип: ${e.runtimeType}',
-      );
-      emit(SettingsError(e.runtimeType.toString()));
+    } catch (e, stack) {
+      emit(SettingsError(Logger.error(
+        title: Errors.settingsError,
+        exception: e,
+        stack: stack,
+      )));
     }
   }
 }

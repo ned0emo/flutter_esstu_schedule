@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'department_event.dart';
-
 part 'department_state.dart';
 
 class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
@@ -45,23 +44,12 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
     try {
       departmentsPages = await _teachersRepository
           .loadDepartmentPages(event.link1, link2: event.link2);
-    } on SocketException catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки страницы кафедры',
-        'Отсутствие интернета или недоступность сайта: ${e.message}',
-      );
-      emit(DepartmentError(
-          message: 'Ошибка загрузки страницы кафедры\n${e.message}'));
-      return;
-    } catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки страницы кафедры',
-        'Неизвестная ошибка. Тип: ${e.runtimeType}',
-      );
-      emit(DepartmentError(
-          message: 'Ошибка загрузки страницы кафедры\n${e.runtimeType}'));
+    } catch (e, stack) {
+      emit(DepartmentError(Logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      )));
       return;
     }
 
@@ -135,14 +123,12 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
         currentTeacher: teachersScheduleMap.keys.elementAt(0),
         weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
       ));
-    } catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка обработки страницы кафедры',
-        'Неизвестная ошибка. Тип: ${e.runtimeType}',
-      );
-      emit(DepartmentError(
-          message: 'Ошибка обработки страницы кафедры\n${e.runtimeType}'));
+    } catch (e, stack) {
+      emit(DepartmentError(Logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      )));
       return;
     }
   }

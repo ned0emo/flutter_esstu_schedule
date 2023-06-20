@@ -1,13 +1,11 @@
-import 'dart:io';
-
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/modules/home/main_repository.dart';
 
 part 'current_group_event.dart';
-
 part 'current_group_state.dart';
 
 class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
@@ -45,15 +43,11 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
           try {
             customDaysOfWeek
                 .add(dayOfWeek.substring(0, dayOfWeek.indexOf('</B>')).trim());
-          } on RangeError catch (e) {
-            Logger.addLog(
-              Logger.warning,
-              'Ошибка определения дня недели',
-              'Имя аргумента: ${e.name}'
-                  '\nМинимально допустимое значение: ${e.start}'
-                  '\nМаксимально допустимое значение: ${e.end}'
-                  '\nТекущее значение: ${e.invalidValue}'
-                  '\n${e.message}',
+          } catch (e, stack) {
+            Logger.warning(
+              title: Errors.pageParsingError,
+              exception: e,
+              stack: stack,
             );
 
             customDaysOfWeek
@@ -90,41 +84,12 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
         weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
         daysOfWeekList: customDaysOfWeek,
       ));
-    } on RangeError catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка обработки страницы расписания',
-        'Имя аргумента: ${e.name}'
-            '\nМинимально допустимое значение: ${e.start}'
-            '\nМаксимально допустимое значение: ${e.end}'
-            '\nТекущее значение: ${e.invalidValue}'
-            '\n${e.message}',
-      );
-
-      emit(CurrentGroupError('Ошибка обработки страницы расписания:'
-          '\nИмя аргумента: ${e.name}'
-          '\nМинимально допустимое значение: ${e.start}'
-          '\nМаксимально допустимое значение: ${e.end}'
-          '\nТекущее значение: ${e.invalidValue}'
-          '\n${e.message}'));
-    } on SocketException catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка обработки страницы расписания',
-        'Отсутствие интернета или недоступность сайта:\n${e.message}',
-      );
-
-      emit(CurrentGroupError(
-          'Ошибка обработки страницы расписания:\n${e.message}'
-          '\nВозможно, проблемы с интернетом или с доступом к сайту'));
-    } catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка обработки страницы расписания',
-        'Неизвестная ошибка. Тип: ${e.runtimeType}',
-      );
-
-      emit(CurrentGroupError('Ошибка загрузки расписания:\n${e.runtimeType}'));
+    } catch (e, stack) {
+      emit(CurrentGroupError(Logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      )));
     }
   }
 

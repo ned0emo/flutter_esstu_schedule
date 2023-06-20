@@ -83,7 +83,6 @@ class _SearchSchedulePageState extends State<SearchSchedulePage> {
                       );
                     },
                   ),
-                  labelColor: Colors.black87,
                   labelStyle: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w500),
                 ),
@@ -93,7 +92,12 @@ class _SearchSchedulePageState extends State<SearchSchedulePage> {
           }
 
           if (state is SearchScheduleError) {
-            return Scaffold(body: Center(child: Text(state.message)));
+            return Scaffold(
+                body: Center(
+                    child: Text(
+              state.message,
+              textAlign: TextAlign.center,
+            )));
           }
 
           return const Scaffold(

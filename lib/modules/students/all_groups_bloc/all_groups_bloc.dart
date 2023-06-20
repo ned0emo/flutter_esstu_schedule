@@ -1,15 +1,13 @@
-import 'dart:io';
-
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_links.dart';
 import 'package:schedule/core/students_type.dart';
 import 'package:schedule/modules/home/main_repository.dart';
 
-part 'all_groups_state.dart';
-
 part 'all_groups_event.dart';
+part 'all_groups_state.dart';
 
 class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
   final MainRepository _repository;
@@ -104,11 +102,11 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
         }
 
         completedThreadsCount++;
-      } catch (e) {
-        Logger.addLog(
-          Logger.warning,
-          'Ошибка добавления пары "группа: ссылка"',
-          'Неизвестная ошибка. Тип: ${e.runtimeType}',
+      } catch (e, stack) {
+        Logger.warning(
+          title: Errors.pageLoadingError,
+          exception: e,
+          stack: stack,
         );
         completedThreadsCount++;
       }
@@ -132,10 +130,9 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
 
       final initCourse = bakScheduleMap.keys.first;
       if (bakScheduleMap[initCourse]!.keys.isEmpty) {
-        Logger.addLog(
-          Logger.info,
-          'Не найдено групп с расписанием',
-          'bakScheduleMap[initCourse]!.keys.isEmpty',
+        Logger.info(
+          title: Errors.studentsNotFoundError,
+          exception: 'bakScheduleMap[initCourse]!.keys.isEmpty',
         );
 
         emit(AllGroupsError(
@@ -154,32 +151,14 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
           currentGroup: bakScheduleMap[initCourse]!.keys.first,
         ));
       } else {
-        Logger.addLog(
-          Logger.error,
-          'Ошибка обработки страниц с учебными группами',
-          'Обработка страниц длилась слишком долго',
-        );
-
-        emit(AllGroupsError(
-            'Ошибка обработки страниц с учебными группами\nОбработка страниц длилась слишком долго'));
+        emit(AllGroupsError(Logger.error(
+          title: Errors.scheduleError,
+          exception: 'Обработка страниц длилась слишком долго',
+        )));
       }
-    } on SocketException catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки страниц с учебными группами',
-        'Отсутствие интернета или недоступность сайта:\n${e.message}',
-      );
-      emit(AllGroupsError(
-          'Ошибка загрузки страниц с учебными группами\n${e.message}'
-          '\nВозможно, проблемы с интернетом или с доступом к сайту'));
-    } catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки страниц с учебными группами',
-        'Неизвестная ошибка. Тип:\n${e.runtimeType}',
-      );
-      emit(AllGroupsError(
-          'Ошибка загрузки страниц с учебными группами\n${e.runtimeType}'));
+    } catch (e, stack) {
+      emit(AllGroupsError(Logger.error(
+          title: Errors.scheduleError, exception: e, stack: stack)));
     }
   }
 
@@ -193,10 +172,9 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
       final courseMap =
           currentState.courseMap(event.courseName, event.studType);
       if (courseMap.isEmpty) {
-        Logger.addLog(
-          Logger.info,
-          'Не найдено групп с расписанием',
-          'AllGroupsLoaded().courseMap is empty',
+        Logger.info(
+          title: Errors.studentsNotFoundError,
+          exception: 'AllGroupsLoaded().courseMap is empty',
         );
 
         emit(currentState.copyWith(
@@ -207,9 +185,10 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
 
       final initGroup = courseMap.keys.first;
       emit(currentState.copyWith(
-          currentCourse: event.courseName,
-          studType: event.studType,
-          currentGroup: initGroup));
+        currentCourse: event.courseName,
+        studType: event.studType,
+        currentGroup: initGroup,
+      ));
     }
   }
 

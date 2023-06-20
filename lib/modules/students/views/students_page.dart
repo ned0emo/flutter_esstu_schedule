@@ -40,7 +40,7 @@ class _StudentsPageState extends State<StudentsPage> {
             return Scaffold(
               appBar: AppBar(
                 title: Text(
-                  state is CourseSelected ? state.courseName : 'Учебная группа',
+                  state is CourseSelected ? state.courseName : 'Учебные группы',
                   textAlign: TextAlign.left,
                 ),
               ),

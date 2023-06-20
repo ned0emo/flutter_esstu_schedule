@@ -136,7 +136,12 @@ class _DepartmentsState extends State<DepartmentsPage> {
         }
 
         if (state is DepartmentError) {
-          return Center(child: Text(state.message));
+          return Center(
+            child: Text(
+              state.message,
+              textAlign: TextAlign.center,
+            ),
+          );
         }
 
         return const Center(child: Text('Неизвестная ошибка'));

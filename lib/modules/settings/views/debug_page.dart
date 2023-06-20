@@ -23,10 +23,12 @@ class _DebugPageState extends State<DebugPage> {
       appBar: AppBar(title: const Text('Логи')),
       body: _logList.isEmpty
           ? const Center(child: Text('Пусто...'))
-          : Column(
-              children: List.generate(
-                _logList.length,
-                (index) => _logTile(_logList[index]),
+          : SingleChildScrollView(
+              child: Column(
+                children: List.generate(
+                  _logList.length,
+                  (index) => _logTile(_logList[index]),
+                ),
               ),
             ),
       floatingActionButton: FloatingActionButton(
@@ -44,9 +46,9 @@ class _DebugPageState extends State<DebugPage> {
     final message = logMessage.split('|');
 
     MaterialColor logColor() {
-      return message[1] == Logger.error
+      return message[1] == 'error'
           ? Colors.red
-          : message[1] == Logger.warning
+          : message[1] == 'warning'
               ? Colors.yellow
               : Colors.grey;
     }
@@ -61,7 +63,14 @@ class _DebugPageState extends State<DebugPage> {
           context: context,
           builder: (context) {
             return Dialog(
-                child: Center(heightFactor: 3, child: Text(message[3])));
+                child: SingleChildScrollView(
+                  child: Center(
+                      heightFactor: 1.2,
+                      child: Text(
+                        message[3],
+                        textAlign: TextAlign.center,
+                      )),
+                ));
           },
         );
       },

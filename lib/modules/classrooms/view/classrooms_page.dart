@@ -84,7 +84,12 @@ class _ClassroomState extends State<ClassroomsPage> {
           if (state is ClassroomsErrorState) {
             return Scaffold(
               appBar: AppBar(title: const Text('Ошибка')),
-              body: Center(child: Text(state.message)),
+              body: Center(
+                child: Text(
+                  state.message,
+                  textAlign: TextAlign.center,
+                ),
+              ),
             );
           }
 
@@ -97,7 +102,7 @@ class _ClassroomState extends State<ClassroomsPage> {
                   children: [
                     const CircularProgressIndicator(),
                     const SizedBox(height: 15),
-                    if(state.percents > 0) Text('${state.percents}%'),
+                    if (state.percents > 0) Text('${state.percents}%'),
                     Text(state.message, textAlign: TextAlign.center),
                   ],
                 ),

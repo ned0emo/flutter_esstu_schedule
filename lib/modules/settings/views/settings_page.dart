@@ -114,7 +114,7 @@ class SettingsPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   )),
                   const ListTile(
-                    title: Text('Версия 3.0.0'),
+                    title: Text('Версия 3.0.1'),
                     subtitle: Text('\nРазработчик: Александр Суворов'
                         '\nКафедра "Программная инженерия и искусственный интеллект"'
                         '\nВСГУТУ, 2023'
@@ -131,7 +131,23 @@ class SettingsPage extends StatelessWidget {
             }
 
             if (state is SettingsError) {
-              return Center(child: Text(state.message));
+              return Center(
+                child: Column(
+                  children: [
+                    ListTile(
+                      title: const Text('Логи'),
+                      onTap: () {
+                        Modular.to.pushNamed(
+                            AppRoutes.settingsRoute + AppRoutes.debugRoute);
+                      },
+                    ),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
             }
 
             return const Center(child: Text('Неизвестная ошибка'));

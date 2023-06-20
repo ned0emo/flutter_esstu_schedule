@@ -26,12 +26,12 @@ class SearchListLoaded extends SearchListState {
   SearchListLoaded copyWith({
     Map<String, List<String>>? scheduleLinksMap,
     String? searchText,
-    List<String>? namesList,
+    List<String>? searchedList,
   }) {
     return SearchListLoaded(
       scheduleLinksMap: scheduleLinksMap ?? this.scheduleLinksMap,
       searchText: searchText ?? this.searchText,
-      searchedList: namesList ?? this.searchedList,
+      searchedList: searchedList ?? this.searchedList,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
@@ -47,7 +48,12 @@ class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
             favoriteListMap[
                     scheduleName.substring(0, scheduleName.indexOf('|'))]!
                 .add(scheduleName.substring(scheduleName.indexOf('|') + 1));
-          } catch (e) {
+          } catch (e, stack) {
+            Logger.warning(
+              title: 'Ошибка определения типа расписания',
+              exception: e,
+              stack: stack,
+            );
             favoriteListMap['']!.add(scheduleName);
           }
         }
@@ -55,24 +61,25 @@ class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
 
       favoriteListMap.removeWhere((key, value) => value.isEmpty);
       emit(FavoriteListLoaded(favoriteListMap));
-    } catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки списка избранного',
-        'Неизвестная ошибка. Тип: ${e.runtimeType}',
-      );
-
-      emit(FavoriteListError('Ошибка загрузки списка избранного\n${e.runtimeType}'));
+    } catch (e, stack) {
+      emit(FavoriteListError(Logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      )));
     }
   }
 
-  Future<void> _clearAllSchedule(ClearAllSchedule event, Emitter<FavoriteListState> emit) async{
+  Future<void> _clearAllSchedule(
+      ClearAllSchedule event, Emitter<FavoriteListState> emit) async {
     await _favoriteRepository.clearSchedule();
     emit(FavoriteListLoaded(const {}));
   }
 
-  Future<void> _deleteSchedule(DeleteScheduleFromList event, Emitter<FavoriteListState> emit) async{
-    await _favoriteRepository.deleteSchedule('${event.scheduleType}|${event.scheduleName}');
+  Future<void> _deleteSchedule(
+      DeleteScheduleFromList event, Emitter<FavoriteListState> emit) async {
+    await _favoriteRepository
+        .deleteSchedule('${event.scheduleType}|${event.scheduleName}');
     add(LoadFavoriteList());
   }
 }

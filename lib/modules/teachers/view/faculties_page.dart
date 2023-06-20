@@ -33,7 +33,8 @@ class _FacultiesState extends State<FacultiesPage> {
               },
               child: BlocBuilder<FacultyBloc, FacultyState>(
                 builder: (context, state) {
-                  if (state is FacultiesLoadingState) {
+                  if (state is FacultiesLoadingState ||
+                      state is CurrentFacultyState) {
                     return const Center(
                       child: CircularProgressIndicator(),
                     );
@@ -60,7 +61,12 @@ class _FacultiesState extends State<FacultiesPage> {
                   }
 
                   if (state is FacultiesErrorState) {
-                    return Center(child: Text(state.message));
+                    return Center(
+                      child: Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                      ),
+                    );
                   }
 
                   return const Center(child: Text('Неизвестная ошибка'));

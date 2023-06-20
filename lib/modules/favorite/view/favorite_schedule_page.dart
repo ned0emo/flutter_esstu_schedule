@@ -183,7 +183,12 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
             }
 
             if (state is FavoriteScheduleError) {
-              return Scaffold(body: Center(child: Text(state.message)));
+              return Scaffold(
+                  body: Center(
+                      child: Text(
+                state.message,
+                textAlign: TextAlign.center,
+              )));
             }
 
             return const Scaffold(
@@ -272,7 +277,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
   }
 
   Future<void> _addToMainDialog() async {
-    if(widget.scheduleType == ScheduleType.classroom) return;
+    if (widget.scheduleType == ScheduleType.classroom) return;
 
     showDialog(
       context: context,

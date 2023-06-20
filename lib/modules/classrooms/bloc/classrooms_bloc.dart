@@ -1,14 +1,13 @@
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_time_data.dart';
 import 'package:schedule/modules/classrooms/repositories/classrooms_repository.dart';
 
 part 'classrooms_event.dart';
-
 part 'classrooms_state.dart';
 
 class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
@@ -115,16 +114,11 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
               teacherName = teacherSection.substring(
                   teacherSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
                   teacherSection.indexOf('</P>'));
-            } on RangeError catch (e) {
-              Logger.addLog(
-                Logger.warning,
-                'Ошибка определения ФИО преподавателя',
-                'Имя аргумента: ${e.name}'
-                    '\nМинимально допустимое значение: ${e.start}'
-                    '\nМаксимально допустимое значение: ${e.end}'
-                    '\nТекущее значение: ${e.invalidValue}'
-                    '\n${e.message}'
-                    '\n${e.stackTrace}',
+            } catch (e, stack) {
+              Logger.warning(
+                title: Errors.pageParsingError,
+                exception: e,
+                stack: stack,
               );
 
               teacherName = e.runtimeType.toString();
@@ -192,12 +186,6 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
                       '$teacherName ${fullLesson.replaceFirst(classroom, '')}';
                 }
 
-                /*if (classroomsMap[classroom] == null) {
-                classroomsMap[classroom] = 1;
-              } else {
-                classroomsMap[classroom] = classroomsMap[classroom]! + 1;
-              }*/
-
                 i++;
                 if (i > 5) {
                   break;
@@ -209,25 +197,8 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
           }
 
           progress++;
-        } on RangeError catch (e) {
-          Logger.addLog(
-            Logger.warning,
-            'Ошибка обработки страницы кафедры',
-            'Имя аргумента: ${e.name}'
-                '\nМинимально допустимое значение: ${e.start}'
-                '\nМаксимально допустимое значение: ${e.end}'
-                '\nТекущее значение: ${e.invalidValue}'
-                '\n${e.message}'
-                '\n${e.stackTrace}',
-          );
-
-          localErrorCount++;
-        } catch (e) {
-          Logger.addLog(
-            Logger.warning,
-            'Ошибка обработки страницы кафедры',
-            'Неизвестная ошибка. Тип: ${e.runtimeType}',
-          );
+        } catch (e, stack) {
+          Logger.warning(title: Errors.pageLoadingError, exception: e, stack: stack);
 
           localErrorCount++;
         }
@@ -308,13 +279,10 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
       } while (completedThreads < threadCount);
 
       if (errorCount > 8) {
-        Logger.addLog(
-          Logger.error,
-          'Ошибка загрузки страниц кафедр',
-          'errorCount > 8',
-        );
-
-        emit(ClassroomsErrorState('Ошибка загрузки страниц расписания кафедр'));
+        emit(ClassroomsErrorState(Logger.error(
+          title: Errors.scheduleError,
+          exception: 'errorCount > 8',
+        )));
         return;
       }
 
@@ -329,23 +297,12 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
         openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
         currentLesson: ScheduleTimeData.getCurrentLessonNumber(),
       ));
-    } on SocketException catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки страниц расписания кафедр',
-        'Отсутствие интернета или недоступность сайта:\n${e.message}',
-      );
-      emit(ClassroomsErrorState(
-          'Ошибка загрузки страниц расписания кафедр\n${e.message}'));
-    } catch (e) {
-      Logger.addLog(
-        Logger.error,
-        'Ошибка загрузки страниц расписания кафедр',
-        'Неизвестная ошибка. Тип: ${e.runtimeType}',
-      );
-
-      emit(ClassroomsErrorState(
-          'Ошибка загрузки страниц расписания кафедр\n${e.runtimeType}'));
+    } catch (e, stack) {
+      emit(ClassroomsErrorState(Logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      )));
     }
   }
 

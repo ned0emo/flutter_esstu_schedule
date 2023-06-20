@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
 import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/modules/search/search_repository.dart';
 
 part 'search_list_event.dart';
-
 part 'search_list_state.dart';
 
 class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
@@ -61,11 +61,11 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
     if (event.scheduleType == ScheduleType.student) {
       final schedulePages = [];
 
-      for (String link in _studentsLinks) {
-        schedulePages.add(await _searchRepository.loadPage(link));
-      }
-
       try {
+        for (String link in _studentsLinks) {
+          schedulePages.add(await _searchRepository.loadPage(link));
+        }
+
         int i = 0;
         for (String page in schedulePages) {
           final splittedPage = page.split('HREF="').skip(1);
@@ -85,19 +85,12 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
           }
           i++;
         }
-      } on RangeError catch (e) {
-        Logger.addLog(
-          Logger.error,
-          'Ошибка загрузки списка учебных групп',
-          'Имя аргумента: ${e.name}'
-              '\nМинимально допустимое значение: ${e.start}'
-              '\nМаксимально допустимое значение: ${e.end}'
-              '\nТекущее значение: ${e.invalidValue}'
-              '\n${e.message}'
-              '\n${e.stackTrace}',
-        );
-        emit(SearchingError(
-            'Ошибка загрузки списка учебных групп:\n${e.runtimeType}'));
+      } catch (e, stack) {
+        emit(SearchingError(Logger.error(
+          title: Errors.scheduleError,
+          exception: e,
+          stack: stack,
+        )));
         return;
       }
     }
@@ -105,8 +98,18 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
     ///Препода
     else {
       final facultiesPages = [];
-      for (String link in teachersLinks) {
-        facultiesPages.add(await _searchRepository.loadPage(link));
+      try {
+        for (String link in teachersLinks) {
+          facultiesPages.add(await _searchRepository.loadPage(link));
+        }
+      }
+      catch(e, stack){
+        emit(SearchingError(Logger.error(
+          title: Errors.scheduleError,
+          exception: e,
+          stack: stack,
+        )));
+        return;
       }
 
       int progress = 0;
@@ -133,16 +136,11 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
               }
               scheduleLinksMap[teacherName]!.add(link);
             }
-          } on RangeError catch (e) {
-            Logger.addLog(
-              Logger.warning,
-              'Ошибка загрузки страницы кафедры',
-              'Имя аргумента: ${e.name}'
-                  '\nМинимально допустимое значение: ${e.start}'
-                  '\nМаксимально допустимое значение: ${e.end}'
-                  '\nТекущее значение: ${e.invalidValue}'
-                  '\n${e.message}'
-                  '\n${e.stackTrace}',
+          } catch (e, stack) {
+            Logger.warning(
+              title: Errors.pageLoadingError,
+              exception: e,
+              stack: stack,
             );
             localErrorCount++;
           }
@@ -179,13 +177,10 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
       }
 
       if (linksCount == 0) {
-        Logger.addLog(
-          Logger.error,
-          'Ошибка загрузки списка преподавателей',
-          'linksCount == 0',
-        );
-
-        emit(SearchingError('Ошибка загрузки списка преподавателей'));
+        emit(SearchingError(Logger.error(
+          title: Errors.pageParsingError,
+          exception: 'linksCount == 0',
+        )));
         return;
       }
 
@@ -216,13 +211,10 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
       } while (completedThreads < _threadCount);
 
       if (errorCount > 8) {
-        Logger.addLog(
-          Logger.error,
-          'Ошибка загрузки страниц расписания кафедр',
-          'errorCount > 8',
-        );
-
-        emit(SearchingError('Ошибка загрузки страниц расписания кафедр'));
+        emit(SearchingError(Logger.error(
+          title: Errors.scheduleError,
+          exception: 'errorsCount > 8',
+        )));
         return;
       }
     }
@@ -240,15 +232,13 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
         namesList.removeWhere((element) =>
             !element.toUpperCase().contains(event.searchText.toUpperCase()));
         emit(currentState.copyWith(
-            namesList: namesList.take(10).toList()..sort()));
-      } catch (e) {
-        Logger.addLog(
-          Logger.error,
-          'Ошибка поиска',
-          'Неизвестная ошибка. Тип: ${e.runtimeType}',
-        );
-
-        emit(SearchingError('Ошибка поиска:\n${e.runtimeType}'));
+            searchedList: namesList.take(10).toList()..sort()));
+      } catch (e, stack) {
+        emit(SearchingError(Logger.error(
+          title: Errors.searchError,
+          exception: e,
+          stack: stack,
+        )));
       }
     }
   }

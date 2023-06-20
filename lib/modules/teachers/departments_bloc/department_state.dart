@@ -55,5 +55,5 @@ class DepartmentLoaded extends DepartmentState {
 class DepartmentError extends DepartmentState {
   final String message;
 
-  DepartmentError({required this.message});
+  DepartmentError(this.message);
 }
