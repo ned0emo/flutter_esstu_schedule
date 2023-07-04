@@ -6,6 +6,7 @@ import 'package:schedule/core/schedule_type.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:schedule/core/settings_types.dart';
 import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
+import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
 
 class HomePage extends StatelessWidget {
@@ -13,8 +14,16 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: Modular.get<FavoriteScheduleBloc>()..add(OpenMainFavSchedule()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(
+          value: Modular.get<FavoriteScheduleBloc>()
+            ..add(OpenMainFavSchedule()),
+        ),
+        BlocProvider.value(
+          value: BlocProvider.of<SettingsBloc>(context),
+        ),
+      ],
       child: BlocListener<FavoriteScheduleBloc, FavoriteScheduleState>(
         listener: (context, state) async {
           if (state is FavoriteScheduleLoaded && state.isFromMainPage) {
@@ -24,7 +33,7 @@ class HomePage extends StatelessWidget {
                 state.scheduleName,
                 state.scheduleType,
                 (await RepositoryProvider.of<SettingsRepository>(context)
-                        .loadSettings())[SettingsTypes.autoUpdate] ==
+                    .loadSettings())[SettingsTypes.autoUpdate] ==
                     'true',
               ],
             );
@@ -47,10 +56,16 @@ class HomePage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 30),
-                Image.asset(
-                  'assets/newlogo.png',
-                  width: 180,
-                  height: 180,
+                BlocBuilder<SettingsBloc, SettingsState>(
+                  builder: (context, state) {
+                    return Image.asset(
+                      state is SettingsLoaded && state.darkTheme
+                          ? 'assets/newlogo_dark.png'
+                          : 'assets/newlogo.png',
+                      width: 180,
+                      height: 180,
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
                 GridView.count(

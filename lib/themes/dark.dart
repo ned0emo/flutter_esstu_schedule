@@ -57,7 +57,7 @@ class DarkTheme extends ThemeTemplate {
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(5)),
             ),
-            foregroundColor: Colors.white,
+            foregroundColor: Colors.grey[300],
             backgroundColor: Colors.grey[900],
             minimumSize: const Size(150, 46),
             textStyle: const TextStyle(

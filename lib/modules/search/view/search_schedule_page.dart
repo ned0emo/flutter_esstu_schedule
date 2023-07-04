@@ -4,6 +4,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/view/schedule_tab.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/search/search_schedule_bloc/search_schedule_bloc.dart';
+import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 
 class SearchSchedulePage extends StatefulWidget {
   final String scheduleName;
@@ -26,6 +27,20 @@ class SearchSchedulePage extends StatefulWidget {
 }
 
 class _SearchSchedulePageState extends State<SearchSchedulePage> {
+  late bool hideSchedule;
+
+  @override
+  void initState() {
+    final settingsState = BlocProvider.of<SettingsBloc>(context).state;
+    if(settingsState is SettingsLoaded){
+      hideSchedule = settingsState.hideSchedule;
+    }
+    else{
+      hideSchedule = false;
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -65,6 +80,7 @@ class _SearchSchedulePageState extends State<SearchSchedulePage> {
                   (index) => ScheduleTab(
                     tabNum: index,
                     scheduleName: state.scheduleName,
+                    hideSchedule: hideSchedule,
                     scheduleList: state.scheduleList,
                     customDaysOfWeek: state.customDaysOfWeek,
                   ),

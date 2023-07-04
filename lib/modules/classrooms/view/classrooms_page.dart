@@ -16,6 +16,20 @@ class ClassroomsPage extends StatefulWidget {
 }
 
 class _ClassroomState extends State<ClassroomsPage> {
+  late bool hideSchedule;
+
+  @override
+  void initState() {
+    final settingsState = BlocProvider.of<SettingsBloc>(context).state;
+    if(settingsState is SettingsLoaded){
+      hideSchedule = settingsState.hideSchedule;
+    }
+    else{
+      hideSchedule = false;
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -44,12 +58,14 @@ class _ClassroomState extends State<ClassroomsPage> {
                         ScheduleTab(
                             tabNum: 0,
                             scheduleName: state.currentClassroom,
+                            hideSchedule: hideSchedule,
                             scheduleList:
                                 state.scheduleMap[state.currentBuildingName]![
                                     state.currentClassroom]!),
                         ScheduleTab(
                             tabNum: 1,
                             scheduleName: state.currentClassroom,
+                            hideSchedule: hideSchedule,
                             scheduleList:
                                 state.scheduleMap[state.currentBuildingName]![
                                     state.currentClassroom]!),

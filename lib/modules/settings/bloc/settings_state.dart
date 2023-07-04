@@ -19,11 +19,13 @@ class SettingsLoaded extends SettingsState {
   final bool darkTheme;
   final bool autoUpdate;
   final bool noUpdateClassroom;
+  final bool hideSchedule;
 
   SettingsLoaded({
     required this.darkTheme,
     required this.autoUpdate,
     required this.noUpdateClassroom,
+    required this.hideSchedule,
   });
 
   String get darkThemeDescription =>

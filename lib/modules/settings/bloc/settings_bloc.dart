@@ -32,6 +32,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
           noUpdateClassroom:
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
+          hideSchedule:
+              stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
         ),
       );
     } catch (e, stack) {
@@ -54,6 +56,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
           noUpdateClassroom:
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
+          hideSchedule:
+              stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
         ),
       );
     } catch (e, stack) {
@@ -78,6 +82,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
           noUpdateClassroom:
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
+          hideSchedule:
+              stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
         ),
       );
     } catch (e, stack) {

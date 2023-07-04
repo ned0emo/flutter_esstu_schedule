@@ -12,6 +12,8 @@ class SettingsRepository {
           await _storage.read(key: SettingsTypes.darkTheme) ?? 'false',
       SettingsTypes.noUpdateClassroom:
           await _storage.read(key: SettingsTypes.noUpdateClassroom) ?? 'false',
+      SettingsTypes.hideSchedule:
+          await _storage.read(key: SettingsTypes.hideSchedule) ?? 'false',
     };
 
     return settingsMap;

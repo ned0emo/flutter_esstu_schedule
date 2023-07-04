@@ -183,7 +183,7 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
                     '$teacherName ${fullLesson.replaceFirst(classroom, '')}'
                         .length) {
                   _buildingsScheduleMap[building]![classroom]![j][i] =
-                      '$teacherName ${fullLesson.replaceFirst(classroom, '')}';
+                      '${teacherName.toUpperCase()} ${fullLesson.replaceFirst(classroom, '')}';
                 }
 
                 i++;

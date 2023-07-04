@@ -7,6 +7,7 @@ import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_b
 import 'package:schedule/modules/favorite/favorite_list_bloc/favorite_list_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_update_bloc/favorite_update_bloc.dart';
+import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 
 class FavoriteSchedulePage extends StatefulWidget {
   final String scheduleType;
@@ -29,9 +30,18 @@ class FavoriteSchedulePage extends StatefulWidget {
 class _FavoriteScheduleState extends State<FavoriteSchedulePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  late bool hideSchedule;
 
   @override
   void initState() {
+    final settingsState = BlocProvider.of<SettingsBloc>(context).state;
+    if(settingsState is SettingsLoaded){
+      hideSchedule = settingsState.hideSchedule;
+    }
+    else{
+      hideSchedule = false;
+    }
+
     _controller = AnimationController(
       duration: const Duration(seconds: 10),
       vsync: this,
@@ -155,6 +165,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                     (index) => ScheduleTab(
                       tabNum: index,
                       scheduleName: state.scheduleName,
+                      hideSchedule: hideSchedule,
                       scheduleList: state.scheduleList,
                       customDaysOfWeek: state.customDaysOfWeek,
                     ),

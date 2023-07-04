@@ -4,6 +4,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/schedule_type.dart';
 import 'package:schedule/core/view/schedule_tab.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
+import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 import 'package:schedule/modules/students/all_groups_bloc/all_groups_bloc.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_bloc.dart';
 import 'package:schedule/modules/students/views/students_drawer.dart';
@@ -16,6 +17,20 @@ class StudentsPage extends StatefulWidget {
 }
 
 class _StudentsPageState extends State<StudentsPage> {
+  late bool hideSchedule;
+
+  @override
+  void initState() {
+    final settingsState = BlocProvider.of<SettingsBloc>(context).state;
+    if(settingsState is SettingsLoaded){
+      hideSchedule = settingsState.hideSchedule;
+    }
+    else{
+      hideSchedule = false;
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -152,6 +167,7 @@ class _StudentsPageState extends State<StudentsPage> {
                         (index) => ScheduleTab(
                           tabNum: index,
                           scheduleName: currentGroupState.name,
+                          hideSchedule: hideSchedule,
                           scheduleList: currentGroupState.scheduleList,
                           customDaysOfWeek: currentGroupState.daysOfWeekList,
                         ),

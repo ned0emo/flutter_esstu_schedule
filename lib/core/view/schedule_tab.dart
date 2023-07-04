@@ -4,24 +4,16 @@ import 'package:schedule/core/schedule_time_data.dart';
 class ScheduleTab extends StatefulWidget {
   final int tabNum;
   final String scheduleName;
+  final bool hideSchedule;
 
-  //final String scheduleType;
   final List<List<String>> scheduleList;
-
-  //final int openedDayIndex;
-  //final int currentLesson;
-  //final int weekNumber;
-
-  //final String? link1;
-  //final String? link2;
   final List<String>? customDaysOfWeek;
-
-  //final bool isNeedUpdate;
 
   const ScheduleTab({
     super.key,
     required this.tabNum,
     required this.scheduleName,
+    required this.hideSchedule,
     required this.scheduleList,
     this.customDaysOfWeek,
   });
@@ -32,6 +24,19 @@ class ScheduleTab extends StatefulWidget {
   int get numOfDays => scheduleList.length == 12 ? 6 : 7;
 
   bool get isZo => scheduleList.length == 12 ? false : true;
+
+  bool get isScheduleExist {
+    if (!hideSchedule) return true;
+
+    for (List<String> dayOfWeek in scheduleList) {
+      for (String lesson in dayOfWeek) {
+        if (lesson.length > 5) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }
 
 class _ScheduleTabState extends State<ScheduleTab> {
@@ -51,10 +56,22 @@ class _ScheduleTabState extends State<ScheduleTab> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        String dayOfWeek;
+    if (!widget.isScheduleExist) {
+      return const Center(child: Text('Расписание отсутствует'));
+    }
 
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(8, 10, 8, 40),
+      itemBuilder: (context, index) {
+        if (widget.hideSchedule &&
+            widget.scheduleList[index + widget.tabNum * widget.numOfDays]
+                    .join()
+                    .length <
+                10) {
+          return const SizedBox();
+        }
+
+        String dayOfWeek;
         if (widget.customDaysOfWeek == null) {
           dayOfWeek = ScheduleTimeData.daysOfWeek[index];
         } else {
@@ -67,15 +84,12 @@ class _ScheduleTabState extends State<ScheduleTab> {
           }
         }
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: _dayOfWeekCard(
-            index,
-            widget.scheduleList[index + widget.tabNum * widget.numOfDays],
-            index == currentDay,
-            dayOfWeek,
-            context,
-          ),
+        return _dayOfWeekCard(
+          index,
+          widget.scheduleList[index + widget.tabNum * widget.numOfDays],
+          index == currentDay,
+          dayOfWeek,
+          context,
         );
       },
       itemCount: widget.numOfDays,
@@ -135,15 +149,20 @@ class _ScheduleTabState extends State<ScheduleTab> {
                             (String lesson) {
                               lessonNumber++;
 
-                              return _lessonSection(
-                                lessonNumber + 1,
-                                ScheduleTimeData.lessonTimeList[lessonNumber],
-                                lesson,
-                                !widget.isZo &&
-                                    isCurrentDay &&
-                                    weekNumber == widget.tabNum &&
-                                    lessonNumber == currentLesson,
-                              );
+                              return lesson.length < 5 && widget.hideSchedule
+                                  ? const SizedBox()
+                                  : _lessonSection(
+                                      lessonNumber: lessonNumber + 1,
+                                      lessonTime: ScheduleTimeData
+                                          .lessonTimeList[lessonNumber],
+                                      lesson: _beautyLesson(lesson),
+                                      teachers: _teacherNames(lesson),
+                                      lessonType: _lessonType(lesson),
+                                      isCurrentLesson: !widget.isZo &&
+                                          isCurrentDay &&
+                                          weekNumber == widget.tabNum &&
+                                          lessonNumber == currentLesson,
+                                    );
                             },
                           ).toList() +
                           [const SizedBox(height: 10)],
@@ -157,8 +176,14 @@ class _ScheduleTabState extends State<ScheduleTab> {
   }
 
   /// Строка пары с номером и временем
-  Widget _lessonSection(int lessonNumber, String lessonTime, String lesson,
-      bool isCurrentLesson) {
+  Widget _lessonSection({
+    required int lessonNumber,
+    required String lessonTime,
+    required String lesson,
+    required List<String> teachers,
+    required String lessonType,
+    required bool isCurrentLesson,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
@@ -200,11 +225,24 @@ class _ScheduleTabState extends State<ScheduleTab> {
                 ),
                 const VerticalDivider(),
                 Expanded(
-                  child: Text(
-                    lesson,
-                    style: isCurrentLesson
-                        ? const TextStyle(fontWeight: FontWeight.bold)
-                        : null,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (lesson.length > 5)
+                        Text(
+                          lessonType,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      Text(
+                        lesson,
+                        style: isCurrentLesson
+                            ? const TextStyle(fontWeight: FontWeight.bold)
+                            : null,
+                      ),
+                      if (lesson.length > 5 && teachers.isNotEmpty)
+                        Text('\n${teachers.join(', ')}')
+                    ],
                   ),
                 ),
               ],
@@ -213,5 +251,48 @@ class _ScheduleTabState extends State<ScheduleTab> {
         ],
       ),
     );
+  }
+
+  String _beautyLesson(String lesson) {
+    return lesson
+        //приписки аудиторий
+        .replaceAll(RegExp(r'и/д|д/кл|д/к|н/х'), '')
+        //препод
+        .replaceAll(RegExp(r'[А-Я]+\s+[А-Я]\.[А-Я]\.|[А-Я]+\s+[А-Я]\.'), '')
+        //тип занятия
+        .replaceAll(RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС'), '')
+        //остатки аудитории в расписании аудиторий
+        .replaceAll('а. ', '')
+        //длинные пробелы
+        .replaceAll(RegExp(r'\s+'), ' ')
+        //много точек
+        .replaceAll(RegExp(r'\.+'), '.')
+        .trim();
+
+    //final index = newLesson.indexOf(RegExp(r'[А-Я]'));
+    //return index < 0 ? newLesson : newLesson.substring(index);
+  }
+
+  List<String> _teacherNames(String lesson) {
+    return RegExp(r'[А-Я]+\s+[А-Я]\.[А-Я]\.|[А-Я]+\s+[А-Я]\.')
+        .allMatches(lesson)
+        .map((e) => e[0] ?? '')
+        .toList();
+  }
+
+  String _lessonType(String lesson) {
+    final lType = RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС').firstMatch(lesson)?[0];
+    switch (lType) {
+      case 'лек.':
+        return 'Лекция';
+      case 'пр.':
+        return 'Практика';
+      case 'лаб.':
+        return 'Лабораторная';
+      case 'ЭК по ФКС':
+        return 'Физическая культура';
+      default:
+        return '';
+    }
   }
 }

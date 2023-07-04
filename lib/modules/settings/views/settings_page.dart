@@ -65,6 +65,24 @@ class SettingsPage extends StatelessWidget {
                       return Colors.grey;
                     }),
                   ),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    title: const Text('Скрывать пустые занятия'),
+                    //subtitle: Text(state.autoUpdateDescription),
+                    value: state.hideSchedule,
+                    onChanged: (value) {
+                      BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
+                          settingType: SettingsTypes.hideSchedule,
+                          value: value.toString()));
+                    },
+                    trackColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.selected)) {
+                        return Theme.of(context).colorScheme.primary;
+                      }
+                      return Colors.grey;
+                    }),
+                  ),
                   const ListTile(
                       title: Text(
                     'Отладка',
@@ -114,7 +132,7 @@ class SettingsPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   )),
                   const ListTile(
-                    title: Text('Версия 3.0.1'),
+                    title: Text('Версия 3.1.0'),
                     subtitle: Text('\nРазработчик: Александр Суворов'
                         '\nКафедра "Программная инженерия и искусственный интеллект"'
                         '\nВСГУТУ, 2023'
