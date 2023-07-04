@@ -35,10 +35,9 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
   @override
   void initState() {
     final settingsState = BlocProvider.of<SettingsBloc>(context).state;
-    if(settingsState is SettingsLoaded){
+    if (settingsState is SettingsLoaded) {
       hideSchedule = settingsState.hideSchedule;
-    }
-    else{
+    } else {
       hideSchedule = false;
     }
 
@@ -71,43 +70,64 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
               ))),
         BlocProvider.value(value: Modular.get<FavoriteUpdateBloc>()),
       ],
-      child: BlocListener<FavoriteUpdateBloc, FavoriteUpdateState>(
-        listener: (context, state) {
-          if (state is FavoriteUpdateInitial) {
-            _controller.reset();
-            if (state.message != null) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(state.message!),
-                  duration: const Duration(seconds: 1)));
-            }
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<FavoriteUpdateBloc, FavoriteUpdateState>(
+            listener: (context, state) {
+              if (state is FavoriteUpdateInitial) {
+                _controller.reset();
+                if (state.message != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(state.message!),
+                      duration: const Duration(seconds: 1)));
+                }
 
-            return;
-          }
+                return;
+              }
 
-          if (state is FavoriteScheduleUpdating) {
-            _controller.forward();
-            return;
-          }
+              if (state is FavoriteScheduleUpdating) {
+                _controller.forward();
+                return;
+              }
 
-          if (state is FavoriteScheduleUpdated) {
-            Modular.get<FavoriteScheduleBloc>()
-                .add(LoadFavoriteSchedule(state.fileName));
+              if (state is FavoriteScheduleUpdated) {
+                Modular.get<FavoriteScheduleBloc>()
+                    .add(LoadFavoriteSchedule(state.fileName));
 
-            _controller.reset();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(state.message),
-                duration: const Duration(seconds: 1)));
-            return;
-          }
+                _controller.reset();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(state.message),
+                    duration: const Duration(seconds: 1)));
+                return;
+              }
 
-          if (state is FavoriteScheduleUpdateError) {
-            _controller.reset();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(state.message),
-                duration: const Duration(milliseconds: 1500)));
-            return;
-          }
-        },
+              if (state is FavoriteScheduleUpdateError) {
+                _controller.reset();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(state.message),
+                    duration: const Duration(milliseconds: 1500)));
+                return;
+              }
+            },
+          ),
+          BlocListener<FavoriteScheduleBloc, FavoriteScheduleState>(
+            listener: (context, state) {
+              if (state is FavoriteScheduleLoaded) {
+                if (state.isNeedUpdate) {
+                  Modular.get<FavoriteUpdateBloc>().add(UpdateSchedule(
+                    scheduleName: state.scheduleName,
+                    scheduleList: state.scheduleList,
+                    scheduleType: state.scheduleType,
+                    isAutoUpdate: true,
+                    link1: state.link1,
+                    link2: state.link2,
+                    customDaysOfWeek: state.customDaysOfWeek,
+                  ));
+                }
+              }
+            },
+          ),
+        ],
         child: BlocBuilder<FavoriteScheduleBloc, FavoriteScheduleState>(
           builder: (context, state) {
             if (state is FavoriteScheduleLoading ||
@@ -117,18 +137,6 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
             }
 
             if (state is FavoriteScheduleLoaded) {
-              if (state.isNeedUpdate) {
-                Modular.get<FavoriteUpdateBloc>().add(UpdateSchedule(
-                  scheduleName: state.scheduleName,
-                  scheduleList: state.scheduleList,
-                  scheduleType: state.scheduleType,
-                  isAutoUpdate: true,
-                  link1: state.link1,
-                  link2: state.link2,
-                  customDaysOfWeek: state.customDaysOfWeek,
-                ));
-              }
-
               return DefaultTabController(
                 length: state.numOfWeeks,
                 initialIndex: state.weekNumber,
