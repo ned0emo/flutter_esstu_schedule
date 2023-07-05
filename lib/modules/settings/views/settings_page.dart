@@ -132,10 +132,10 @@ class SettingsPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   )),
                   const ListTile(
-                    title: Text('Версия 3.1.1'),
+                    title: Text('Версия 3.1.2'),
                     subtitle: Text('\nРазработчик: Александр Суворов'
                         '\nКафедра "Программная инженерия и искусственный интеллект"'
-                        '\nВСГУТУ, 2023'
+                        '\nВСГУТУ'
                         '\n\nСвязь с разработчиком:'
                         '\nAlexandr42suv@mail.ru'
                         '\n\nЗначок приложения основан на иконке от SmashIcons:'

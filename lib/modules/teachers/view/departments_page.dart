@@ -23,10 +23,9 @@ class _DepartmentsState extends State<DepartmentsPage> {
   @override
   void initState() {
     final settingsState = BlocProvider.of<SettingsBloc>(context).state;
-    if(settingsState is SettingsLoaded){
+    if (settingsState is SettingsLoaded) {
       hideSchedule = settingsState.hideSchedule;
-    }
-    else{
+    } else {
       hideSchedule = false;
     }
     super.initState();
@@ -215,8 +214,12 @@ class _DepartmentsState extends State<DepartmentsPage> {
                             departmentName: department,
                             link1: widget
                                 .facultyState.departmentsMap[department]![0],
-                            link2: widget
-                                .facultyState.departmentsMap[department]![1],
+                            link2: widget.facultyState
+                                        .departmentsMap[department]!.length >
+                                    1
+                                ? widget
+                                    .facultyState.departmentsMap[department]![1]
+                                : null,
                           ));
 
                           Navigator.pop(context);

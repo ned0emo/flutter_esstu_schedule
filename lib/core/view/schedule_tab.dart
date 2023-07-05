@@ -28,8 +28,9 @@ class ScheduleTab extends StatefulWidget {
   bool get isScheduleExist {
     if (!hideSchedule) return true;
 
-    for (List<String> dayOfWeek in scheduleList) {
-      for (String lesson in dayOfWeek) {
+    int border = tabNum * numOfDays;
+    for (int i = border; i < border + numOfDays;i++){
+      for (String lesson in scheduleList[i]) {
         if (lesson.length > 5) {
           return true;
         }
@@ -258,9 +259,9 @@ class _ScheduleTabState extends State<ScheduleTab> {
         //приписки аудиторий
         .replaceAll(RegExp(r'и/д|д/кл|д/к|н/х'), '')
         //препод
-        .replaceAll(RegExp(r'[А-Я]+\s+[А-Я]\.[А-Я]\.|[А-Я]+\s+[А-Я]\.'), '')
+        .replaceAll(RegExp(r'[А-Я]+\s+[А-Я]\.[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.'), '')
         //тип занятия
-        .replaceAll(RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС'), '')
+        .replaceAll(RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура'), '')
         //остатки аудитории в расписании аудиторий
         .replaceAll('а. ', '')
         //длинные пробелы
@@ -274,14 +275,14 @@ class _ScheduleTabState extends State<ScheduleTab> {
   }
 
   List<String> _teacherNames(String lesson) {
-    return RegExp(r'[А-Я]+\s+[А-Я]\.[А-Я]\.|[А-Я]+\s+[А-Я]\.')
+    return RegExp(r'[А-Я]+\s+[А-Я]\.[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.')
         .allMatches(lesson)
         .map((e) => e[0] ?? '')
         .toList();
   }
 
   String _lessonType(String lesson) {
-    final lType = RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС').firstMatch(lesson)?[0];
+    final lType = RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура').firstMatch(lesson)?[0];
     switch (lType) {
       case 'лек.':
         return 'Лекция';
@@ -290,6 +291,8 @@ class _ScheduleTabState extends State<ScheduleTab> {
       case 'лаб.':
         return 'Лабораторная';
       case 'ЭК по ФКС':
+        return 'Физическая культура';
+      case 'Физическая культура':
         return 'Физическая культура';
       default:
         return '';
