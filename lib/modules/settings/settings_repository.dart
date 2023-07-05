@@ -7,13 +7,13 @@ class SettingsRepository {
   Future<Map<String, String>> loadSettings() async {
     final Map<String, String> settingsMap = {
       SettingsTypes.autoUpdate:
-          await _storage.read(key: SettingsTypes.autoUpdate) ?? 'true',
+          (await _storage.read(key: SettingsTypes.autoUpdate)) ?? 'true',
       SettingsTypes.darkTheme:
-          await _storage.read(key: SettingsTypes.darkTheme) ?? 'false',
+          (await _storage.read(key: SettingsTypes.darkTheme)) ?? 'false',
       SettingsTypes.noUpdateClassroom:
-          await _storage.read(key: SettingsTypes.noUpdateClassroom) ?? 'false',
+          (await _storage.read(key: SettingsTypes.noUpdateClassroom)) ?? 'false',
       SettingsTypes.hideSchedule:
-          await _storage.read(key: SettingsTypes.hideSchedule) ?? 'false',
+          (await _storage.read(key: SettingsTypes.hideSchedule)) ?? 'false',
     };
 
     return settingsMap;

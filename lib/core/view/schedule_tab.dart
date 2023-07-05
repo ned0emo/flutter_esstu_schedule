@@ -259,9 +259,9 @@ class _ScheduleTabState extends State<ScheduleTab> {
         //приписки аудиторий
         .replaceAll(RegExp(r'и/д|д/кл|д/к|н/х'), '')
         //препод
-        .replaceAll(RegExp(r'[А-Я]+\s+[А-Я]\.[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.'), '')
+        .replaceAll(RegExp(r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.'), '')
         //тип занятия
-        .replaceAll(RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура'), '')
+        .replaceAll(RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура|экз\.'), '')
         //остатки аудитории в расписании аудиторий
         .replaceAll('а. ', '')
         //длинные пробелы
@@ -275,14 +275,14 @@ class _ScheduleTabState extends State<ScheduleTab> {
   }
 
   List<String> _teacherNames(String lesson) {
-    return RegExp(r'[А-Я]+\s+[А-Я]\.[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.')
+    return RegExp(r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.')
         .allMatches(lesson)
         .map((e) => e[0] ?? '')
         .toList();
   }
 
   String _lessonType(String lesson) {
-    final lType = RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура').firstMatch(lesson)?[0];
+    final lType = RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура|экз\.').firstMatch(lesson)?[0];
     switch (lType) {
       case 'лек.':
         return 'Лекция';
@@ -294,8 +294,10 @@ class _ScheduleTabState extends State<ScheduleTab> {
         return 'Физическая культура';
       case 'Физическая культура':
         return 'Физическая культура';
+      case 'экз.':
+        return 'Экзамен';
       default:
-        return '';
+        return 'Другое';
     }
   }
 }

@@ -71,7 +71,16 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   Future<void> _clearAll(ClearAll event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
-    await _settingsRepository.clearAll();
+    try{
+      await _settingsRepository.clearAll();
+    }
+    catch (e, stack){
+      Logger.error(
+        title: Errors.settingsError,
+        exception: e,
+        stack: stack,
+      );
+    }
 
     try {
       final stringSettingsValues = await _settingsRepository.loadSettings();

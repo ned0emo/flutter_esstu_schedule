@@ -132,7 +132,7 @@ class SettingsPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   )),
                   const ListTile(
-                    title: Text('Версия 3.1.2'),
+                    title: Text('Версия 3.1.3'),
                     subtitle: Text('\nРазработчик: Александр Суворов'
                         '\nКафедра "Программная инженерия и искусственный интеллект"'
                         '\nВСГУТУ'

@@ -56,8 +56,8 @@ android {
         minSdkVersion 25
         targetSdkVersion flutter.targetSdkVersion
         //05.07.2023
-        versionCode 30
-        versionName "3.1.2"
+        versionCode 31
+        versionName "3.1.3"
     }
 
     signingConfigs {
