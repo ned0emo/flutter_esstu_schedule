@@ -6,14 +6,10 @@ import 'package:schedule/modules/settings/views/settings_page.dart';
 
 class SettingsModule extends Module {
   @override
-  List<Bind<Object>> get binds => [];
-
-  @override
-  List<ModularRoute> get routes => [
-        ChildRoute('/', child: (context, args) => const SettingsPage()),
-        ChildRoute(AppRoutes.debugRoute,
-            child: (context, args) => const DebugPage()),
-      ];
+  void routes(RouteManager r) {
+    r.child('/', child: (context) => const SettingsPage());
+    r.child(AppRoutes.debugRoute, child: (context) => const DebugPage());
+  }
 
   @override
   List<Module> get imports => [HomeModule()];

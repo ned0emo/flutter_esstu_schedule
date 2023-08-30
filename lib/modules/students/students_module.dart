@@ -4,20 +4,18 @@ import 'package:schedule/modules/students/all_groups_bloc/all_groups_bloc.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_bloc.dart';
 import 'package:schedule/modules/students/views/students_page.dart';
 
-class StudentsModule extends Module{
+class StudentsModule extends Module {
   @override
-  List<Bind<Object>> get binds => [
-    Bind((i) => AllGroupsBloc(i.get())),
-    Bind((i) => CurrentGroupBloc(i.get())),
-  ];
+  void binds(i) {
+    i.addSingleton(AllGroupsBloc.new);
+    i.addSingleton(CurrentGroupBloc.new);
+  }
 
   @override
-  List<ModularRoute> get routes => [
-    ChildRoute('/', child: (context, args) => const StudentsPage())
-  ];
+  void routes(RouteManager r) {
+    r.child('/', child: (context) => const StudentsPage());
+  }
 
   @override
-  List<Module> get imports => [
-    HomeModule(),
-  ];
+  List<Module> get imports => [HomeModule()];
 }

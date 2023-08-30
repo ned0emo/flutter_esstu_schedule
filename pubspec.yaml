@@ -33,13 +33,13 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.0.0
   bloc: ^8.1.0
-  flutter_secure_storage: ^6.0.0
-  http: ^0.13.5
+  flutter_secure_storage: ^9.0.0
+  http: ^1.1.0
   font_awesome_flutter: ^10.1.0
   settings_ui: ^2.0.2
   enough_convert: ^1.6.0
-  jiffy: ^5.0.0
-  flutter_modular: ^5.0.3
+  jiffy: ^6.2.1
+  flutter_modular: ^6.1.1
   collection: ^1.17.1
   intl: ^0.18.1
 

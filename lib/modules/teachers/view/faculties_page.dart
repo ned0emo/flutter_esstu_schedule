@@ -28,7 +28,7 @@ class _FacultiesState extends State<FacultiesPage> {
                 if (state is CurrentFacultyState) {
                   Modular.to.pushReplacementNamed(
                       AppRoutes.teachersRoute + AppRoutes.departmentsRoute,
-                      arguments: [state]);
+                      arguments: state);
                 }
               },
               child: BlocBuilder<FacultyBloc, FacultyState>(

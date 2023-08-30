@@ -8,23 +8,21 @@ import 'package:schedule/modules/home/home_module.dart';
 
 class FavoriteModule extends Module {
   @override
-  List<Bind<Object>> get binds => [
-        Bind((i) => FavoriteListBloc(i.get())),
-        Bind((i) => FavoriteUpdateBloc(i.get())),
-      ];
+  void binds(i) {
+    i.addSingleton(FavoriteListBloc.new);
+    i.addSingleton(FavoriteUpdateBloc.new);
+  }
 
   @override
-  List<ModularRoute> get routes => [
-        ChildRoute('/', child: (context, args) => const FavoriteListPage()),
-        ChildRoute(
-          AppRoutes.favoriteScheduleRoute,
-          child: (context, args) => FavoriteSchedulePage(
-            scheduleName: args.data[0],
-            scheduleType: args.data[1],
-            isAutoUpdateEnabled: args.data[2],
-          ),
-        ),
-      ];
+  void routes(RouteManager r) {
+    r.child('/', child: (context) => const FavoriteListPage());
+    r.child(AppRoutes.favoriteScheduleRoute,
+        child: (context) => FavoriteSchedulePage(
+              scheduleName: r.args.data[0],
+              scheduleType: r.args.data[1],
+              isAutoUpdateEnabled: r.args.data[2],
+            ));
+  }
 
   @override
   List<Module> get imports => [HomeModule()];

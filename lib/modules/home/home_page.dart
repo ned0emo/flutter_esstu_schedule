@@ -17,12 +17,10 @@ class HomePage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(
-          value: Modular.get<FavoriteScheduleBloc>()
-            ..add(OpenMainFavSchedule()),
+          value: //ModularWatchExtension(context).watch<FavoriteScheduleBloc>()
+              Modular.get<FavoriteScheduleBloc>()..add(OpenMainFavSchedule()),
         ),
-        BlocProvider.value(
-          value: BlocProvider.of<SettingsBloc>(context),
-        ),
+        BlocProvider.value(value: BlocProvider.of<SettingsBloc>(context)),
       ],
       child: BlocListener<FavoriteScheduleBloc, FavoriteScheduleState>(
         listener: (context, state) async {
@@ -33,7 +31,7 @@ class HomePage extends StatelessWidget {
                 state.scheduleName,
                 state.scheduleType,
                 (await RepositoryProvider.of<SettingsRepository>(context)
-                    .loadSettings())[SettingsTypes.autoUpdate] ==
+                        .loadSettings())[SettingsTypes.autoUpdate] ==
                     'true',
               ],
             );

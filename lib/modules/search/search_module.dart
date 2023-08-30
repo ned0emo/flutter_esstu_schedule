@@ -9,25 +9,24 @@ import 'package:schedule/modules/search/view/search_schedule_page.dart';
 
 class SearchModule extends Module {
   @override
-  List<Bind<Object>> get binds => [
-        Bind((i) => SearchRepository()),
-        Bind((i) => SearchListBloc(i.get())),
-        Bind((i) => SearchScheduleBloc(i.get())),
-      ];
+  void binds(i) {
+    i.addSingleton(SearchRepository.new);
+    i.addSingleton(SearchListBloc.new);
+    i.addSingleton(SearchScheduleBloc.new);
+  }
 
   @override
-  List<ModularRoute> get routes => [
-        ChildRoute('/',
-            child: (context, args) =>
-                SearchListPage(scheduleType: args.data[0])),
-        ChildRoute(AppRoutes.searchingScheduleRoute,
-            child: (context, args) => SearchSchedulePage(
-                  scheduleName: args.data[0],
-                  scheduleType: args.data[1],
-                  scheduleLink1: args.data[2],
-                  scheduleLink2: args.data[3],
-                )),
-      ];
+  void routes(RouteManager r) {
+    r.child('/',
+        child: (context) => SearchListPage(scheduleType: r.args.data[0]));
+    r.child(AppRoutes.searchingScheduleRoute,
+        child: (context) => SearchSchedulePage(
+              scheduleName: r.args.data[0],
+              scheduleType: r.args.data[1],
+              scheduleLink1: r.args.data[2],
+              scheduleLink2: r.args.data[3],
+            ));
+  }
 
   @override
   List<Module> get imports => [HomeModule()];

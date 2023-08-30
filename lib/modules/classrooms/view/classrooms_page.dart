@@ -21,10 +21,9 @@ class _ClassroomState extends State<ClassroomsPage> {
   @override
   void initState() {
     final settingsState = BlocProvider.of<SettingsBloc>(context).state;
-    if(settingsState is SettingsLoaded){
+    if (settingsState is SettingsLoaded) {
       hideSchedule = settingsState.hideSchedule;
-    }
-    else{
+    } else {
       hideSchedule = false;
     }
     super.initState();
@@ -34,7 +33,7 @@ class _ClassroomState extends State<ClassroomsPage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider.value(value: Modular.get<ClassroomsBloc>()),
+        BlocProvider.value(value: Modular.get<ClassroomsBloc>()..add(LoadClassroomsSchedule())),
         BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
       ],
       child: BlocBuilder<ClassroomsBloc, ClassroomsState>(

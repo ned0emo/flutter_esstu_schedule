@@ -23,7 +23,7 @@ class ScheduleTimeData {
 
   static int getCurrentLessonNumber() {
     int currentLesson = -1;
-    final currentTime = Jiffy().dateTime.minute + Jiffy().dateTime.hour * 60;
+    final currentTime = Jiffy.now().dateTime.minute + Jiffy.now().dateTime.hour * 60;
     if (currentTime >= 540 && currentTime <= 635) {
       currentLesson = 0;
     } else if (currentTime >= 645 && currentTime <= 740) {
@@ -41,7 +41,7 @@ class ScheduleTimeData {
     return currentLesson;
   }
 
-  static int getCurrentWeekNumber() => (Jiffy().week + 1) % 2;
+  static int getCurrentWeekNumber() => (Jiffy.now().weekOfYear + 1) % 2;
 
-  static int getCurrentDayOfWeek() => Jiffy().dateTime.weekday - 1;
+  static int getCurrentDayOfWeek() => Jiffy.now().dateTime.weekday - 1;
 }

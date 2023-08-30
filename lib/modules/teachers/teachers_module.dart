@@ -9,23 +9,20 @@ import 'package:schedule/modules/teachers/view/faculties_page.dart';
 
 class TeachersModule extends Module {
   @override
-  List<Bind<Object>> get binds => [
-        Bind((i) => TeachersRepository()),
-        Bind((i) => FacultyBloc(i.get())),
-        Bind((i) => DepartmentBloc(i.get()))
-      ];
+  void binds(i) {
+    i.addSingleton(TeachersRepository.new);
+    i.addSingleton(FacultyBloc.new);
+    i.addSingleton(DepartmentBloc.new);
+  }
 
   @override
-  List<ModularRoute> get routes => [
-        ChildRoute('/', child: (context, args) => const FacultiesPage()),
-        ChildRoute(
-          AppRoutes.departmentsRoute,
-          child: (context, args) => DepartmentsPage(facultyState: args.data[0]),
-        ),
-      ];
+  void routes(RouteManager r) {
+    //final args = r.args;
+    r.child('/', child: (context) => const FacultiesPage());
+    r.child(AppRoutes.departmentsRoute,
+        child: (context) => DepartmentsPage(facultyState: r.args.data));
+  }
 
   @override
-  List<Module> get imports => [
-        HomeModule(),
-      ];
+  List<Module> get imports => [HomeModule()];
 }

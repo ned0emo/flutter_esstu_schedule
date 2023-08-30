@@ -6,15 +6,16 @@ import 'package:schedule/modules/home/home_module.dart';
 
 class ClassroomsModule extends Module {
   @override
-  List<Bind<Object>> get binds => [
-        Bind((i) => ClassroomsRepository()),
-        Bind((i) => ClassroomsBloc(i.get<ClassroomsRepository>())
-          ..add(LoadClassroomsSchedule())),
-      ];
+  void binds(i) {
+    i.addSingleton(ClassroomsRepository.new);
+    i.addSingleton(ClassroomsBloc.new);
+      //..add(LoadClassroomsSchedule()));
+  }
 
   @override
-  List<ModularRoute> get routes =>
-      [ChildRoute('/', child: (context, args) => const ClassroomsPage())];
+  void routes(RouteManager r) {
+    r.child('/', child: (context) => const ClassroomsPage());
+  }
 
   @override
   List<Module> get imports => [HomeModule()];

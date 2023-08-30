@@ -133,15 +133,16 @@ class SettingsPage extends StatelessWidget {
                   )),
                   const ListTile(
                     title: Text('Версия 3.1.3'),
+                    //TODO: Оформить ссылки, поправить текст
                     subtitle: Text('\nРазработчик: Александр Суворов'
                         '\nКафедра "Программная инженерия и искусственный интеллект"'
                         '\nВСГУТУ'
-                        '\n\nСвязь с разработчиком:'
-                        '\nAlexandr42suv@mail.ru'
+                        '\n\nОб ошибках в работе приложения писать здесь:'
+                        '\nhttps://github.com/ned0emo/flutter_esstu_schedule/issues'
                         '\n\nЗначок приложения основан на иконке от SmashIcons:'
                         '\nhttps://www.flaticon.com/authors/smashicons'
                         '\n\nИконки на главной странице от FontAwesome:'
-                        '\nhttps://fontawesome.com/v4/icons/'
+                        '\nhttps://fontawesome.com/v4/icons'
                         '\n\nСоциализм или варварство\n\n'),
                   ),
                 ],

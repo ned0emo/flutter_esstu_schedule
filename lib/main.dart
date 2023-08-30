@@ -6,6 +6,6 @@ import 'package:schedule/app_widget.dart';
 
 
 void main() async {
-  await Jiffy.locale('ru');
+  await Jiffy.setLocale('ru');
   runApp(ModularApp(module: AppModule(), child: const AppWidget()));
 }

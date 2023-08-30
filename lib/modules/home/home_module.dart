@@ -1,3 +1,4 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/app_routes.dart';
 import 'package:schedule/core/logger.dart';
@@ -15,23 +16,37 @@ import 'package:schedule/modules/teachers/teachers_module.dart';
 
 class HomeModule extends Module {
   @override
-  List<Bind<Object>> get binds => [
-        Bind.singleton((i) => FavoriteRepository()),
-        Bind.singleton((i) => FavoriteButtonBloc(i.get<FavoriteRepository>()),
-            export: true),
-        Bind.singleton((i) => FavoriteScheduleBloc(i.get())),
-        Bind.singleton((i) => MainRepository()),
-        Bind.singleton((i) => Logger()),
-      ];
+  void binds(i) {
+    i.addSingleton(FavoriteButtonBloc.new);
+    i.addSingleton(FavoriteScheduleBloc.new);
+    i.addSingleton(Logger.new);
+  }
 
   @override
-  List<ModularRoute> get routes => [
-        ChildRoute('/', child: (context, args) => const HomePage()),
-        ModuleRoute(AppRoutes.studentsRoute, module: StudentsModule()),
-        ModuleRoute(AppRoutes.settingsRoute, module: SettingsModule()),
-        ModuleRoute(AppRoutes.teachersRoute, module: TeachersModule()),
-        ModuleRoute(AppRoutes.classesRoute, module: ClassroomsModule()),
-        ModuleRoute(AppRoutes.favoriteListRoute, module: FavoriteModule()),
-        ModuleRoute(AppRoutes.searchRoute, module: SearchModule()),
-      ];
+  void exportedBinds(i) {
+    i.addSingleton(FavoriteRepository.new);
+    i.addSingleton(MainRepository.new);
+  }
+
+  BindConfig<T> blocConfig<T extends Bloc>() {
+    return BindConfig(
+      notifier: (bloc) => bloc.stream,
+      onDispose: (bloc) => bloc.close(),
+    );
+  }
+
+  @override
+  void routes(r) {
+    r.child('/', child: (context) => const HomePage());
+
+    r.module(AppRoutes.studentsRoute, module: StudentsModule());
+    r.module(AppRoutes.settingsRoute, module: SettingsModule());
+    r.module(AppRoutes.teachersRoute, module: TeachersModule());
+    r.module(AppRoutes.classesRoute, module: ClassroomsModule());
+    r.module(AppRoutes.favoriteListRoute, module: FavoriteModule());
+    r.module(AppRoutes.searchRoute, module: SearchModule());
+  }
+
+  @override
+  List<Module> get imports => [this];
 }

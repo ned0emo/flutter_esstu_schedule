@@ -5,11 +5,8 @@ import 'package:schedule/modules/students/students_module.dart';
 
 class AppModule extends Module {
   @override
-  List<Bind<Object>> get binds => [];
-
-  @override
-  List<ModularRoute> get routes => [
-        ModuleRoute('/', module: HomeModule()),
-        ModuleRoute(AppRoutes.studentsRoute, module: StudentsModule()),
-      ];
+  void routes(RouteManager r) {
+    r.module('/', module: HomeModule());
+    r.module(AppRoutes.studentsRoute, module: StudentsModule());
+  }
 }
