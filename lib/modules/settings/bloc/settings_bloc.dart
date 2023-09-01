@@ -34,6 +34,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
           hideSchedule:
               stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
+          lessonColor:
+              stringSettingsValues[SettingsTypes.lessonColor] == 'true',
         ),
       );
     } catch (e, stack) {
@@ -58,6 +60,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
           hideSchedule:
               stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
+          lessonColor:
+              stringSettingsValues[SettingsTypes.lessonColor] == 'true',
         ),
       );
     } catch (e, stack) {
@@ -93,6 +97,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
           hideSchedule:
               stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
+          lessonColor:
+              stringSettingsValues[SettingsTypes.lessonColor] == 'true',
         ),
       );
     } catch (e, stack) {

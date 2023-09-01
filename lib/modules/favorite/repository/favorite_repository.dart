@@ -1,7 +1,7 @@
 import 'package:enough_convert/enough_convert.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:schedule/modules/favorite/models/favorite_schedule_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 ///
 /// Название ключа расписания для сохранения должно выглядеть:
@@ -12,18 +12,18 @@ import 'package:http/http.dart' as http;
 ///
 class FavoriteRepository {
   final _codec = const Windows1251Codec(allowInvalid: false);
-  final _storage = const FlutterSecureStorage();
 
   Future<List<String>> getFavoriteList() async {
-    final list = await _storage.readAll();
+    final storage = await SharedPreferences.getInstance();
+    final list = storage.getKeys().toList();
+    list.removeWhere((key) => key.contains('Service'));
 
-    list.removeWhere((key, value) => key.contains('Service'));
-
-    return list.keys.toList();
+    return list;
   }
 
   Future<FavoriteScheduleModel?> getScheduleModel(String key) async {
-    final scheduleString = await _storage.read(key: key);
+    final storage = await SharedPreferences.getInstance();
+    final scheduleString = storage.getString(key);
     if (scheduleString == null) {
       return null;
     }
@@ -32,21 +32,27 @@ class FavoriteRepository {
   }
 
   Future<void> saveSchedule(String key, String schedule) async {
-    _storage.write(key: key, value: schedule);
+    final storage = await SharedPreferences.getInstance();
+    await storage.setString(key, schedule);
   }
 
   Future<void> deleteSchedule(String key) async {
+    final storage = await SharedPreferences.getInstance();
     await _removeOldMainFav(key);
-    await _storage.delete(key: key);
+    await storage.remove(key);
   }
 
   Future<bool> checkSchedule(String key) async =>
-      (await _storage.readAll()).keys.contains(key);
+      (await SharedPreferences.getInstance()).getKeys().contains(key);
 
-  Future<void> clearSchedule() async {
-    final list = await getFavoriteList();
+  Future<void> clearAllSchedule() async {
+    final storage = await SharedPreferences.getInstance();
+
+    final list = storage.getKeys().toList();
+    list.removeWhere((key) => key.contains('Service') && !key.contains('MainFavService'));
+
     for (String key in list) {
-      await _storage.delete(key: key);
+      await storage.remove(key);
     }
   }
 
@@ -61,27 +67,30 @@ class FavoriteRepository {
   }
 
   Future<void> addToMainPage(String key) async {
+    final storage = await SharedPreferences.getInstance();
     await _removeOldMainFav(key);
-    await _storage.write(key: '${key}MainFavService', value: '');
+    await storage.setString('${key}MainFavService', '');
   }
 
   Future<void> _removeOldMainFav(String key) async {
-    final storageMap = (await _storage.readAll());
-    storageMap.removeWhere((key, value) => !key.contains('MainFav'));
+    final storage = await SharedPreferences.getInstance();
+    final storageList = storage.getKeys();
+    storageList.removeWhere((key) => !key.contains('MainFav'));
 
-    for (String oldMainFav in storageMap.keys) {
-      await _storage.delete(key: oldMainFav);
+    for (String oldMainFav in storageList) {
+      await storage.remove(oldMainFav);
     }
   }
 
   Future<String?> getMainFavScheduleName() async {
-    final storageMap = await _storage.readAll();
-    storageMap.removeWhere((key, value) => !key.contains('MainFav'));
+    final storage = await SharedPreferences.getInstance();
+    final storageList = storage.getKeys();
+    storageList.removeWhere((key) => !key.contains('MainFav'));
 
-    if (storageMap.isEmpty) {
+    if (storageList.isEmpty) {
       return null;
     }
 
-    return storageMap.keys.first.replaceAll('MainFavService', '');
+    return storageList.first.replaceAll('MainFavService', '');
   }
 }

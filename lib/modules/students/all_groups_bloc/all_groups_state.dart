@@ -66,6 +66,14 @@ class AllGroupsLoaded extends AllGroupsState {
                 ? colScheduleMap[course]!
                 : zoScheduleMap[course]!;
   }
+
+  String get studentTypeString => studType == StudentsType.bak
+      ? 'Бакалавриат'
+      : studType == StudentsType.mag
+          ? 'Магистратура'
+          : studType == StudentsType.col
+              ? 'Колледж'
+              : 'Заочное';
 }
 
 class CourseSelected extends AllGroupsState {

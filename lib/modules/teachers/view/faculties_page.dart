@@ -26,22 +26,23 @@ class _FacultiesState extends State<FacultiesPage> {
             child: BlocListener<FacultyBloc, FacultyState>(
               listener: (context, state) {
                 if (state is CurrentFacultyState) {
-                  Modular.to.pushReplacementNamed(
+                  Modular.to.pushNamed(
                       AppRoutes.teachersRoute + AppRoutes.departmentsRoute,
                       arguments: state);
                 }
               },
               child: BlocBuilder<FacultyBloc, FacultyState>(
                 builder: (context, state) {
-                  if (state is FacultiesLoadingState ||
-                      state is CurrentFacultyState) {
+                  if (state is FacultiesLoadingState) {
                     return const Center(
                       child: CircularProgressIndicator(),
                     );
                   }
 
-                  if (state is FacultiesLoadedState) {
-                    final map = state.facultyDepartmentLinkMap;
+                  if (state is FacultiesLoadedState ||
+                      state is CurrentFacultyState) {
+                    final map = state.facultyDepartmentLinkMap!;
+
                     return Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(

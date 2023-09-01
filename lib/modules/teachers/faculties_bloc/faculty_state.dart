@@ -1,16 +1,21 @@
 part of 'faculty_bloc.dart';
 
-@immutable
-abstract class FacultyState {}
+abstract class FacultyState {
+  Map<String, Map<String, List<String>>>? facultyDepartmentLinkMap;
+}
 
 class FacultyInitial extends FacultyState {}
 
 class FacultiesLoadingState extends FacultyState {}
 
 class FacultiesLoadedState extends FacultyState {
-  final Map<String, Map<String, List<String>>> facultyDepartmentLinkMap;
+  //final Map<String, Map<String, List<String>>> facultyDepartmentLinkMap;
 
-  FacultiesLoadedState({required this.facultyDepartmentLinkMap});
+  FacultiesLoadedState(
+      {required Map<String, Map<String, List<String>>>
+          facultyDepartmentLinkMap}) {
+    this.facultyDepartmentLinkMap = facultyDepartmentLinkMap;
+  }
 }
 
 class FacultiesErrorState extends FacultyState {
@@ -23,10 +28,15 @@ class CurrentFacultyState extends FacultyState {
   final String facultyName;
   final Map<String, List<String>> departmentsMap;
 
+  //final Map<String, Map<String, List<String>>> facultyDepartmentLinkMap;
+
   CurrentFacultyState({
     required this.facultyName,
     required this.departmentsMap,
-  });
+    required Map<String, Map<String, List<String>>> facultyDepartmentLinkMap,
+  }) {
+    this.facultyDepartmentLinkMap = facultyDepartmentLinkMap;
+  }
 
   String get abbreviatedFacultyName {
     if (facultyName.length < 26) {

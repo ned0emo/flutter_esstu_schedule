@@ -5,6 +5,7 @@ class ScheduleTab extends StatefulWidget {
   final int tabNum;
   final String scheduleName;
   final bool hideSchedule;
+  final bool showLessonColor;
 
   final List<List<String>> scheduleList;
   final List<String>? customDaysOfWeek;
@@ -14,6 +15,7 @@ class ScheduleTab extends StatefulWidget {
     required this.tabNum,
     required this.scheduleName,
     required this.hideSchedule,
+    required this.showLessonColor,
     required this.scheduleList,
     this.customDaysOfWeek,
   });
@@ -29,7 +31,7 @@ class ScheduleTab extends StatefulWidget {
     if (!hideSchedule) return true;
 
     int border = tabNum * numOfDays;
-    for (int i = border; i < border + numOfDays;i++){
+    for (int i = border; i < border + numOfDays; i++) {
       for (String lesson in scheduleList[i]) {
         if (lesson.length > 5) {
           return true;
@@ -231,9 +233,32 @@ class _ScheduleTabState extends State<ScheduleTab> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       if (lesson.length > 5)
-                        Text(
-                          lessonType,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        Row(
+                          children: [
+                            Text(
+                              lessonType,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: widget.showLessonColor ? Container(
+                                height: 8,
+                                decoration: BoxDecoration(
+                                    color: _lessonColor(lessonType),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(4))),
+                              ) : const SizedBox(),
+                            ),
+                            if (isCurrentLesson)
+                              const Padding(
+                                padding: EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                child: Text(
+                                  'Сейчас',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              )
+                          ],
                         ),
                       Text(
                         lesson,
@@ -259,9 +284,13 @@ class _ScheduleTabState extends State<ScheduleTab> {
         //приписки аудиторий
         .replaceAll(RegExp(r'и/д|д/кл|д/к|н/х'), '')
         //препод
-        .replaceAll(RegExp(r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.'), '')
+        .replaceAll(
+            RegExp(
+                r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.'),
+            '')
         //тип занятия
-        .replaceAll(RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура|экз\.'), '')
+        .replaceAll(
+            RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура|экз\.'), '')
         //остатки аудитории в расписании аудиторий
         .replaceAll('а. ', '')
         //длинные пробелы
@@ -275,14 +304,17 @@ class _ScheduleTabState extends State<ScheduleTab> {
   }
 
   List<String> _teacherNames(String lesson) {
-    return RegExp(r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.')
+    return RegExp(
+            r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.')
         .allMatches(lesson)
         .map((e) => e[0] ?? '')
         .toList();
   }
 
   String _lessonType(String lesson) {
-    final lType = RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура|экз\.').firstMatch(lesson)?[0];
+    final lType =
+        RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура|экз\.')
+            .firstMatch(lesson)?[0];
     switch (lType) {
       case 'лек.':
         return 'Лекция';
@@ -298,6 +330,23 @@ class _ScheduleTabState extends State<ScheduleTab> {
         return 'Экзамен';
       default:
         return 'Другое';
+    }
+  }
+
+  Color _lessonColor(String lessonType) {
+    switch (lessonType) {
+      case 'Лекция':
+        return const Color.fromARGB(255, 255, 129, 118);
+      case 'Практика':
+        return const Color.fromARGB(255, 88, 209, 255);
+      case 'Лабораторная':
+        return const Color.fromARGB(255, 255, 231, 112);
+      case 'Физическая культура':
+        return const Color.fromARGB(255, 118, 255, 150);
+      case 'Экзамен':
+        return const Color.fromARGB(255, 255, 157, 239);
+      default:
+        return const Color.fromARGB(255, 253, 200, 81);
     }
   }
 }

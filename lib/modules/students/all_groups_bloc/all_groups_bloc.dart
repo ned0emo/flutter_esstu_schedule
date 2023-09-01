@@ -178,6 +178,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
         );
 
         emit(currentState.copyWith(
+            currentCourse: event.courseName,
             warningMessage:
                 'Хмм... Кажется, здесь нет групп с заполненным расписанием'));
         return;

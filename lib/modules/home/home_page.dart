@@ -17,8 +17,8 @@ class HomePage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(
-          value: //ModularWatchExtension(context).watch<FavoriteScheduleBloc>()
-              Modular.get<FavoriteScheduleBloc>()..add(OpenMainFavSchedule()),
+          value: Modular.get<FavoriteScheduleBloc>()
+            ..add(OpenMainFavSchedule()),
         ),
         BlocProvider.value(value: BlocProvider.of<SettingsBloc>(context)),
       ],

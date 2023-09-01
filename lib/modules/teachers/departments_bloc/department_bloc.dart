@@ -113,6 +113,15 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
         }
       }
 
+      if(teachersScheduleMap.isEmpty){
+        emit(DepartmentError(Logger.warning(
+          title: 'Хмм.. Кажется, расписание для данной кафедры отсутствует',
+          exception: 'teachersScheduleMap isEmpty',
+        )));
+
+        return;
+      }
+
       emit(DepartmentLoaded(
         departmentName: event.departmentName,
         teachersScheduleMap: teachersScheduleMap,

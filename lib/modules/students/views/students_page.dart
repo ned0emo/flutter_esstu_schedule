@@ -18,15 +18,17 @@ class StudentsPage extends StatefulWidget {
 
 class _StudentsPageState extends State<StudentsPage> {
   late bool hideSchedule;
+  late bool showLessonColor;
 
   @override
   void initState() {
     final settingsState = BlocProvider.of<SettingsBloc>(context).state;
-    if(settingsState is SettingsLoaded){
+    if (settingsState is SettingsLoaded) {
       hideSchedule = settingsState.hideSchedule;
-    }
-    else{
+      showLessonColor = settingsState.lessonColor;
+    } else {
       hideSchedule = false;
+      showLessonColor = true;
     }
     super.initState();
   }
@@ -55,12 +57,12 @@ class _StudentsPageState extends State<StudentsPage> {
             return Scaffold(
               appBar: AppBar(
                 title: Text(
-                  state is CourseSelected ? state.courseName : 'Учебные группы',
+                  state is AllGroupsLoaded ? ('${state.studentTypeString}. ${state.currentCourse}') : 'Учебные группы',
                   textAlign: TextAlign.left,
                 ),
               ),
-              body: BlocBuilder<AllGroupsBloc, AllGroupsState>(
-                builder: (context, state) {
+              body: Builder(
+                builder: (context) {
                   if (state is AllGroupsLoading) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -168,6 +170,7 @@ class _StudentsPageState extends State<StudentsPage> {
                           tabNum: index,
                           scheduleName: currentGroupState.name,
                           hideSchedule: hideSchedule,
+                          showLessonColor: showLessonColor,
                           scheduleList: currentGroupState.scheduleList,
                           customDaysOfWeek: currentGroupState.daysOfWeekList,
                         ),

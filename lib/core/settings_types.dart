@@ -5,4 +5,5 @@ class SettingsTypes {
   static String debug = 'debug';
   static String noUpdateClassroom = 'noUpdateClassroomService';
   static String hideSchedule = 'hideScheduleService';
+  static String lessonColor = 'lessonColorService';
 }

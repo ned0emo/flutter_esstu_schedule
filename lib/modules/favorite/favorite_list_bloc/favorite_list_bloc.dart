@@ -72,7 +72,7 @@ class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
 
   Future<void> _clearAllSchedule(
       ClearAllSchedule event, Emitter<FavoriteListState> emit) async {
-    await _favoriteRepository.clearSchedule();
+    await _favoriteRepository.clearAllSchedule();
     emit(FavoriteListLoaded(const {}));
   }
 

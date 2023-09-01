@@ -1,31 +1,35 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:schedule/core/settings_types.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsRepository {
-  final _storage = const FlutterSecureStorage();
-
   Future<Map<String, String>> loadSettings() async {
+    final storage = await SharedPreferences.getInstance();
+
     final Map<String, String> settingsMap = {
       SettingsTypes.autoUpdate:
-          (await _storage.read(key: SettingsTypes.autoUpdate)) ?? 'true',
+          (storage.getString(SettingsTypes.autoUpdate)) ?? 'true',
       SettingsTypes.darkTheme:
-          (await _storage.read(key: SettingsTypes.darkTheme)) ?? 'false',
+          (storage.getString(SettingsTypes.darkTheme)) ?? 'false',
       SettingsTypes.noUpdateClassroom:
-          (await _storage.read(key: SettingsTypes.noUpdateClassroom)) ?? 'false',
+          (storage.getString(SettingsTypes.noUpdateClassroom)) ?? 'false',
       SettingsTypes.hideSchedule:
-          (await _storage.read(key: SettingsTypes.hideSchedule)) ?? 'false',
+          (storage.getString(SettingsTypes.hideSchedule)) ?? 'false',
+      SettingsTypes.lessonColor:
+          (storage.getString(SettingsTypes.lessonColor)) ?? 'true',
     };
 
     return settingsMap;
   }
 
   Future<Map<String, String>> saveSettings(String type, String value) async {
-    await _storage.write(key: type, value: value);
+    final storage = await SharedPreferences.getInstance();
+    await storage.setString(type, value);
 
     return await loadSettings();
   }
 
   Future<void> clearAll() async {
-    await _storage.deleteAll();
+    final storage = await SharedPreferences.getInstance();
+    await storage.clear();
   }
 }

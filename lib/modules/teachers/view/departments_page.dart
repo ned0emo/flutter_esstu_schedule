@@ -19,14 +19,17 @@ class DepartmentsPage extends StatefulWidget {
 
 class _DepartmentsState extends State<DepartmentsPage> {
   late bool hideSchedule;
+  late bool showLessonColor;
 
   @override
   void initState() {
     final settingsState = BlocProvider.of<SettingsBloc>(context).state;
     if (settingsState is SettingsLoaded) {
       hideSchedule = settingsState.hideSchedule;
+      showLessonColor = settingsState.lessonColor;
     } else {
       hideSchedule = false;
+      showLessonColor = true;
     }
     super.initState();
   }
@@ -135,6 +138,7 @@ class _DepartmentsState extends State<DepartmentsPage> {
                     tabNum: 0,
                     scheduleName: state.currentTeacher,
                     hideSchedule: hideSchedule,
+                    showLessonColor: showLessonColor,
                     scheduleList:
                         state.teachersScheduleMap[state.currentTeacher]!,
                   ),
@@ -142,6 +146,7 @@ class _DepartmentsState extends State<DepartmentsPage> {
                     tabNum: 1,
                     scheduleName: state.currentTeacher,
                     hideSchedule: hideSchedule,
+                    showLessonColor: showLessonColor,
                     scheduleList:
                         state.teachersScheduleMap[state.currentTeacher]!,
                   ),
@@ -152,12 +157,29 @@ class _DepartmentsState extends State<DepartmentsPage> {
         }
 
         if (state is DepartmentError) {
-          return Center(
-            child: Text(
-              state.message,
-              textAlign: TextAlign.center,
-            ),
-          );
+          return state.message.contains('Хмм')
+              ? Center(
+                  child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/hmmm.png',
+                      width: 180,
+                      height: 180,
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ))
+              : Center(
+                  child: Text(
+                    state.message,
+                    textAlign: TextAlign.center,
+                  ),
+                );
         }
 
         return const Center(child: Text('Неизвестная ошибка'));
@@ -261,38 +283,40 @@ class _DepartmentsState extends State<DepartmentsPage> {
       },
       child: BlocBuilder<DepartmentBloc, DepartmentState>(
         builder: (context, departmentState) {
-          return BlocBuilder<FavoriteButtonBloc, FavoriteButtonState>(
-            builder: (context, state) {
-              return FloatingActionButton(
-                onPressed: departmentState is DepartmentLoaded
-                    ? () {
-                        if (state is FavoriteExist) {
-                          Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
-                              name: departmentState.currentTeacher,
-                              scheduleType: ScheduleType.teacher));
-                          return;
-                        }
+          if (departmentState is DepartmentLoaded) {
+            return BlocBuilder<FavoriteButtonBloc, FavoriteButtonState>(
+              builder: (context, state) {
+                return FloatingActionButton(
+                  onPressed: () {
+                    if (state is FavoriteExist) {
+                      Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
+                          name: departmentState.currentTeacher,
+                          scheduleType: ScheduleType.teacher));
+                      return;
+                    }
 
-                        if (state is FavoriteDoesNotExist) {
-                          Modular.get<FavoriteButtonBloc>().add(SaveSchedule(
-                            name: departmentState.currentTeacher,
-                            scheduleType: ScheduleType.teacher,
-                            scheduleList: departmentState.teachersScheduleMap[
-                                departmentState.currentTeacher]!,
-                            link1: departmentState.link1,
-                            link2: departmentState.link2,
-                          ));
+                    if (state is FavoriteDoesNotExist) {
+                      Modular.get<FavoriteButtonBloc>().add(SaveSchedule(
+                        name: departmentState.currentTeacher,
+                        scheduleType: ScheduleType.teacher,
+                        scheduleList: departmentState.teachersScheduleMap[
+                            departmentState.currentTeacher]!,
+                        link1: departmentState.link1,
+                        link2: departmentState.link2,
+                      ));
 
-                          _addToMainDialog(departmentState);
-                        }
-                      }
-                    : null,
-                child: state is FavoriteExist
-                    ? const Icon(Icons.star)
-                    : const Icon(Icons.star_border),
-              );
-            },
-          );
+                      _addToMainDialog(departmentState);
+                    }
+                  },
+                  child: state is FavoriteExist
+                      ? const Icon(Icons.star)
+                      : const Icon(Icons.star_border),
+                );
+              },
+            );
+          }
+
+          return const SizedBox();
         },
       ),
     );

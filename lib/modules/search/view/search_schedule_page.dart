@@ -28,15 +28,18 @@ class SearchSchedulePage extends StatefulWidget {
 
 class _SearchSchedulePageState extends State<SearchSchedulePage> {
   late bool hideSchedule;
+  late bool showLessonColor;
 
   @override
   void initState() {
     final settingsState = BlocProvider.of<SettingsBloc>(context).state;
     if(settingsState is SettingsLoaded){
       hideSchedule = settingsState.hideSchedule;
+      showLessonColor = settingsState.lessonColor;
     }
     else{
       hideSchedule = false;
+      showLessonColor = true;
     }
     super.initState();
   }
@@ -81,6 +84,7 @@ class _SearchSchedulePageState extends State<SearchSchedulePage> {
                     tabNum: index,
                     scheduleName: state.scheduleName,
                     hideSchedule: hideSchedule,
+                    showLessonColor: showLessonColor,
                     scheduleList: state.scheduleList,
                     customDaysOfWeek: state.customDaysOfWeek,
                   ),

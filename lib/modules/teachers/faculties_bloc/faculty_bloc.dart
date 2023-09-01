@@ -7,6 +7,7 @@ import 'package:schedule/core/logger.dart';
 import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'faculty_event.dart';
+
 part 'faculty_state.dart';
 
 class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
@@ -141,9 +142,14 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
 
   Future<void> _chooseFaculty(
       ChooseFaculty event, Emitter<FacultyState> emit) async {
+    //final currentState = state;
+
+    //if (currentState is FacultiesLoadedState) {
     emit(CurrentFacultyState(
       facultyName: event.facultyName,
       departmentsMap: event.departmentsMap,
+      facultyDepartmentLinkMap: state.facultyDepartmentLinkMap ?? {},
     ));
+    //}
   }
 }

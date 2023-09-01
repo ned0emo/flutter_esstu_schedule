@@ -20,12 +20,14 @@ class HomeModule extends Module {
     i.addSingleton(FavoriteButtonBloc.new);
     i.addSingleton(FavoriteScheduleBloc.new);
     i.addSingleton(Logger.new);
+    i.addSingleton(FavoriteRepository.new);
+    i.addSingleton(MainRepository.new);
   }
 
   @override
   void exportedBinds(i) {
-    i.addSingleton(FavoriteRepository.new);
-    i.addSingleton(MainRepository.new);
+    //i.addSingleton(MainRepository.new);
+    //i.addSingleton(FavoriteRepository.new);
   }
 
   BindConfig<T> blocConfig<T extends Bloc>() {
@@ -47,6 +49,6 @@ class HomeModule extends Module {
     r.module(AppRoutes.searchRoute, module: SearchModule());
   }
 
-  @override
-  List<Module> get imports => [this];
+  //@override
+  //List<Module> get imports => [this];
 }

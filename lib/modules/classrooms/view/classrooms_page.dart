@@ -17,14 +17,17 @@ class ClassroomsPage extends StatefulWidget {
 
 class _ClassroomState extends State<ClassroomsPage> {
   late bool hideSchedule;
+  late bool showLessonColor;
 
   @override
   void initState() {
     final settingsState = BlocProvider.of<SettingsBloc>(context).state;
     if (settingsState is SettingsLoaded) {
       hideSchedule = settingsState.hideSchedule;
+      showLessonColor = settingsState.lessonColor;
     } else {
       hideSchedule = false;
+      showLessonColor = true;
     }
     super.initState();
   }
@@ -58,6 +61,7 @@ class _ClassroomState extends State<ClassroomsPage> {
                             tabNum: 0,
                             scheduleName: state.currentClassroom,
                             hideSchedule: hideSchedule,
+                            showLessonColor: showLessonColor,
                             scheduleList:
                                 state.scheduleMap[state.currentBuildingName]![
                                     state.currentClassroom]!),
@@ -65,6 +69,7 @@ class _ClassroomState extends State<ClassroomsPage> {
                             tabNum: 1,
                             scheduleName: state.currentClassroom,
                             hideSchedule: hideSchedule,
+                            showLessonColor: showLessonColor,
                             scheduleList:
                                 state.scheduleMap[state.currentBuildingName]![
                                     state.currentClassroom]!),

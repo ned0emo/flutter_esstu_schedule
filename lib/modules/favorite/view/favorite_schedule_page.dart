@@ -31,18 +31,21 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late bool hideSchedule;
+  late bool showLessonColor;
 
   @override
   void initState() {
     final settingsState = BlocProvider.of<SettingsBloc>(context).state;
     if (settingsState is SettingsLoaded) {
       hideSchedule = settingsState.hideSchedule;
+      showLessonColor = settingsState.lessonColor;
     } else {
       hideSchedule = false;
+      showLessonColor = true;
     }
 
     _controller = AnimationController(
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 25),
       vsync: this,
     );
     super.initState();
@@ -160,7 +163,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                                 ));
                               },
                               icon: RotationTransition(
-                                turns: Tween(begin: 0.0, end: 10.0)
+                                turns: Tween(begin: 0.0, end: 30.0)
                                     .animate(_controller),
                                 child: const Icon(Icons.refresh),
                               ),
@@ -174,6 +177,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                       tabNum: index,
                       scheduleName: state.scheduleName,
                       hideSchedule: hideSchedule,
+                      showLessonColor: showLessonColor,
                       scheduleList: state.scheduleList,
                       customDaysOfWeek: state.customDaysOfWeek,
                     ),
