@@ -15,6 +15,7 @@ class CurrentGroupLoaded extends CurrentGroupState {
   final int weekNumber;
 
   final List<String>? daysOfWeekList;
+  final String? message;
 
   CurrentGroupLoaded({
     required this.name,
@@ -24,8 +25,12 @@ class CurrentGroupLoaded extends CurrentGroupState {
     required this.currentLesson,
     required this.weekNumber,
     this.daysOfWeekList,
+    this.message,
   });
 
+  ///
+  /// [message] не копируется, так оно для одноразового вызова AlertDialog
+  ///
   CurrentGroupLoaded copyWith({
     String? name,
     List<List<String>>? scheduleList,

@@ -42,22 +42,49 @@ class _StudentsPageState extends State<StudentsPage> {
         BlocProvider.value(value: Modular.get<CurrentGroupBloc>()),
         BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
       ],
-      child: BlocListener<AllGroupsBloc, AllGroupsState>(
-        listener: (context, state) {
-          if (state is AllGroupsLoaded && state.warningMessage == null) {
-            Modular.get<CurrentGroupBloc>().add(LoadGroup(
-                scheduleName: state.currentGroup,
-                link: state.currentCourseMap[state.currentGroup]!));
-            Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
-                scheduleType: ScheduleType.student, name: state.currentGroup));
-          }
-        },
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<AllGroupsBloc, AllGroupsState>(
+            listener: (context, state) {
+              if (state is AllGroupsLoaded && state.warningMessage == null) {
+                Modular.get<CurrentGroupBloc>().add(LoadGroup(
+                    scheduleName: state.currentGroup,
+                    link: state.currentCourseMap[state.currentGroup]!));
+                Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
+                    scheduleType: ScheduleType.student,
+                    name: state.currentGroup));
+              }
+            },
+          ),
+          BlocListener<CurrentGroupBloc, CurrentGroupState>(
+            listener: (context, state) {
+              if (state is CurrentGroupLoaded && state.message != null) {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('Внимание'),
+                      content: Text(state.message!),
+                      actions: [
+                        TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('ОК'))
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+          ),
+        ],
         child: BlocBuilder<AllGroupsBloc, AllGroupsState>(
           builder: (context, state) {
             return Scaffold(
               appBar: AppBar(
                 title: Text(
-                  state is AllGroupsLoaded ? ('${state.studentTypeString}. ${state.currentCourse}') : 'Учебные группы',
+                  state is AllGroupsLoaded
+                      ? ('${state.studentTypeString}. ${state.currentCourse}')
+                      : 'Учебные группы',
                   textAlign: TextAlign.left,
                 ),
               ),

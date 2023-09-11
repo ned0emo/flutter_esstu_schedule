@@ -7,6 +7,7 @@ import 'package:schedule/core/students_type.dart';
 import 'package:schedule/modules/home/main_repository.dart';
 
 part 'all_groups_event.dart';
+
 part 'all_groups_state.dart';
 
 class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
@@ -128,6 +129,14 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
         longDelayCheck++;
       }
 
+      if (longDelayCheck > 29) {
+        emit(AllGroupsError(Logger.error(
+          title: Errors.scheduleError,
+          exception: 'Обработка страниц длилась слишком долго',
+        )));
+        return;
+      }
+
       final initCourse = bakScheduleMap.keys.first;
       if (bakScheduleMap[initCourse]!.keys.isEmpty) {
         Logger.info(
@@ -140,22 +149,15 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
         return;
       }
 
-      if (longDelayCheck < 30) {
-        emit(AllGroupsLoaded(
-          bakScheduleMap: bakScheduleMap,
-          magScheduleMap: magScheduleMap,
-          colScheduleMap: colScheduleMap,
-          zoScheduleMap: zoScheduleMap,
-          studType: StudentsType.bak,
-          currentCourse: initCourse,
-          currentGroup: bakScheduleMap[initCourse]!.keys.first,
-        ));
-      } else {
-        emit(AllGroupsError(Logger.error(
-          title: Errors.scheduleError,
-          exception: 'Обработка страниц длилась слишком долго',
-        )));
-      }
+      emit(AllGroupsLoaded(
+        bakScheduleMap: bakScheduleMap,
+        magScheduleMap: magScheduleMap,
+        colScheduleMap: colScheduleMap,
+        zoScheduleMap: zoScheduleMap,
+        studType: StudentsType.bak,
+        currentCourse: initCourse,
+        currentGroup: bakScheduleMap[initCourse]!.keys.first,
+      ));
     } catch (e, stack) {
       emit(AllGroupsError(Logger.error(
           title: Errors.scheduleError, exception: e, stack: stack)));

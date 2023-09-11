@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:schedule/core/schedule_time_data.dart';
 
@@ -42,11 +44,13 @@ class ScheduleTab extends StatefulWidget {
   }
 }
 
-class _ScheduleTabState extends State<ScheduleTab> {
+class _ScheduleTabState extends State<ScheduleTab>
+    with AutomaticKeepAliveClientMixin {
   late int openedDayIndex;
   late int currentLesson;
   late int weekNumber;
   late int currentDay;
+  late ScrollController scrollController;
 
   @override
   void initState() {
@@ -54,16 +58,25 @@ class _ScheduleTabState extends State<ScheduleTab> {
     currentDay = ScheduleTimeData.getCurrentDayOfWeek();
     currentLesson = ScheduleTimeData.getCurrentLessonNumber();
     weekNumber = ScheduleTimeData.getCurrentWeekNumber();
+    scrollController = ScrollController(initialScrollOffset: 70.0 * currentDay);
     super.initState();
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (!widget.isScheduleExist) {
       return const Center(child: Text('Расписание отсутствует'));
     }
 
+    int cardCounter = 0;
+    //scrollController.position.maxScrollExtent;
+
     return ListView.builder(
+      controller: scrollController,
       padding: const EdgeInsets.fromLTRB(8, 10, 8, 40),
       itemBuilder: (context, index) {
         if (widget.hideSchedule &&
@@ -87,8 +100,10 @@ class _ScheduleTabState extends State<ScheduleTab> {
           }
         }
 
+        //TODO: ПОнедельник становится 6-м по cardCounter
         return _dayOfWeekCard(
           index,
+          cardCounter++,
           widget.scheduleList[index + widget.tabNum * widget.numOfDays],
           index == currentDay,
           dayOfWeek,
@@ -101,6 +116,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
 
   Widget _dayOfWeekCard(
     int currentCardIndex,
+    int absoluteCardIndex,
     List<String> scheduleList,
     bool isCurrentDay,
     String dayOfWeek,
@@ -127,8 +143,16 @@ class _ScheduleTabState extends State<ScheduleTab> {
         children: [
           OutlinedButton(
             onPressed: () {
+              if (!isCurrentDayOpened) {
+                scrollController.animateTo(
+                    min(70.0 * absoluteCardIndex,
+                        scrollController.position.maxScrollExtent),
+                    duration: Duration(milliseconds: 100),
+                    curve: Curves.linear);
+              }
+
               setState(() {
-                openedDayIndex = currentCardIndex;
+                openedDayIndex = isCurrentDayOpened ? -1 : currentCardIndex;
               });
             },
             style: OutlinedButton.styleFrom(
@@ -197,23 +221,29 @@ class _ScheduleTabState extends State<ScheduleTab> {
           IntrinsicHeight(
             child: Row(
               children: [
-                Center(
-                  child: Stack(
-                    alignment: AlignmentDirectional.center,
-                    children: [
-                      Icon(
-                        Icons.circle,
-                        color: isCurrentLesson
-                            ? const Color(0xFFFA8D62)
-                            : const Color(0xFF6EB5C0),
-                        size: 30,
-                      ),
-                      Text(
-                        lessonNumber.toString(),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Stack(
+                      alignment: AlignmentDirectional.center,
+                      children: [
+                        Icon(
+                          Icons.circle,
+                          color: isCurrentLesson
+                              ? const Color(0xFFFA8D62)
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .secondary, // const Color(0xFF6EB5C0),
+                          size: 30,
+                        ),
+                        Text(
+                          lessonNumber.toString(),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 const VerticalDivider(),
                 SizedBox(
@@ -242,13 +272,15 @@ class _ScheduleTabState extends State<ScheduleTab> {
                             ),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: widget.showLessonColor ? Container(
-                                height: 8,
-                                decoration: BoxDecoration(
-                                    color: _lessonColor(lessonType),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(4))),
-                              ) : const SizedBox(),
+                              child: widget.showLessonColor
+                                  ? Container(
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                          color: _lessonColor(lessonType),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(4))),
+                                    )
+                                  : const SizedBox(),
                             ),
                             if (isCurrentLesson)
                               const Padding(
@@ -257,9 +289,10 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                   'Сейчас',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                              )
+                              ),
                           ],
                         ),
+                      if (lesson.length > 5) const SizedBox(height: 10),
                       Text(
                         lesson,
                         style: isCurrentLesson
@@ -267,7 +300,9 @@ class _ScheduleTabState extends State<ScheduleTab> {
                             : null,
                       ),
                       if (lesson.length > 5 && teachers.isNotEmpty)
-                        Text('\n${teachers.join(', ')}')
+                        const SizedBox(height: 10),
+                      if (lesson.length > 5 && teachers.isNotEmpty)
+                        Text(teachers.join(', '))
                     ],
                   ),
                 ),
@@ -290,13 +325,15 @@ class _ScheduleTabState extends State<ScheduleTab> {
             '')
         //тип занятия
         .replaceAll(
-            RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура|экз\.'), '')
+            RegExp(
+                r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура| и спорт|экз\.|'),
+            '')
         //остатки аудитории в расписании аудиторий
         .replaceAll('а. ', '')
         //длинные пробелы
-        .replaceAll(RegExp(r'\s+'), ' ')
+        .replaceAll(RegExp(r'\s{2,}'), ' ')
         //много точек
-        .replaceAll(RegExp(r'\.+'), '.')
+        .replaceAll(RegExp(r'\.{2,}'), '.')
         .trim();
 
     //final index = newLesson.indexOf(RegExp(r'[А-Я]'));
@@ -346,7 +383,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
       case 'Экзамен':
         return const Color.fromARGB(255, 255, 157, 239);
       default:
-        return const Color.fromARGB(255, 253, 200, 81);
+        return const Color.fromARGB(255, 255, 190, 41);
     }
   }
 }
