@@ -47,6 +47,53 @@ class HomePage extends StatelessWidget {
                 },
                 icon: const Icon(Icons.settings),
               ),
+              IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('Поиск расписания'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    Modular.to.popAndPushNamed(
+                                      AppRoutes.searchRoute,
+                                      arguments: [ScheduleType.student],
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Учебная группа',
+                                    style: TextStyle(fontSize: 20),
+                                  )),
+                            ),
+                            const SizedBox(height: 15),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    Modular.to.popAndPushNamed(
+                                      AppRoutes.searchRoute,
+                                      arguments: [ScheduleType.teacher],
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Преподаватель',
+                                    style: TextStyle(fontSize: 20),
+                                  )),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+                icon: const Icon(Icons.search),
+              ),
             ],
           ),
           body: SingleChildScrollView(
@@ -114,53 +161,6 @@ class HomePage extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: const Text('Поиск расписания'),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                              onPressed: () {
-                                Modular.to.popAndPushNamed(
-                                  AppRoutes.searchRoute,
-                                  arguments: [ScheduleType.student],
-                                );
-                              },
-                              child: const Text(
-                                'Учебная группа',
-                                style: TextStyle(fontSize: 20),
-                              )),
-                        ),
-                        const SizedBox(height: 15),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                              onPressed: () {
-                                Modular.to.popAndPushNamed(
-                                  AppRoutes.searchRoute,
-                                  arguments: [ScheduleType.teacher],
-                                );
-                              },
-                              child: const Text(
-                                'Преподаватель',
-                                style: TextStyle(fontSize: 20),
-                              )),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            },
-            child: const Icon(Icons.search),
           ),
         ),
       ),

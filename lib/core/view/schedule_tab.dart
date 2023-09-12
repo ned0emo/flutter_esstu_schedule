@@ -54,11 +54,12 @@ class _ScheduleTabState extends State<ScheduleTab>
 
   @override
   void initState() {
-    openedDayIndex = ScheduleTimeData.getCurrentDayOfWeek();
+    openedDayIndex = widget.isZo ? -1 : ScheduleTimeData.getCurrentDayOfWeek();
     currentDay = ScheduleTimeData.getCurrentDayOfWeek();
     currentLesson = ScheduleTimeData.getCurrentLessonNumber();
     weekNumber = ScheduleTimeData.getCurrentWeekNumber();
-    scrollController = ScrollController(initialScrollOffset: 70.0 * currentDay);
+    scrollController = ScrollController();
+
     super.initState();
   }
 
@@ -72,10 +73,10 @@ class _ScheduleTabState extends State<ScheduleTab>
       return const Center(child: Text('Расписание отсутствует'));
     }
 
-    int cardCounter = 0;
-    //scrollController.position.maxScrollExtent;
+    int fix = 0;
 
     return ListView.builder(
+      cacheExtent: 1000,
       controller: scrollController,
       padding: const EdgeInsets.fromLTRB(8, 10, 8, 40),
       itemBuilder: (context, index) {
@@ -84,6 +85,7 @@ class _ScheduleTabState extends State<ScheduleTab>
                     .join()
                     .length <
                 10) {
+          fix++;
           return const SizedBox();
         }
 
@@ -100,10 +102,9 @@ class _ScheduleTabState extends State<ScheduleTab>
           }
         }
 
-        //TODO: ПОнедельник становится 6-м по cardCounter
         return _dayOfWeekCard(
           index,
-          cardCounter++,
+          index - fix,
           widget.scheduleList[index + widget.tabNum * widget.numOfDays],
           index == currentDay,
           dayOfWeek,
@@ -143,17 +144,17 @@ class _ScheduleTabState extends State<ScheduleTab>
         children: [
           OutlinedButton(
             onPressed: () {
-              if (!isCurrentDayOpened) {
-                scrollController.animateTo(
-                    min(70.0 * absoluteCardIndex,
-                        scrollController.position.maxScrollExtent),
-                    duration: Duration(milliseconds: 100),
-                    curve: Curves.linear);
-              }
-
               setState(() {
                 openedDayIndex = isCurrentDayOpened ? -1 : currentCardIndex;
               });
+
+              if (!isCurrentDayOpened) {
+                scrollController.animateTo(
+                    min(68.0 * absoluteCardIndex + 10,
+                        scrollController.position.maxScrollExtent),
+                    duration: const Duration(milliseconds: 100),
+                    curve: Curves.linear);
+              }
             },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(

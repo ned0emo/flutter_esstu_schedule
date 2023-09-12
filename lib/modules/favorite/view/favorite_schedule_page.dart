@@ -82,7 +82,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                 if (state.message != null) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text(state.message!),
-                      duration: const Duration(seconds: 1)));
+                      duration: const Duration(seconds: 2)));
                 }
 
                 return;
@@ -100,7 +100,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                 _controller.reset();
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text(state.message),
-                    duration: const Duration(seconds: 1)));
+                    duration: const Duration(seconds: 2)));
                 return;
               }
 
@@ -108,7 +108,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
                 _controller.reset();
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text(state.message),
-                    duration: const Duration(milliseconds: 1500)));
+                    duration: const Duration(seconds: 2)));
                 return;
               }
             },
