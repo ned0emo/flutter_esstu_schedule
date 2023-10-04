@@ -28,11 +28,13 @@ class CurrentFacultyState extends FacultyState {
   final String facultyName;
   final Map<String, List<String>> departmentsMap;
 
+  final int weekNumber;
   //final Map<String, Map<String, List<String>>> facultyDepartmentLinkMap;
 
   CurrentFacultyState({
     required this.facultyName,
     required this.departmentsMap,
+    required this.weekNumber,
     required Map<String, Map<String, List<String>>> facultyDepartmentLinkMap,
   }) {
     this.facultyDepartmentLinkMap = facultyDepartmentLinkMap;

@@ -74,7 +74,7 @@ class _SearchSchedulePageState extends State<SearchSchedulePage> {
           if (state is SearchScheduleLoaded) {
             return DefaultTabController(
               length: state.numOfWeeks,
-              initialIndex: state.weekNumber,
+              initialIndex: state.isZo ? 0 : state.weekNumber,
               child: Scaffold(
                 appBar: AppBar(title: Text(state.scheduleName)),
                 body: TabBarView(

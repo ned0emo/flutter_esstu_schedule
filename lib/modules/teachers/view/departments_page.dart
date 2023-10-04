@@ -58,6 +58,7 @@ class _DepartmentsState extends State<DepartmentsPage> {
         ],
         child: DefaultTabController(
           length: 2,
+          initialIndex: widget.facultyState.weekNumber,
           child: Scaffold(
             appBar: AppBar(title: _appBarText(context)),
             body: _body(context),

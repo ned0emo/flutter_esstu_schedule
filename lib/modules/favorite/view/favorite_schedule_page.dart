@@ -142,7 +142,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
             if (state is FavoriteScheduleLoaded) {
               return DefaultTabController(
                 length: state.numOfWeeks,
-                initialIndex: state.weekNumber,
+                initialIndex: state.isZo ? 0 : state.weekNumber,
                 child: Scaffold(
                   appBar: AppBar(
                     title: Text(state.scheduleName),

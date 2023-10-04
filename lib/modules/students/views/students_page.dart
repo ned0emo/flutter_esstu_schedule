@@ -185,7 +185,8 @@ class _StudentsPageState extends State<StudentsPage> {
         if (currentGroupState is CurrentGroupLoaded) {
           return DefaultTabController(
             length: currentGroupState.numOfWeeks,
-            initialIndex: currentGroupState.weekNumber,
+            initialIndex:
+                currentGroupState.isZo ? 0 : currentGroupState.weekNumber,
             child: Column(
               children: [
                 Expanded(

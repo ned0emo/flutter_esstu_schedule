@@ -13,10 +13,10 @@ packages:
     dependency: transitive
     description:
       name: auto_injector
-      sha256: a715862b587c518c81d7275044d4c1e6237ab1ccb921171a544dce04c6f771ca
+      sha256: "2952a4d4339ed3b65e8e54765ec68ee6ada5cb21d83cb8d39e3f6b4e690ab5ca"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0+2"
+    version: "2.0.2"
   bloc:
     dependency: "direct main"
     description:
@@ -89,14 +89,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
-  fake_reflection:
-    dependency: transitive
-    description:
-      name: fake_reflection
-      sha256: "3e0fff7d8d60f0935a620904a1e6978e024df5fee8b710f37355166df00be506"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
   ffi:
     dependency: transitive
     description:
@@ -138,10 +130,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_modular
-      sha256: "3e9eff30acb2fd741a6e65151289020b6655d2dec0e42ed7f1c9745bf87dd5f4"
+      sha256: ac6298ce1abd414286ee5a554fc45e81e358461979b5d4e02c8abd685e3b23f2
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.0"
+    version: "6.3.2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -228,10 +220,10 @@ packages:
     dependency: transitive
     description:
       name: modular_core
-      sha256: def3d484b46644c2974597202639675e9c13518b2e88f93b3db54a16e20bcba2
+      sha256: "5baaa460ac9d85d457d6864ef41a2194b8115a6bdeb585a684789f2d9004c892"
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.0"
+    version: "3.3.2"
   nested:
     dependency: transitive
     description:
@@ -304,14 +296,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  settings_ui:
-    dependency: "direct main"
-    description:
-      name: settings_ui
-      sha256: d9838037cb554b24b4218b2d07666fbada3478882edefae375ee892b6c820ef3
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.2"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -521,10 +505,10 @@ packages:
     dependency: transitive
     description:
       name: win32
-      sha256: "9e82a402b7f3d518fb9c02d0e9ae45952df31b9bf34d77baf19da2de03fc2aaa"
+      sha256: "350a11abd2d1d97e0cc7a28a81b781c08002aa2864d9e3f192ca0ffa18b06ed3"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.7"
+    version: "5.0.9"
   xdg_directories:
     dependency: transitive
     description:
