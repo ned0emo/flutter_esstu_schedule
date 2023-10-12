@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/schedule_time_data.dart';
-import 'package:schedule/core/schedule_type.dart';
+import 'package:schedule/core/models/lesson_model.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/lesson_builder.dart';
+import 'package:schedule/core/static/schedule_time_data.dart';
+import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/home/main_repository.dart';
 
 part 'search_schedule_event.dart';
@@ -36,7 +38,7 @@ class SearchScheduleBloc
         if (event.link2 != null) await _repository.loadPage(event.link2!)
       ];
 
-      final List<List<String>> scheduleList = [];
+      final List<List<Lesson>> scheduleList = [];
       List<String>? customDaysOfWeek;
 
       bool isScheduleNeedCreate = true;
@@ -66,7 +68,7 @@ class SearchScheduleBloc
 
           final daysOfWeek = weekSection.split('"CENTER">').skip(1);
           if (isScheduleNeedCreate) {
-            scheduleList.add(List.generate(numOfLessons, (index) => ''));
+            scheduleList.add(List.generate(numOfLessons, (index) => Lesson(lessonNumber: index + 1)));
           }
 
           int j = 0;
@@ -74,9 +76,8 @@ class SearchScheduleBloc
             final lesson = dayOfWeekSection
                 .substring(0, dayOfWeekSection.indexOf('<'))
                 .trim();
-            if (lesson.length > scheduleList[i][j].length) {
-              scheduleList[i][j] = lesson;
-            }
+
+            scheduleList[i][j] = LessonBuilder.createLessonIfTitleLonger(scheduleList[i][j], lesson);//.updateLesson(lesson);
 
             j++;
             if (j >= numOfLessons) {
@@ -95,8 +96,8 @@ class SearchScheduleBloc
         scheduleList: scheduleList,
         scheduleType: event.scheduleType,
         openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
-        currentLesson: ScheduleTimeData.getCurrentLessonNumber(),
-        weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
+        currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
+        weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
         link1: event.link1,
         link2: event.link2,
         customDaysOfWeek: customDaysOfWeek,

@@ -1,5 +1,5 @@
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:schedule/core/app_routes.dart';
+import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/modules/home/home_module.dart';
 import 'package:schedule/modules/search/search_list_bloc/search_list_bloc.dart';
 import 'package:schedule/modules/search/search_repository.dart';

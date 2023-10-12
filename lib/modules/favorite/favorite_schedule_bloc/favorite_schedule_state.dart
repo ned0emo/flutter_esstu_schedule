@@ -15,7 +15,7 @@ class FavoriteScheduleLoading extends FavoriteScheduleState {}
 
 class FavoriteScheduleLoaded extends FavoriteScheduleState {
   final String scheduleName;
-  final List<List<String>> scheduleList;
+  final List<List<Lesson>> scheduleList;
   final String scheduleType;
   final int openedDayIndex;
   final int currentLesson;
@@ -44,7 +44,7 @@ class FavoriteScheduleLoaded extends FavoriteScheduleState {
 
   FavoriteScheduleLoaded copyWith({
     String? scheduleName,
-    List<List<String>>? scheduleList,
+    List<List<Lesson>>? scheduleList,
     String? scheduleType,
     int? openedDayIndex,
     int? currentLesson,

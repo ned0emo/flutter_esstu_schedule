@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/schedule_time_data.dart';
+import 'package:schedule/core/models/lesson_model.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/lesson_builder.dart';
+import 'package:schedule/core/static/schedule_time_data.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
 part 'favorite_update_event.dart';
@@ -50,7 +52,9 @@ class FavoriteUpdateBloc
       final numOfDays = event.customDaysOfWeek?.length ?? 12;
       final numOfLessons = numOfDays == 12 ? 5 : 6;
       final scheduleList = List.generate(
-          numOfDays, (index) => List.generate(numOfLessons + 1, (index) => ''));
+          numOfDays,
+          (index) => List.generate(
+              numOfLessons + 1, (index) => Lesson(lessonNumber: index + 1)));
 
       for (String page in pagesList) {
         final scheduleSection = page
@@ -62,10 +66,6 @@ class FavoriteUpdateBloc
 
         int j = 0;
         for (String dayOfWeek in daysOfWeekFromPage) {
-          if (j == numOfDays) {
-            break;
-          }
-
           if (customDaysOfWeek != null) {
             try {
               customDaysOfWeek.add(
@@ -90,16 +90,12 @@ class FavoriteUpdateBloc
                 .substring(0, lessonSection.indexOf('</FONT>'))
                 .trim();
 
-            if (scheduleList[j][i].length < lesson.length) {
-              scheduleList[j][i] = lesson;
-            }
-            i++;
-            if (i > numOfLessons) {
-              break;
-            }
+            scheduleList[j][i] = LessonBuilder.createLessonIfTitleLonger(scheduleList[j][i], lesson);// .updateLesson(lesson);
+
+            if (++i > numOfLessons) break;
           }
 
-          j++;
+          if (++j >= numOfDays) break;
         }
       }
 

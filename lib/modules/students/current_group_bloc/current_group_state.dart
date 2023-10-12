@@ -8,7 +8,7 @@ class CurrentGroupLoading extends CurrentGroupState {}
 
 class CurrentGroupLoaded extends CurrentGroupState {
   final String name;
-  final List<List<String>> scheduleList;
+  final List<List<Lesson>> scheduleList;
   final String link;
   final int openedDayIndex;
   final int currentLesson;
@@ -33,7 +33,7 @@ class CurrentGroupLoaded extends CurrentGroupState {
   ///
   CurrentGroupLoaded copyWith({
     String? name,
-    List<List<String>>? scheduleList,
+    List<List<Lesson>>? scheduleList,
     String? link,
     int? openedDayIndex,
     int? currentLesson,

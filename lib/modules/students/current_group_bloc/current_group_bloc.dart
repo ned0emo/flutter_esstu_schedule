@@ -1,8 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/schedule_time_data.dart';
+import 'package:schedule/core/models/lesson_model.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/lesson_builder.dart';
+import 'package:schedule/core/static/schedule_time_data.dart';
 import 'package:schedule/modules/home/main_repository.dart';
 
 part 'current_group_event.dart';
@@ -40,7 +42,7 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
               'Выбранная группа: ${event.scheduleName}\n'
               'Загруженная группа: $groupNameOnPage';
 
-      List<List<String>> scheduleList = [];
+      List<List<Lesson>> scheduleList = [];
       List<String>? customDaysOfWeek = event.isZo ? [] : null;
       final numOfLessons = event.isZo ? 7 : 6;
 
@@ -53,7 +55,8 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
 
       int j = 0;
       for (String dayOfWeek in daysOfWeekFromPage) {
-        scheduleList.add(List.generate(numOfLessons, (index) => ''));
+        scheduleList.add(List.generate(
+            numOfLessons, (index) => Lesson(lessonNumber: index + 1)));
         if (customDaysOfWeek != null) {
           try {
             customDaysOfWeek
@@ -78,13 +81,9 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
               .substring(0, lessonSection.indexOf('</FONT>'))
               .trim();
 
-          if (scheduleList[j][i].length < lesson.length) {
-            scheduleList[j][i] = lesson;
-          }
-          i++;
-          if (i >= numOfLessons) {
-            break;
-          }
+          scheduleList[j][i] = LessonBuilder.createLesson(i + 1, lesson);//.updateLesson(lesson);
+
+          if (++i >= numOfLessons) break;
         }
 
         j++;
@@ -95,8 +94,8 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
         scheduleList: scheduleList,
         link: event.link,
         openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
-        currentLesson: ScheduleTimeData.getCurrentLessonNumber(),
-        weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
+        currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
+        weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
         daysOfWeekList: customDaysOfWeek,
         message: message,
       ));

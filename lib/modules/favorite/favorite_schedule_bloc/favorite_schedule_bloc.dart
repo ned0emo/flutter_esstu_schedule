@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/schedule_time_data.dart';
+import 'package:schedule/core/models/lesson_model.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/schedule_time_data.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
 part 'favorite_schedule_event.dart';
@@ -43,8 +44,8 @@ class FavoriteScheduleBloc
         scheduleList: scheduleModel.scheduleList,
         scheduleType: scheduleModel.scheduleType,
         openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
-        currentLesson: ScheduleTimeData.getCurrentLessonNumber(),
-        weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
+        currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
+        weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
         link1: scheduleModel.link1,
         link2: scheduleModel.link2,
         customDaysOfWeek: scheduleModel.daysOfWeekList,

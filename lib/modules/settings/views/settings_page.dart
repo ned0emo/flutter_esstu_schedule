@@ -2,9 +2,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:schedule/core/app_routes.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/settings_types.dart';
+import 'package:schedule/core/static/app_routes.dart';
+import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 

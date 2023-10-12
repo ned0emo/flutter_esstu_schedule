@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/schedule_time_data.dart';
+import 'package:schedule/core/models/lesson_model.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/lesson_builder.dart';
+import 'package:schedule/core/static/schedule_time_data.dart';
 import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'department_event.dart';
+
 part 'department_state.dart';
 
 class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
@@ -53,7 +56,7 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
       return;
     }
 
-    final Map<String, List<List<String>>> teachersScheduleMap = {};
+    final Map<String, List<List<Lesson>>> teachersScheduleMap = {};
 
     try {
       for (String page in departmentsPages) {
@@ -66,54 +69,42 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
               .trim();
 
           if (teachersScheduleMap[teacherName] == null) {
-            teachersScheduleMap[teacherName] = [
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-              ['', '', '', '', '', ''],
-            ];
+            teachersScheduleMap[teacherName] = List.generate(
+                12,
+                (index) => List.generate(
+                    6, (index) => Lesson(lessonNumber: index + 1)));
           }
 
           final daysOfWeekFromPage =
               teacherSection.split('SIZE=2><P ALIGN="CENTER">').skip(1);
 
-          int j = 0;
+          int dayOfWeekIndex = 0;
           for (String dayOfWeek in daysOfWeekFromPage) {
-            if (j == 12) break;
-
             final lessons =
                 dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
 
-            int i = 0;
+            int lessonIndex = 0;
             for (String lessonSection in lessons) {
-              final lesson = lessonSection
+              String lesson = lessonSection
                   .substring(0, lessonSection.indexOf('</FONT>'))
                   .trim();
 
-              if (teachersScheduleMap[teacherName]![j][i].length <
-                  lesson.length) {
-                teachersScheduleMap[teacherName]![j][i] = lesson;
-              }
-              i++;
-              if (i > 5) {
-                break;
-              }
+              teachersScheduleMap[teacherName]![dayOfWeekIndex][lessonIndex] =
+                  LessonBuilder.createLessonIfTitleLonger(
+                teachersScheduleMap[teacherName]![dayOfWeekIndex][lessonIndex],
+                lesson,
+              );
+              // .updateLesson(lesson);
+
+              if (++lessonIndex > 5) break;
             }
 
-            j++;
+            if (++dayOfWeekIndex > 11) break;
           }
         }
       }
 
-      if(teachersScheduleMap.isEmpty){
+      if (teachersScheduleMap.isEmpty) {
         emit(DepartmentError(Logger.warning(
           title: 'Хмм.. Кажется, расписание для данной кафедры отсутствует',
           exception: 'teachersScheduleMap isEmpty',
@@ -127,10 +118,10 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
         teachersScheduleMap: teachersScheduleMap,
         link1: event.link1,
         link2: event.link2,
-        currentLesson: ScheduleTimeData.getCurrentLessonNumber(),
+        currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
         openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
         currentTeacher: teachersScheduleMap.keys.elementAt(0),
-        weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
+        weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
       ));
     } catch (e, stack) {
       emit(DepartmentError(Logger.error(

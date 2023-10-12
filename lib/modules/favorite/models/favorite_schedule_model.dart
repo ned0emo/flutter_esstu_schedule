@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:schedule/core/models/lesson_model.dart';
+
 ///
 /// [name] - имя файла (группа/препод/аудитория)
 ///
@@ -16,7 +18,7 @@ import 'dart:convert';
 class FavoriteScheduleModel {
   final String name;
   final String scheduleType;
-  final List<List<String>> scheduleList;
+  final List<List<Lesson>> scheduleList;
   final String? link1;
   final String? link2;
   final List<String>? daysOfWeekList;
@@ -41,10 +43,14 @@ class FavoriteScheduleModel {
 
   static fromString(String str) => fromJson(jsonDecode(str));
 
-  static List<List<String>> _scheduleListConvert(List<dynamic> list) {
-    List<List<String>> newList = [];
-    for (dynamic it in list) {
-      newList.add(List<String>.from(it));
+  static List<List<Lesson>> _scheduleListConvert(List<dynamic> list) {
+    List<List<Lesson>> newList = [];
+    for (var it in list) {
+      List<Lesson> newLessons = [];
+      for(var el in it){
+        newLessons.add(Lesson.fromJson(el));
+      }
+      newList.add(newLessons);
     }
 
     return newList;
@@ -69,7 +75,7 @@ class FavoriteScheduleModel {
   FavoriteScheduleModel copyWith({
     String? name,
     String? scheduleType,
-    List<List<String>>? scheduleList,
+    List<List<Lesson>>? scheduleList,
     String? link1,
     String? link2,
     List<String>? daysOfWeekList,

@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/schedule_type.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
 part 'favorite_list_event.dart';

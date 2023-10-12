@@ -2,12 +2,15 @@ import 'dart:collection';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/schedule_time_data.dart';
+import 'package:schedule/core/models/lesson_model.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/lesson_builder.dart';
+import 'package:schedule/core/static/schedule_time_data.dart';
 import 'package:schedule/modules/classrooms/repositories/classrooms_repository.dart';
 
 part 'classrooms_event.dart';
+
 part 'classrooms_state.dart';
 
 class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
@@ -15,23 +18,26 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
   final String facultyLinkMag = 'spezialitet/craspisanEdt.htm';
   final int threadCount = 6;
 
-  final Map<String, SplayTreeMap<String, List<List<String>>>>
+  /// Карта "корпус" - сортированная карта аудиторий:
+  /// "аудитория" - список дней недели.
+  /// В элементе списка дней недели пары
+  final Map<String, SplayTreeMap<String, List<List<Lesson>>>>
       _buildingsScheduleMap = {
-    '1 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '2 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '3 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '4 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '5 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '6 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '7 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '8 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '9 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '10 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '11 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '12 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '13 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '14 корпус': SplayTreeMap<String, List<List<String>>>(),
-    '15 корпус': SplayTreeMap<String, List<List<String>>>(),
+    '1 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '2 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '3 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '4 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '5 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '6 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '7 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '8 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '9 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '10 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '11 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '12 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '13 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '14 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
+    '15 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
     //'16 корпус': SplayTreeMap<String, List<List<String>>>(),
     //'17 корпус': SplayTreeMap<String, List<List<String>>>(),
     //'18 корпус': SplayTreeMap<String, List<List<String>>>(),
@@ -121,7 +127,7 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
                 stack: stack,
               );
 
-              teacherName = e.runtimeType.toString();
+              teacherName = 'Не распознано';
             }
 
             final daysOfWeekFromPage =
@@ -129,8 +135,6 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
 
             int j = 0;
             for (String dayOfWeek in daysOfWeekFromPage) {
-              if (j == 12) break;
-
               final lessons =
                   dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
 
@@ -163,42 +167,29 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
 
                 final building = '${_getBuildingByClassroom(classroom)} корпус';
                 if (_buildingsScheduleMap[building]![classroom] == null) {
-                  _buildingsScheduleMap[building]![classroom] = [
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                  ];
+                  _buildingsScheduleMap[building]![classroom] = List.generate(
+                      12,
+                      (index) => List.generate(
+                          6, (index) => Lesson(lessonNumber: index + 1)));
                 }
 
-                if (_buildingsScheduleMap[building]![classroom]![j][i].length <
-                    '$teacherName ${fullLesson.replaceFirst(classroom, '')}'
-                        .length) {
-                  _buildingsScheduleMap[building]![classroom]![j][i] =
-                      '${teacherName.toUpperCase()} ${fullLesson.replaceFirst(classroom, '')}';
-                }
+                _buildingsScheduleMap[building]![classroom]![j][i] =
+                    LessonBuilder.createLessonIfTitleLonger(
+                  _buildingsScheduleMap[building]![classroom]![j][i],
+                  '$teacherName ${fullLesson.replaceFirst(classroom, '')}',
+                );
 
-                i++;
-                if (i > 5) {
-                  break;
-                }
+                if (++i > 5) break;
               }
 
-              j++;
+              if (++j > 11) break;
             }
           }
 
           progress++;
         } catch (e, stack) {
-          Logger.warning(title: Errors.pageLoadingError, exception: e, stack: stack);
+          Logger.warning(
+              title: Errors.pageLoadingError, exception: e, stack: stack);
 
           localErrorCount++;
         }
@@ -289,13 +280,13 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
       _buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
 
       emit(ClassroomsLoadedState(
-        weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
+        weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
         currentBuildingName: _buildingsScheduleMap.keys.first,
         scheduleMap: _buildingsScheduleMap,
         currentClassroom:
             _buildingsScheduleMap[_buildingsScheduleMap.keys.first]!.keys.first,
         openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
-        currentLesson: ScheduleTimeData.getCurrentLessonNumber(),
+        currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
       ));
     } catch (e, stack) {
       emit(ClassroomsErrorState(Logger.error(

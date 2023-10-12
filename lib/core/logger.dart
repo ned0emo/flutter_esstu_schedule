@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,6 +18,12 @@ class Logger {
     if (e is SocketException) {
       return 'Ошибка подключения'
           '\nАдрес: ${e.address?.address}'
+          '\nСообщение: ${e.message}';
+    }
+
+    if (e is ClientException) {
+      return 'Ошибка подключения'
+          '\nАдрес: ${e.uri?.path}'
           '\nСообщение: ${e.message}';
     }
 

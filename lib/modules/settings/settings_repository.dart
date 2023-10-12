@@ -1,4 +1,4 @@
-import 'package:schedule/core/settings_types.dart';
+import 'package:schedule/core/static/settings_types.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsRepository {
@@ -16,6 +16,8 @@ class SettingsRepository {
           (storage.getString(SettingsTypes.hideSchedule)) ?? 'false',
       SettingsTypes.lessonColor:
           (storage.getString(SettingsTypes.lessonColor)) ?? 'true',
+      SettingsTypes.legacyFavoriteDeleted:
+          (storage.getString(SettingsTypes.legacyFavoriteDeleted)) ?? 'false',
     };
 
     return settingsMap;
@@ -31,5 +33,16 @@ class SettingsRepository {
   Future<void> clearAll() async {
     final storage = await SharedPreferences.getInstance();
     await storage.clear();
+  }
+
+  Future<void> clearFavorite() async {
+    final storage = await SharedPreferences.getInstance();
+    final list = storage.getKeys();
+
+    for (var key in list) {
+      if (!key.contains('Service')) {
+        storage.remove(key);
+      }
+    }
   }
 }

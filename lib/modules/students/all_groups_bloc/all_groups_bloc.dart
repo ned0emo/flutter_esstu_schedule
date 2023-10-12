@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/schedule_links.dart';
-import 'package:schedule/core/students_type.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/schedule_links.dart';
+import 'package:schedule/core/static/students_type.dart';
 import 'package:schedule/modules/home/main_repository.dart';
 
 part 'all_groups_event.dart';

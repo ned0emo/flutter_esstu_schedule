@@ -5,7 +5,7 @@ abstract class FavoriteUpdateEvent {}
 
 class UpdateSchedule extends FavoriteUpdateEvent {
   final String scheduleName;
-  final List<List<String>> scheduleList;
+  final List<List<Lesson>> scheduleList;
   final String scheduleType;
   final bool isAutoUpdate;
 

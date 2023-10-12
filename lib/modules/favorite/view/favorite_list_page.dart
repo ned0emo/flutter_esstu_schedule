@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:schedule/core/app_routes.dart';
-import 'package:schedule/core/schedule_type.dart';
+import 'package:schedule/core/static/app_routes.dart';
+import 'package:schedule/core/static/schedule_type.dart';
+import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_list_bloc/favorite_list_bloc.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
-import 'package:schedule/core/settings_types.dart';
 
 class FavoriteListPage extends StatefulWidget {
   const FavoriteListPage({super.key});

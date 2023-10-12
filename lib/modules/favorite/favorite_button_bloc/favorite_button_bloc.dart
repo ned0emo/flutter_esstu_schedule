@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/models/lesson_model.dart';
 import 'package:schedule/modules/favorite/models/favorite_schedule_model.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 

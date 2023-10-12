@@ -10,7 +10,7 @@ class DepartmentLoading extends DepartmentState {}
 
 class DepartmentLoaded extends DepartmentState {
   final String departmentName;
-  final Map<String, List<List<String>>> teachersScheduleMap;
+  final Map<String, List<List<Lesson>>> teachersScheduleMap;
   final String link1;
   final String? link2;
   final int openedDayIndex;
@@ -31,7 +31,7 @@ class DepartmentLoaded extends DepartmentState {
 
   DepartmentLoaded copyWith({
     String? departmentName,
-    Map<String, List<List<String>>>? teachersScheduleMap,
+    Map<String, List<List<Lesson>>>? teachersScheduleMap,
     String? link1,
     String? link2,
     int? openedDayIndex,

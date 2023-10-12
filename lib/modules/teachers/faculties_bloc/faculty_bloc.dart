@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/schedule_time_data.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/schedule_time_data.dart';
 import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'faculty_event.dart';
@@ -149,7 +149,7 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
     emit(CurrentFacultyState(
       facultyName: event.facultyName,
       departmentsMap: event.departmentsMap,
-      weekNumber: ScheduleTimeData.getCurrentWeekNumber(),
+      weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
       facultyDepartmentLinkMap: state.facultyDepartmentLinkMap ?? {},
     ));
     //}

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:schedule/core/students_type.dart';
+import 'package:schedule/core/static/students_type.dart';
 import 'package:schedule/modules/students/all_groups_bloc/all_groups_bloc.dart';
 
 class StudentsDrawer extends StatelessWidget {

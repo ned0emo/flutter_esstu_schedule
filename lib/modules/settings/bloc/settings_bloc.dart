@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:schedule/core/errors.dart';
 import 'package:schedule/core/logger.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
-import 'package:schedule/core/settings_types.dart';
 
 part 'settings_state.dart';
 
@@ -25,6 +25,14 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     emit(SettingsLoading());
     try {
       final stringSettingsValues = await _settingsRepository.loadSettings();
+
+      /// Разовая чистка легаси избранного
+      /// TODO: В следующих обновлениях убрать
+      if (stringSettingsValues[SettingsTypes.legacyFavoriteDeleted] !=
+          'true') {
+        await _settingsRepository.clearFavorite();
+        await _settingsRepository.saveSettings(SettingsTypes.legacyFavoriteDeleted, 'true');
+      }
 
       emit(
         SettingsLoaded(
@@ -75,10 +83,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   Future<void> _clearAll(ClearAll event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
-    try{
+    try {
       await _settingsRepository.clearAll();
-    }
-    catch (e, stack){
+    } catch (e, stack) {
       Logger.error(
         title: Errors.settingsError,
         exception: e,

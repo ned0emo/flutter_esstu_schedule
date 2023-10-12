@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:schedule/core/app_routes.dart';
+import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/modules/teachers/faculties_bloc/faculty_bloc.dart';
 
 class FacultiesPage extends StatefulWidget {

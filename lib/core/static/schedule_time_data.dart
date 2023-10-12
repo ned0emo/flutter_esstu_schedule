@@ -21,7 +21,8 @@ class ScheduleTimeData {
     'Воскресенье',
   ];
 
-  static int getCurrentLessonNumber() {
+  /// Индекс текущей пары, начиная с нуля. Если сейчас пары нет, то -1
+  static int getCurrentLessonIndex() {
     int currentLesson = -1;
     final currentTime = Jiffy.now().dateTime.minute + Jiffy.now().dateTime.hour * 60;
     if (currentTime >= 540 && currentTime <= 635) {
@@ -41,7 +42,9 @@ class ScheduleTimeData {
     return currentLesson;
   }
 
-  static int getCurrentWeekNumber() => (Jiffy.now().weekOfYear + 1) % 2;
+  /// Индекс текущей недели, начиная с нуля
+  static int getCurrentWeekIndex() => (Jiffy.now().weekOfYear + 1) % 2;
 
+  /// Индекс текущего дня недели, начиная с нуля
   static int getCurrentDayOfWeek() => Jiffy.now().dateTime.weekday - 1;
 }

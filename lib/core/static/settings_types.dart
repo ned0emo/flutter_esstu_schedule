@@ -1,4 +1,6 @@
-///Типы должня оканчиваться на Service
+/// !!!
+/// Типы должны оканчиваться на Service
+/// !!!
 class SettingsTypes {
   static String darkTheme = 'darkThemeService';
   static String autoUpdate = 'autoUpdateService';
@@ -6,4 +8,5 @@ class SettingsTypes {
   static String noUpdateClassroom = 'noUpdateClassroomService';
   static String hideSchedule = 'hideScheduleService';
   static String lessonColor = 'lessonColorService';
+  static String legacyFavoriteDeleted = 'legacyFavoriteDeletedService';
 }

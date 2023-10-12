@@ -21,7 +21,7 @@ class ClassroomsLoadingState extends ClassroomsState {
 class ClassroomsLoadedState extends ClassroomsState {
   final int weekNumber;
   final String currentBuildingName;
-  final Map<String, Map<String, List<List<String>>>> scheduleMap;
+  final Map<String, Map<String, List<List<Lesson>>>> scheduleMap;
   final String currentClassroom;
   final int openedDayIndex;
   final int currentLesson;
@@ -38,7 +38,7 @@ class ClassroomsLoadedState extends ClassroomsState {
   ClassroomsLoadedState copyWith({
     int? weekNumber,
     String? currentBuildingName,
-    Map<String, Map<String, List<List<String>>>>? scheduleMap,
+    Map<String, Map<String, List<List<Lesson>>>>? scheduleMap,
     String? currentClassroom,
     int? openedDayIndex,
     int? currentLesson,

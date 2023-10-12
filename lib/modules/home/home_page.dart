@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:schedule/core/app_routes.dart';
-import 'package:schedule/core/schedule_type.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:schedule/core/settings_types.dart';
+import 'package:schedule/core/static/app_routes.dart';
+import 'package:schedule/core/static/schedule_type.dart';
+import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';

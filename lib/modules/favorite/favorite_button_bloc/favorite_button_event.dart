@@ -6,7 +6,7 @@ abstract class FavoriteButtonEvent {}
 class SaveSchedule extends FavoriteButtonEvent {
   final String name;
   final String scheduleType;
-  final List<List<String>> scheduleList;
+  final List<List<Lesson>> scheduleList;
   final String? link1;
   final String? link2;
   final List<String>? daysOfWeekList;
