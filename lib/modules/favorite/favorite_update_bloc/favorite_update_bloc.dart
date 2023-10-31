@@ -90,7 +90,7 @@ class FavoriteUpdateBloc
                 .substring(0, lessonSection.indexOf('</FONT>'))
                 .trim();
 
-            scheduleList[j][i] = LessonBuilder.createLessonIfTitleLonger(scheduleList[j][i], lesson);// .updateLesson(lesson);
+            //scheduleList[j][i] = LessonBuilder.createLessonIfTitleLonger(scheduleList[j][i], lesson);// .updateLesson(lesson);
 
             if (++i > numOfLessons) break;
           }

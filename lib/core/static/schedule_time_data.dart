@@ -2,13 +2,13 @@ import 'package:jiffy/jiffy.dart';
 
 class ScheduleTimeData {
   static final List<String> lessonTimeList = [
-    '9:00\n10:35',
-    '10:45\n12:20',
-    '13:00\n14:35',
-    '14:45\n16:20',
-    '16:25\n18:00',
-    '18:05\n19:40',
-    '19:45\n21:20',
+    '9:00 - 10:35',
+    '10:45 - 12:20',
+    '13:00 - 14:35',
+    '14:45 - 16:20',
+    '16:25 - 18:00',
+    '18:05 - 19:40',
+    '19:45 - 21:20',
   ];
 
   static final daysOfWeek = [
@@ -19,6 +19,16 @@ class ScheduleTimeData {
     'Пятница',
     'Суббота',
     'Воскресенье',
+  ];
+
+  static final daysOfWeekSmall = [
+    'ПН',
+    'ВТ',
+    'СР',
+    'ЧТ',
+    'ПТ',
+    'СБ',
+    'ВС',
   ];
 
   /// Индекс текущей пары, начиная с нуля. Если сейчас пары нет, то -1
@@ -46,5 +56,5 @@ class ScheduleTimeData {
   static int getCurrentWeekIndex() => (Jiffy.now().weekOfYear + 1) % 2;
 
   /// Индекс текущего дня недели, начиная с нуля
-  static int getCurrentDayOfWeek() => Jiffy.now().dateTime.weekday - 1;
+  static int getCurrentDayOfWeekIndex() => Jiffy.now().dateTime.weekday - 1;
 }

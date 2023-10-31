@@ -43,7 +43,7 @@ class FavoriteScheduleBloc
         scheduleName: scheduleModel.name,
         scheduleList: scheduleModel.scheduleList,
         scheduleType: scheduleModel.scheduleType,
-        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
+        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeekIndex(),
         currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
         weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
         link1: scheduleModel.link1,

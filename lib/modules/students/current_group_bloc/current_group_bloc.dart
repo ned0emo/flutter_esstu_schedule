@@ -81,7 +81,7 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
               .substring(0, lessonSection.indexOf('</FONT>'))
               .trim();
 
-          scheduleList[j][i] = LessonBuilder.createLesson(i + 1, lesson);//.updateLesson(lesson);
+          //scheduleList[j][i] = LessonBuilder.createStudentLesson(i + 1, lesson);//.updateLesson(lesson);
 
           if (++i >= numOfLessons) break;
         }
@@ -93,7 +93,7 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
         name: event.scheduleName,
         scheduleList: scheduleList,
         link: event.link,
-        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
+        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeekIndex(),
         currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
         weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
         daysOfWeekList: customDaysOfWeek,

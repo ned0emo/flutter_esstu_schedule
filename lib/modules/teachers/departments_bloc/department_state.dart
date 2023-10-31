@@ -2,58 +2,45 @@ part of 'department_bloc.dart';
 
 @immutable
 abstract class DepartmentState {
+  final String? appBarTitle;
+
+  const DepartmentState({this.appBarTitle});
 }
 
 class DepartmentInitial extends DepartmentState {}
 
-class DepartmentLoading extends DepartmentState {}
+class DepartmentLoading extends DepartmentState {
+  const DepartmentLoading({String? appBarTitle})
+      : super(appBarTitle: appBarTitle);
+}
 
 class DepartmentLoaded extends DepartmentState {
-  final String departmentName;
-  final Map<String, List<List<Lesson>>> teachersScheduleMap;
-  final String link1;
-  final String? link2;
-  final int openedDayIndex;
-  final int currentLesson;
-  final String currentTeacher;
-  final int weekNumber;
+  final String initialTeacherName;
 
-  DepartmentLoaded({
-    required this.departmentName,
-    required this.teachersScheduleMap,
-    required this.link1,
-    this.link2,
-    required this.openedDayIndex,
-    required this.currentLesson,
-    required this.currentTeacher,
-    required this.weekNumber,
-  });
+  final List<ScheduleModel> teachersScheduleData;
+
+  const DepartmentLoaded({
+    String? appBarTitle,
+    required this.initialTeacherName,
+    required this.teachersScheduleData,
+  }) : super(appBarTitle: appBarTitle);
 
   DepartmentLoaded copyWith({
-    String? departmentName,
-    Map<String, List<List<Lesson>>>? teachersScheduleMap,
-    String? link1,
-    String? link2,
-    int? openedDayIndex,
-    int? currentLesson,
-    String? currentTeacher,
-    int? weekNumber,
+    String? appBarTitle,
+    List<ScheduleModel>? teachersScheduleData,
+    String? initialTeacherName,
   }) {
     return DepartmentLoaded(
-      departmentName: departmentName ?? this.departmentName,
-      teachersScheduleMap: teachersScheduleMap ?? this.teachersScheduleMap,
-      link1: link1 ?? this.link1,
-      link2: link2 ?? this.link2,
-      openedDayIndex: openedDayIndex ?? this.openedDayIndex,
-      currentLesson: currentLesson ?? this.currentLesson,
-      currentTeacher: currentTeacher ?? this.currentTeacher,
-      weekNumber: weekNumber ?? this.weekNumber,
+      appBarTitle: appBarTitle ?? this.appBarTitle,
+      teachersScheduleData: teachersScheduleData ?? this.teachersScheduleData,
+      initialTeacherName: initialTeacherName ?? this.initialTeacherName,
     );
   }
 }
 
 class DepartmentError extends DepartmentState {
-  final String message;
+  final String? errorMessage;
+  final String? warningMessage;
 
-  DepartmentError(this.message);
+  const DepartmentError({this.errorMessage, this.warningMessage});
 }

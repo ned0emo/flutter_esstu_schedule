@@ -1,55 +1,51 @@
 part of 'classrooms_bloc.dart';
 
 @immutable
-abstract class ClassroomsState {}
+abstract class ClassroomsState {
+  final String? appBarTitle;
+
+  const ClassroomsState({this.appBarTitle});
+}
 
 class ClassroomsInitial extends ClassroomsState {}
 
-class ClassroomsErrorState extends ClassroomsState {
+class ClassroomsError extends ClassroomsState {
   final String message;
 
-  ClassroomsErrorState(this.message);
+  const ClassroomsError(this.message);
 }
 
-class ClassroomsLoadingState extends ClassroomsState {
+class ClassroomsLoading extends ClassroomsState {
   final int percents;
   final String message;
 
-  ClassroomsLoadingState({this.percents = 0, this.message = ''});
+  const ClassroomsLoading(
+      {String? appBarTitle, this.percents = 0, this.message = ''})
+      : super(appBarTitle: appBarTitle);
 }
 
-class ClassroomsLoadedState extends ClassroomsState {
-  final int weekNumber;
+class ClassroomsLoaded extends ClassroomsState {
   final String currentBuildingName;
-  final Map<String, Map<String, List<List<Lesson>>>> scheduleMap;
-  final String currentClassroom;
-  final int openedDayIndex;
-  final int currentLesson;
+  final Map<String, List<ScheduleModel>> scheduleMap;
+  final String initialClassroom;
 
-  ClassroomsLoadedState({
-    required this.weekNumber,
+  const ClassroomsLoaded({
+    String? appBarTitle,
     required this.currentBuildingName,
     required this.scheduleMap,
-    required this.currentClassroom,
-    required this.openedDayIndex,
-    required this.currentLesson,
-  });
+    required this.initialClassroom,
+  }) : super(appBarTitle: appBarTitle);
 
-  ClassroomsLoadedState copyWith({
-    int? weekNumber,
+  ClassroomsLoaded copyWith({
     String? currentBuildingName,
-    Map<String, Map<String, List<List<Lesson>>>>? scheduleMap,
-    String? currentClassroom,
-    int? openedDayIndex,
-    int? currentLesson,
+    Map<String, List<ScheduleModel>>? scheduleMap,
+    String? initialClassroom,
   }) {
-    return ClassroomsLoadedState(
-      weekNumber: weekNumber ?? this.weekNumber,
+    return ClassroomsLoaded(
+      appBarTitle: currentBuildingName ?? appBarTitle,
       currentBuildingName: currentBuildingName ?? this.currentBuildingName,
       scheduleMap: scheduleMap ?? this.scheduleMap,
-      currentClassroom: currentClassroom ?? this.currentClassroom,
-      openedDayIndex: openedDayIndex ?? this.openedDayIndex,
-      currentLesson: currentLesson ?? this.currentLesson,
+      initialClassroom: initialClassroom ?? this.initialClassroom,
     );
   }
 }

@@ -77,7 +77,7 @@ class SearchScheduleBloc
                 .substring(0, dayOfWeekSection.indexOf('<'))
                 .trim();
 
-            scheduleList[i][j] = LessonBuilder.createLessonIfTitleLonger(scheduleList[i][j], lesson);//.updateLesson(lesson);
+            //scheduleList[i][j] = LessonBuilder.createLessonIfTitleLonger(scheduleList[i][j], lesson);//.updateLesson(lesson);
 
             j++;
             if (j >= numOfLessons) {
@@ -95,7 +95,7 @@ class SearchScheduleBloc
         scheduleName: event.scheduleName,
         scheduleList: scheduleList,
         scheduleType: event.scheduleType,
-        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
+        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeekIndex(),
         currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
         weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
         link1: event.link1,

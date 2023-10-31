@@ -29,7 +29,6 @@ class CurrentFacultyState extends FacultyState {
   final Map<String, List<String>> departmentsMap;
 
   final int weekNumber;
-  //final Map<String, Map<String, List<String>>> facultyDepartmentLinkMap;
 
   CurrentFacultyState({
     required this.facultyName,
@@ -40,21 +39,11 @@ class CurrentFacultyState extends FacultyState {
     this.facultyDepartmentLinkMap = facultyDepartmentLinkMap;
   }
 
-  String get abbreviatedFacultyName {
-    if (facultyName.length < 26) {
-      return facultyName;
-    }
+  String get firstDepartment => departmentsMap.keys.elementAt(0);
 
-    String newStr = facultyName[0];
+  String get firstLink1 => departmentsMap.values.elementAt(0)[0];
 
-    for (int i = 0; i < facultyName.length - 1; i++) {
-      if (facultyName[i] == ' ' || facultyName[i] == '-') {
-        newStr += facultyName[i + 2] == ' '
-            ? facultyName[i + 1]
-            : facultyName[i + 1].toUpperCase();
-      }
-    }
-
-    return newStr;
-  }
+  String? get firstLink2 => departmentsMap.values.elementAt(0).length > 1
+      ? departmentsMap.values.elementAt(0)[1]
+      : null;
 }

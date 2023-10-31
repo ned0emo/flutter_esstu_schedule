@@ -3,6 +3,12 @@ import 'dart:convert';
 import 'package:equatable/equatable.dart';
 
 class Lesson extends Equatable {
+  ///Для заполнения lessonData
+  static const teachers = 'teachers';
+  static const classrooms = 'classrooms';
+  static const title = 'title';
+  static const type = 'type';
+
   final int lessonNumber;
 
   final String? _fullLesson;
@@ -10,22 +16,23 @@ class Lesson extends Equatable {
   final String? _type;
 
   final List<String>? _teachers;
-  final List<String>? _groups;
   final List<String>? _classrooms;
 
-  const Lesson(
-      {required this.lessonNumber,
-      String? fullLesson,
-      String? title,
-      String? type,
-      List<String>? teachers,
-      List<String>? groups,
-      List<String>? classrooms})
-      : _fullLesson = fullLesson,
+  final List<Map<String, String>>? lessonData;
+
+  const Lesson({
+    required this.lessonNumber,
+    this.lessonData,
+    String? fullLesson,
+    String? title,
+    String? type,
+    List<String>? teachers,
+    List<String>? groups,
+    List<String>? classrooms,
+  })  : _fullLesson = fullLesson,
         _title = title,
         _type = type,
         _teachers = teachers,
-        _groups = groups,
         _classrooms = classrooms;
 
   @override
@@ -37,7 +44,6 @@ class Lesson extends Equatable {
         'title': _title,
         'type': _type,
         'teachers': _teachers,
-        'groups': _groups,
         'classrooms': _classrooms,
       };
 
@@ -47,7 +53,6 @@ class Lesson extends Equatable {
         title: json['title'],
         type: json['type'],
         teachers: List<String>.from(json['teachers'] ?? []),
-        groups: List<String>.from(json['groups'] ?? []),
         classrooms: List<String>.from(json['classrooms'] ?? []),
       );
 
@@ -55,16 +60,16 @@ class Lesson extends Equatable {
 
   String get fullLesson => _fullLesson ?? '';
 
-  String get title => _title ?? _fullLesson ?? '';
+  String get titleOld => _title ?? _fullLesson ?? '';
 
-  String get type => _type ?? '';
+  String get typeOld => _type ?? '';
 
-  List<String> get teachers => _teachers ?? [];
+  List<String> get teachersList => _teachers ?? [];
 
-  List<String> get groups => _groups ?? [];
-
-  List<String> get classrooms => _classrooms ?? [];
+  List<String> get classroomsList => _classrooms ?? [];
 
   @override
   List<Object?> get props => [_fullLesson, _title];
+
+  int get lessonIndex => lessonNumber - 1;
 }

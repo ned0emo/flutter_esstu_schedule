@@ -53,8 +53,8 @@ class _ScheduleTabState extends State<ScheduleTab>
 
   @override
   void initState() {
-    openedDayIndex = widget.isZo ? -1 : ScheduleTimeData.getCurrentDayOfWeek();
-    currentDay = ScheduleTimeData.getCurrentDayOfWeek();
+    openedDayIndex = widget.isZo ? -1 : ScheduleTimeData.getCurrentDayOfWeekIndex();
+    currentDay = ScheduleTimeData.getCurrentDayOfWeekIndex();
     currentLesson = ScheduleTimeData.getCurrentLessonIndex();
     weekNumber = ScheduleTimeData.getCurrentWeekIndex();
     scrollController = ScrollController();
@@ -157,9 +157,7 @@ class _ScheduleTabState extends State<ScheduleTab>
               }
             },
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(
-                color: Colors.transparent,
-              ),
+              side: const BorderSide(color: Colors.transparent),
               minimumSize: const Size(400, 60),
             ),
             child: Text(
@@ -179,15 +177,17 @@ class _ScheduleTabState extends State<ScheduleTab>
                                   ? const SizedBox()
                                   : _lessonSection(
                                       lessonNumber: lesson.lessonNumber,
-                                      lessonTime: ScheduleTimeData
-                                          .lessonTimeList[lesson.lessonNumber - 1],
-                                      lesson: lesson.title,
-                                      teachers: lesson.teachers,
-                                      lessonType: lesson.type,
+                                      lessonTime:
+                                          ScheduleTimeData.lessonTimeList[
+                                              lesson.lessonNumber - 1],
+                                      lesson: lesson.titleOld,
+                                      teachers: lesson.teachersList,
+                                      lessonType: lesson.typeOld,
                                       isCurrentLesson: !widget.isZo &&
                                           isCurrentDay &&
                                           weekNumber == widget.tabNum &&
-                                          lesson.lessonNumber - 1 == currentLesson,
+                                          lesson.lessonNumber - 1 ==
+                                              currentLesson,
                                     );
                             },
                           ).toList() +

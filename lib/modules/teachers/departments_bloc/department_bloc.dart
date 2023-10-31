@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/models/lesson_model.dart';
+import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/lesson_builder.dart';
-import 'package:schedule/core/static/schedule_time_data.dart';
+import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'department_event.dart';
@@ -21,34 +22,19 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
         super(DepartmentInitial()) {
     on<DepartmentEvent>((event, emit) {});
     on<LoadDepartment>(_loadDepartment);
-    on<ChangeOpenedDay>(_changeOpenedDay);
-    on<ChooseTeacher>(_chooseTeacher);
-  }
-
-  Future<void> _chooseTeacher(
-      ChooseTeacher event, Emitter<DepartmentState> emit) async {
-    final currentState = state;
-    if (currentState is DepartmentLoaded) {
-      emit(DepartmentLoading());
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      emit(currentState.copyWith(
-        currentTeacher: event.teacherName,
-        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
-      ));
-    }
   }
 
   Future<void> _loadDepartment(
       LoadDepartment event, Emitter<DepartmentState> emit) async {
-    emit(DepartmentLoading());
+    emit(DepartmentLoading(appBarTitle: event.departmentName));
 
     List<String> departmentsPages = [];
     try {
       departmentsPages = await _teachersRepository
           .loadDepartmentPages(event.link1, link2: event.link2);
     } catch (e, stack) {
-      emit(DepartmentError(Logger.error(
+      emit(DepartmentError(
+          errorMessage: Logger.error(
         title: Errors.scheduleError,
         exception: e,
         stack: stack,
@@ -56,7 +42,7 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
       return;
     }
 
-    final Map<String, List<List<Lesson>>> teachersScheduleMap = {};
+    final List<ScheduleModel> teachersSchedule = [];
 
     try {
       for (String page in departmentsPages) {
@@ -68,11 +54,19 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
               .substring(0, teacherSection.indexOf('</P>'))
               .trim();
 
-          if (teachersScheduleMap[teacherName] == null) {
-            teachersScheduleMap[teacherName] = List.generate(
-                12,
-                (index) => List.generate(
-                    6, (index) => Lesson(lessonNumber: index + 1)));
+          bool isScheduleExist = true;
+          var currentScheduleModel = teachersSchedule
+              .firstWhereOrNull((element) => element.name == teacherName);
+
+          if (currentScheduleModel == null) {
+            currentScheduleModel = ScheduleModel(
+              name: teacherName,
+              type: ScheduleType.teacher,
+              weeks: [],
+              link1: event.link1,
+              link2: event.link2,
+            );
+            isScheduleExist = false;
           }
 
           final daysOfWeekFromPage =
@@ -85,27 +79,41 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
 
             int lessonIndex = 0;
             for (String lessonSection in lessons) {
-              String lesson = lessonSection
+              final lesson = lessonSection
                   .substring(0, lessonSection.indexOf('</FONT>'))
                   .trim();
 
-              teachersScheduleMap[teacherName]![dayOfWeekIndex][lessonIndex] =
-                  LessonBuilder.createLessonIfTitleLonger(
-                teachersScheduleMap[teacherName]![dayOfWeekIndex][lessonIndex],
-                lesson,
-              );
-              // .updateLesson(lesson);
+              final lessonChecker =
+                  lesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
 
+              if (lessonChecker.isEmpty) {
+                lessonIndex++;
+                continue;
+              }
+
+              currentScheduleModel.updateWeek(
+                  dayOfWeekIndex ~/ 6,
+                  dayOfWeekIndex % 6,
+                  lessonIndex,
+                  LessonBuilder.createTeacherLesson(
+                    lessonNumber: lessonIndex + 1,
+                    lesson: lesson,
+                  ));
               if (++lessonIndex > 5) break;
             }
 
             if (++dayOfWeekIndex > 11) break;
           }
+
+          if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
+            teachersSchedule.add(currentScheduleModel);
+          }
         }
       }
 
-      if (teachersScheduleMap.isEmpty) {
-        emit(DepartmentError(Logger.warning(
+      if (teachersSchedule.isEmpty) {
+        emit(DepartmentError(
+            warningMessage: Logger.warning(
           title: 'Хмм.. Кажется, расписание для данной кафедры отсутствует',
           exception: 'teachersScheduleMap isEmpty',
         )));
@@ -114,31 +122,18 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
       }
 
       emit(DepartmentLoaded(
-        departmentName: event.departmentName,
-        teachersScheduleMap: teachersScheduleMap,
-        link1: event.link1,
-        link2: event.link2,
-        currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
-        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
-        currentTeacher: teachersScheduleMap.keys.elementAt(0),
-        weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
+        appBarTitle: state.appBarTitle,
+        teachersScheduleData: teachersSchedule,
+        initialTeacherName: teachersSchedule[0].name,
       ));
     } catch (e, stack) {
-      emit(DepartmentError(Logger.error(
+      emit(DepartmentError(
+          errorMessage: Logger.error(
         title: Errors.scheduleError,
         exception: e,
         stack: stack,
       )));
       return;
-    }
-  }
-
-  Future<void> _changeOpenedDay(
-      ChangeOpenedDay event, Emitter<DepartmentState> emit) async {
-    final currentState = state;
-
-    if (currentState is DepartmentLoaded) {
-      emit(currentState.copyWith(openedDayIndex: event.dayIndex));
     }
   }
 }

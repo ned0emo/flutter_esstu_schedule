@@ -35,6 +35,16 @@ class PrimaryTheme extends ThemeTemplate {
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       foregroundColor: Colors.white,
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.black87,
+      ),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: const Color(0xFF006C84),
+      ),
+    ),
     tabBarTheme: const TabBarTheme(labelColor: Colors.black87),
   );
 }
