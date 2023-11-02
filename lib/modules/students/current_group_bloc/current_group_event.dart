@@ -11,9 +11,3 @@ class LoadGroup extends CurrentGroupEvent{
 
   bool get isZo => link.contains('zo') ? true : false;
 }
-
-class ChangeOpenedDay extends CurrentGroupEvent{
-  final int numOfDay;
-
-  ChangeOpenedDay(this.numOfDay);
-}

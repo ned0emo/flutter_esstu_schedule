@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/models/lesson_model.dart';
+import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/lesson_builder.dart';
-import 'package:schedule/core/static/schedule_time_data.dart';
+import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/home/main_repository.dart';
 
 part 'current_group_event.dart';
@@ -18,7 +18,6 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
       : _repository = repository,
         super(CurrentGroupInitial()) {
     on<LoadGroup>(_loadGroup);
-    on<ChangeOpenedDay>(_changeOpenedDay);
   }
 
   Future<void> _loadGroup(
@@ -42,8 +41,14 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
               'Выбранная группа: ${event.scheduleName}\n'
               'Загруженная группа: $groupNameOnPage';
 
-      List<List<Lesson>> scheduleList = [];
-      List<String>? customDaysOfWeek = event.isZo ? [] : null;
+      final currentScheduleModel = ScheduleModel(
+        name: event.scheduleName,
+        type: ScheduleType.student,
+        weeks: [],
+        link1: event.link,
+      );
+
+      final isThereCustomDaysOfWeeks = event.isZo;
       final numOfLessons = event.isZo ? 7 : 6;
 
       final scheduleSection = page
@@ -53,50 +58,51 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
       final daysOfWeekFromPage =
           scheduleSection.split('SIZE=2><P ALIGN="CENTER">').skip(1);
 
-      int j = 0;
+      int dayOfWeekIndex = 0;
       for (String dayOfWeek in daysOfWeekFromPage) {
-        scheduleList.add(List.generate(
-            numOfLessons, (index) => Lesson(lessonNumber: index + 1)));
-        if (customDaysOfWeek != null) {
-          try {
-            customDaysOfWeek
-                .add(dayOfWeek.substring(0, dayOfWeek.indexOf('</B>')).trim());
-          } catch (e, stack) {
-            Logger.warning(
-              title: Errors.pageParsingError,
-              exception: e,
-              stack: stack,
-            );
-
-            customDaysOfWeek
-                .add(ScheduleTimeData.daysOfWeek[customDaysOfWeek.length % 7]);
-          }
+        String? dayOfWeekDate;
+        if (isThereCustomDaysOfWeeks) {
+          final lastIndex = dayOfWeek.indexOf('</B>');
+          dayOfWeekDate = lastIndex > 0
+              ? _dateFromZoDayOfWeek(dayOfWeek.substring(0, lastIndex).trim())
+              : null;
         }
 
         final lessons = dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
 
-        int i = 0;
+        int lessonIndex = 0;
         for (String lessonSection in lessons) {
           final lesson = lessonSection
               .substring(0, lessonSection.indexOf('</FONT>'))
               .trim();
 
-          //scheduleList[j][i] = LessonBuilder.createStudentLesson(i + 1, lesson);//.updateLesson(lesson);
+          final lessonChecker = lesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
 
-          if (++i >= numOfLessons) break;
+          if (lessonChecker.isEmpty) {
+            lessonIndex++;
+            continue;
+          }
+
+          currentScheduleModel.updateWeek(
+            dayOfWeekIndex ~/ numOfLessons,
+            dayOfWeekIndex % numOfLessons,
+            lessonIndex,
+            LessonBuilder.createStudentLesson(
+              lessonNumber: lessonIndex + 1,
+              lesson: lesson,
+            ),
+            dayOfWeekDate: dayOfWeekDate,
+          );
+
+          if (++lessonIndex >= numOfLessons) break;
         }
 
-        j++;
+        dayOfWeekIndex++;
       }
 
       emit(CurrentGroupLoaded(
         name: event.scheduleName,
-        scheduleList: scheduleList,
-        link: event.link,
-        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeekIndex(),
-        currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
-        weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
-        daysOfWeekList: customDaysOfWeek,
+        scheduleModel: currentScheduleModel,
         message: message,
       ));
     } catch (e, stack) {
@@ -108,11 +114,57 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
     }
   }
 
-  Future<void> _changeOpenedDay(
-      ChangeOpenedDay event, Emitter<CurrentGroupState> emit) async {
-    final currentState = state;
-    if (currentState is CurrentGroupLoaded) {
-      emit(currentState.copyWith(openedDayIndex: event.numOfDay));
+  String? _dateFromZoDayOfWeek(String? dayOfWeek) {
+    if (dayOfWeek == null) return null;
+
+    final splittedDayOfWeek = dayOfWeek.split(RegExp(r'\s+'));
+    if (splittedDayOfWeek.length < 2) return null;
+
+    final day = splittedDayOfWeek[0].contains(',')
+        ? splittedDayOfWeek[0].split(',')[1]
+        : splittedDayOfWeek[0];
+
+    final month = splittedDayOfWeek[1];
+    if (month.contains('янв') || month.contains('ЯНВ')) {
+      return '$day.01';
     }
+    if (month.contains('фев') || month.contains('ФЕВ')) {
+      return '$day.02';
+    }
+    if (month.contains('мар') || month.contains('МАР')) {
+      return '$day.03';
+    }
+    if (month.contains('апр') || month.contains('АПР')) {
+      return '$day.04';
+    }
+    if (month.contains('мая') ||
+        month.contains('МАЯ') ||
+        month.contains('май') ||
+        month.contains('МАЙ')) {
+      return '$day.05';
+    }
+    if (month.contains('июн') || month.contains('ИЮН')) {
+      return '$day.06';
+    }
+    if (month.contains('июл') || month.contains('ИЮЛ')) {
+      return '$day.07';
+    }
+    if (month.contains('авг') || month.contains('АВГ')) {
+      return '$day.08';
+    }
+    if (month.contains('сен') || month.contains('СЕН')) {
+      return '$day.09';
+    }
+    if (month.contains('окт') || month.contains('ОКТ')) {
+      return '$day.10';
+    }
+    if (month.contains('ноя') || month.contains('НОЯ')) {
+      return '$day.11';
+    }
+    if (month.contains('дек') || month.contains('ДЕК')) {
+      return '$day.12';
+    }
+
+    return null;
   }
 }

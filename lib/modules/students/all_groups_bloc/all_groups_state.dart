@@ -1,8 +1,16 @@
 part of 'all_groups_bloc.dart';
 
-abstract class AllGroupsState {}
+@immutable
+abstract class AllGroupsState {
+  final String? appBarTitle;
 
-class AllGroupsLoading extends AllGroupsState {}
+  const AllGroupsState({this.appBarTitle});
+}
+
+class AllGroupsLoading extends AllGroupsState {
+  const AllGroupsLoading({String? appBarTitle})
+      : super(appBarTitle: appBarTitle);
+}
 
 class AllGroupsLoaded extends AllGroupsState {
   final Map<String, Map<String, String>> bakScheduleMap;
@@ -16,7 +24,7 @@ class AllGroupsLoaded extends AllGroupsState {
 
   final String? warningMessage;
 
-  AllGroupsLoaded({
+  const AllGroupsLoaded({
     required this.bakScheduleMap,
     required this.magScheduleMap,
     required this.colScheduleMap,
@@ -25,7 +33,8 @@ class AllGroupsLoaded extends AllGroupsState {
     required this.studType,
     required this.currentGroup,
     this.warningMessage,
-  });
+    String? appBarTitle,
+  }) : super(appBarTitle: appBarTitle);
 
   AllGroupsLoaded copyWith({
     Map<String, Map<String, String>>? bakScheduleMap,
@@ -36,6 +45,7 @@ class AllGroupsLoaded extends AllGroupsState {
     String? currentGroup,
     String? studType,
     String? warningMessage,
+    String? appBarTitle,
   }) {
     return AllGroupsLoaded(
       bakScheduleMap: bakScheduleMap ?? this.bakScheduleMap,
@@ -46,6 +56,7 @@ class AllGroupsLoaded extends AllGroupsState {
       currentGroup: currentGroup ?? this.currentGroup,
       studType: studType ?? this.studType,
       warningMessage: warningMessage,
+      appBarTitle: appBarTitle ?? this.appBarTitle,
     );
   }
 
@@ -66,14 +77,6 @@ class AllGroupsLoaded extends AllGroupsState {
                 ? colScheduleMap[course]!
                 : zoScheduleMap[course]!;
   }
-
-  String get studentTypeString => studType == StudentsType.bak
-      ? 'Бакалавриат'
-      : studType == StudentsType.mag
-          ? 'Магистратура'
-          : studType == StudentsType.col
-              ? 'Колледж'
-              : 'Заочное';
 }
 
 class CourseSelected extends AllGroupsState {
@@ -81,15 +84,16 @@ class CourseSelected extends AllGroupsState {
   final String courseName;
   final String currentGroup;
 
-  CourseSelected({
+  const CourseSelected({
     required this.linkGroupMap,
     required this.courseName,
     required this.currentGroup,
-  });
+    String? appBarTitle,
+  }) : super(appBarTitle: appBarTitle);
 }
 
 class AllGroupsError extends AllGroupsState {
   final String errorMessage;
 
-  AllGroupsError(this.errorMessage);
+  const AllGroupsError(this.errorMessage);
 }

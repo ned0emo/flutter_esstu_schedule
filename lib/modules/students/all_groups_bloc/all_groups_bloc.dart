@@ -15,7 +15,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
 
   AllGroupsBloc(MainRepository repository)
       : _repository = repository,
-        super(AllGroupsLoading()) {
+        super(const AllGroupsLoading()) {
     on<LoadAllGroups>(_loadGroupList);
     on<SelectCourse>(_selectCourse);
     on<SelectGroup>(_selectGroup);
@@ -27,7 +27,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
   /// Заполнение мэпов по курсам с парами "Имя группы - Ссылка"
   Future<void> _loadGroupList(
       LoadAllGroups event, Emitter<AllGroupsState> emit) async {
-    emit(AllGroupsLoading());
+    emit(const AllGroupsLoading());
 
     final bakScheduleMap = <String, Map<String, String>>{
       '1 курс': {},
@@ -137,27 +137,30 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
         return;
       }
 
-      final initCourse = bakScheduleMap.keys.first;
-      if (bakScheduleMap[initCourse]!.keys.isEmpty) {
+      final currentCourse = bakScheduleMap.keys.first;
+      if (bakScheduleMap[currentCourse]!.keys.isEmpty) {
         Logger.info(
           title: Errors.studentsNotFoundError,
           exception: 'bakScheduleMap[initCourse]!.keys.isEmpty',
         );
 
-        emit(AllGroupsError(
+        emit(const AllGroupsError(
             'Хмм... Кажется, здесь нет групп с заполненным расписанием'));
         return;
       }
 
-      emit(AllGroupsLoaded(
-        bakScheduleMap: bakScheduleMap,
-        magScheduleMap: magScheduleMap,
-        colScheduleMap: colScheduleMap,
-        zoScheduleMap: zoScheduleMap,
-        studType: StudentsType.bak,
-        currentCourse: initCourse,
-        currentGroup: bakScheduleMap[initCourse]!.keys.first,
-      ));
+      emit(
+        AllGroupsLoaded(
+            bakScheduleMap: bakScheduleMap,
+            magScheduleMap: magScheduleMap,
+            colScheduleMap: colScheduleMap,
+            zoScheduleMap: zoScheduleMap,
+            studType: StudentsType.bak,
+            currentCourse: currentCourse,
+            currentGroup: bakScheduleMap[currentCourse]!.keys.first,
+            appBarTitle:
+                '${_groupTypeString(StudentsType.bak)}. $currentCourse'),
+      );
     } catch (e, stack) {
       emit(AllGroupsError(Logger.error(
           title: Errors.scheduleError, exception: e, stack: stack)));
@@ -169,7 +172,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
     final currentState = state;
 
     if (currentState is AllGroupsLoaded) {
-      emit(AllGroupsLoading());
+      emit(AllGroupsLoading(appBarTitle: currentState.appBarTitle));
 
       final courseMap =
           currentState.courseMap(event.courseName, event.studType);
@@ -191,6 +194,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
         currentCourse: event.courseName,
         studType: event.studType,
         currentGroup: initGroup,
+        appBarTitle: '${_groupTypeString(event.studType)}. ${event.courseName}',
       ));
     }
   }
@@ -202,4 +206,12 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
       emit(currentState.copyWith(currentGroup: event.groupName));
     }
   }
+
+  String _groupTypeString(String type) => type == StudentsType.bak
+      ? 'Бакалавриат'
+      : type == StudentsType.mag
+          ? 'Магистратура'
+          : type == StudentsType.col
+              ? 'Колледж'
+              : 'Заочное';
 }

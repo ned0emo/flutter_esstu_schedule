@@ -5,11 +5,13 @@ class DayOfWeekModel {
   final int dayOfWeekNumber;
   final String dayOfWeekName;
   final List<Lesson> lessons;
+  final String? dayOfWeekDate;
 
   DayOfWeekModel({
     required this.dayOfWeekNumber,
     required this.dayOfWeekName,
     required this.lessons,
+    this.dayOfWeekDate,
   });
 
   int get dayOfWeekIndex => dayOfWeekNumber - 1;

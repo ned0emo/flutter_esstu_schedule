@@ -4,7 +4,7 @@ class LessonBuilder {
   static const teachersRegExp =
       r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.';
   static const classroomsJunkRegExp =
-      r'и/д-*|д/кл-*|д/к-*|н/х-*|\s+мф\s*|смук-*';
+      r'и/д-*|д/кл-*|д/к-*|н/х-*|\s+мф\s*|\s+св\s*|смук-*';
   static const classroomsRegExp = r'(?:\s*а\.\s*\S+\s*)+';
   static const oneClassroomRegExp = r'а\.\s*\S+';
 
@@ -18,7 +18,7 @@ class LessonBuilder {
     List<String>? groups,
     List<String>? classrooms,
   }) {
-    final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), '');
+    final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), ' ');
 
     final List<Map<String, String>> lessonData = [];
 
@@ -45,11 +45,16 @@ class LessonBuilder {
         title = lessonData[i - 1]['title'] ?? 'Ошибка';
       }
 
+      String type = _lessonType(lessons[i]);
+      if(type == 'Другое' && i > 0){
+        type = lessonData[0][Lesson.type] ?? type;
+      }
+
       lessonData.add({
         Lesson.title: title,
         Lesson.teachers: teachers.join(', '),
         Lesson.classrooms: i < classrooms.length ? classrooms[i] : '',
-        Lesson.type: _lessonType(lessons[i])
+        Lesson.type: type
       });
     }
 
@@ -72,7 +77,7 @@ class LessonBuilder {
     List<String>? groups,
     List<String>? classrooms,
   }) {
-    final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), '');
+    final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), ' ');
 
     return Lesson(
       lessonNumber: lessonNumber,

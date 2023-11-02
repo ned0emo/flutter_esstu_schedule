@@ -97,16 +97,19 @@ class LessonSection extends StatelessWidget {
                                   Text(
                                     lessonPart[Lesson.title].toString(),
                                     style: TextStyle(
+                                      fontSize: 16,
                                       fontWeight: isCurrentLesson
                                           ? FontWeight.bold
                                           : null,
                                     ),
                                   ),
-                                  if (lessonPart[Lesson.teachers] != null)
+                                  if (lessonPart[Lesson.teachers]?.isNotEmpty ??
+                                      false)
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0),
+                                      padding: const EdgeInsets.only(top: 8.0),
                                       child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             lessonPart[Lesson.teachers]!
@@ -114,15 +117,22 @@ class LessonSection extends StatelessWidget {
                                                 ? 'Преподаватели: '
                                                 : 'Преподаватель: ',
                                           ),
-                                          Text(lessonPart[Lesson.teachers]!),
+                                          Expanded(
+                                              child: Text(
+                                            lessonPart[Lesson.teachers]!,
+                                          )),
                                         ],
                                       ),
                                     ),
-                                  if (lessonPart[Lesson.classrooms] != null)
+                                  if (lessonPart[Lesson.classrooms]
+                                          ?.isNotEmpty ??
+                                      false)
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 8.0),
                                       child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             lessonPart[Lesson.classrooms]!
@@ -130,7 +140,10 @@ class LessonSection extends StatelessWidget {
                                                 ? 'Аудитории: '
                                                 : 'Аудитория: ',
                                           ),
-                                          Text(lessonPart[Lesson.classrooms]!),
+                                          Expanded(
+                                              child: Text(
+                                            lessonPart[Lesson.classrooms]!,
+                                          )),
                                         ],
                                       ),
                                     ),

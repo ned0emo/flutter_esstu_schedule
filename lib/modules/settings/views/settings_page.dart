@@ -161,10 +161,11 @@ class SettingsPage extends StatelessWidget {
                                     '\nВСГУТУ'
                                     '\n\nОб ошибках в работе приложения сообщать здесь:',
                                 style: TextStyle(
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.color)),
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.color,
+                                )),
                             TextSpan(
                               text:
                                   '\nhttps://github.com/ned0emo/flutter_esstu_schedule/issues',

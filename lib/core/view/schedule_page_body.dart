@@ -9,9 +9,10 @@ import 'package:schedule/core/view/lesson_section.dart';
 import 'package:schedule/modules/classrooms/bloc/classrooms_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
+import 'package:schedule/modules/students/current_group_bloc/current_group_bloc.dart';
 import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart';
 
-//TODO: расписание студентов, избранного, поиска
+//TODO: расписание избранного, поиска
 //TODO: удаление лишних настроек
 //TODO: замена ненужных stateful виджетов на stateless
 class SchedulePageBody<T1 extends Bloc> extends StatefulWidget {
@@ -42,6 +43,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   int currentDropdownIndex = 0;
 
   bool isNeedToSelectTab = false;
+
+  bool isZo = false;
 
   String? selectedDropdownElement;
 
@@ -88,11 +91,6 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             currentScheduleModel =
                 state.teachersScheduleData[currentDropdownIndex];
 
-            //Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
-            //  scheduleType: currentScheduleModel.type,
-            //  name: currentScheduleModel.name,
-            //));
-
             numOfWeeks = currentScheduleModel.numOfWeeks;
             if (selectedWeekIndex >= numOfWeeks) {
               selectedWeekIndex = 0;
@@ -121,11 +119,6 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             currentScheduleModel = state
                 .scheduleMap[state.currentBuildingName]![currentDropdownIndex];
 
-            //Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
-            //  scheduleType: currentScheduleModel.type,
-            //  name: currentScheduleModel.name,
-            //));
-
             numOfWeeks = currentScheduleModel.numOfWeeks;
             if (selectedWeekIndex >= numOfWeeks) {
               selectedWeekIndex = 0;
@@ -140,6 +133,28 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                   .map((e) => e.name)
                   .toList(),
             );
+          }
+
+          if (state is CurrentGroupLoaded) {
+            if (state.scheduleModel.isEmpty) {
+              return const Center(child: Text('Расписание отсутствует'));
+            }
+
+            currentScheduleModel = state.scheduleModel;
+
+            isZo = currentScheduleModel.isZo;
+
+            numOfWeeks = currentScheduleModel.numOfWeeks;
+            if (selectedWeekIndex >= numOfWeeks) {
+              selectedWeekIndex = 0;
+            }
+
+            if (!isZo) {
+              initialTabIndex = currentScheduleModel.dayOfWeekByAbsoluteIndex(
+                  selectedWeekIndex, currentDayOfWeekIndex);
+            }
+
+            return _tabController();
           }
 
           return const Center(child: CircularProgressIndicator());
@@ -248,7 +263,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                               const Icon(Icons.calendar_month),
                               const SizedBox(width: 5),
                               Text('${selectedWeekIndex + 1} неделя'
-                                  '${isCurrentWeek ? ' (Сейчас)' : ''}'),
+                                  '${isCurrentWeek && !isZo ? ' (Сейчас)' : ''}'),
                             ],
                           ),
                         ),
@@ -262,12 +277,43 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
               controller: tabController,
               tabs: currentScheduleModel.weeks[selectedWeekIndex].daysOfWeek
                   .map(
-                    (e) => Tab(
-                      text: e.dayOfWeekIndex == currentDayOfWeekIndex &&
-                              isCurrentWeek
-                          ? '[${e.dayOfWeekName}]'
-                          : e.dayOfWeekName,
-                    ),
+                    (e) => e.dayOfWeekDate != null
+                        ? Tab(
+                            child: RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: e.dayOfWeekName,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.color,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: '\n${e.dayOfWeekDate}',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.color,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
+                        : Tab(
+                            text: e.dayOfWeekIndex == currentDayOfWeekIndex &&
+                                    isCurrentWeek
+                                ? '[${e.dayOfWeekName}]'
+                                : e.dayOfWeekName,
+                          ),
                   )
                   .toList(),
             ),
@@ -294,7 +340,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                   Navigator.of(context).pop();
                 },
                 child: Text('${index + 1} неделя'
-                    '${index == ScheduleTimeData.getCurrentWeekIndex() ? ' (Сейчас)' : ''}'),
+                    '${index == ScheduleTimeData.getCurrentWeekIndex() && !isZo ? ' (Сейчас)' : ''}'),
               ),
             ),
           ),

@@ -20,18 +20,20 @@ class ScheduleModel {
   /// Если [weekIndex] равен длине массива, добавит неделю.
   /// Не обновляет, если новое название короче
   void updateWeek(
-      int weekIndex, int dayOfWeekIndex, int lessonIndex, Lesson lesson) {
+    int weekIndex,
+    int dayOfWeekIndex,
+    int lessonIndex,
+    Lesson lesson, {
+    String? dayOfWeekDate,
+  }) {
     if (weekIndex >= weeks.length) {
       for (int i = weeks.length; i <= weekIndex; i++) {
         weeks.add(WeekModel(weekNumber: weekIndex + 1, daysOfWeek: []));
       }
     }
 
-    //try {
-      weeks[weekIndex].updateDayOfWeek(dayOfWeekIndex, lesson);
-    //} catch (e) {
-    //  int lol = 0;
-    //}
+    weeks[weekIndex]
+        .updateDayOfWeek(dayOfWeekIndex, lesson, dayOfWeekDate: dayOfWeekDate);
   }
 
   /// Если [weekIndex] за пределами массива, выдаст исключение
@@ -53,4 +55,14 @@ class ScheduleModel {
       weeks[weekIndex].dayOfWeekByAbsoluteIndex(dayOfWeekIndex);
 
   int weekLength(int weekIndex) => weeks[weekIndex].weekLength;
+
+  bool get isZo {
+    for (var week in weeks) {
+      for (var dayOfWeek in week.daysOfWeek) {
+        if (dayOfWeek.dayOfWeekDate != null) return true;
+      }
+    }
+
+    return false;
+  }
 }

@@ -12,7 +12,8 @@ class WeekModel {
   /// Добавляет пару в день недели.
   /// Если день недели существует, то записывает в него, иначе создает новый.
   /// Если пара уже существует, то перезаписывает, если новая длиннее
-  void updateDayOfWeek(int dayOfWeekIndex, Lesson lesson) {
+  void updateDayOfWeek(int dayOfWeekIndex, Lesson lesson,
+      {String? dayOfWeekDate}) {
     final sameDay = daysOfWeek.firstWhereOrNull(
         (element) => element.dayOfWeekIndex == dayOfWeekIndex);
 
@@ -22,10 +23,11 @@ class WeekModel {
     }
 
     daysOfWeek.add(DayOfWeekModel(
-        dayOfWeekNumber: dayOfWeekIndex + 1,
-        dayOfWeekName: ScheduleTimeData.daysOfWeekSmall[dayOfWeekIndex],
-        lessons: [])
-      ..updateLesson(lesson));
+      dayOfWeekNumber: dayOfWeekIndex + 1,
+      dayOfWeekName: ScheduleTimeData.daysOfWeekSmall[dayOfWeekIndex],
+      lessons: [],
+      dayOfWeekDate: dayOfWeekDate,
+    )..updateLesson(lesson));
     daysOfWeek.sort((a, b) => a.dayOfWeekNumber.compareTo(b.dayOfWeekNumber));
   }
 
