@@ -8,13 +8,15 @@ import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/core/view/lesson_section.dart';
 import 'package:schedule/modules/classrooms/bloc/classrooms_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
+import 'package:schedule/modules/search/search_schedule_bloc/search_schedule_bloc.dart';
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_bloc.dart';
 import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart';
 
-//TODO: расписание избранного, поиска
+//TODO: расписание избранного
 //TODO: удаление лишних настроек
 //TODO: замена ненужных stateful виджетов на stateless
+//TODO: доработка темной темы
 class SchedulePageBody<T1 extends Bloc> extends StatefulWidget {
   const SchedulePageBody({super.key});
 
@@ -157,16 +159,35 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             return _tabController();
           }
 
+          if (state is SearchScheduleLoaded) {
+            if (state.scheduleModel.isEmpty) {
+              return const Center(child: Text('Расписание отсутствует'));
+            }
+
+            currentScheduleModel = state.scheduleModel;
+
+            isZo = currentScheduleModel.isZo;
+
+            numOfWeeks = currentScheduleModel.numOfWeeks;
+            if (selectedWeekIndex >= numOfWeeks) {
+              selectedWeekIndex = 0;
+            }
+
+            if (!isZo) {
+              initialTabIndex = currentScheduleModel.dayOfWeekByAbsoluteIndex(
+                  selectedWeekIndex, currentDayOfWeekIndex);
+            }
+
+            return _tabController();
+          }
+
           return const Center(child: CircularProgressIndicator());
         },
       ),
     );
   }
 
-  Widget _tabController({
-    String? dropDownName,
-    List<String>? dropDownList,
-  }) {
+  Widget _tabController({String? dropDownName, List<String>? dropDownList}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (isCurrentWeek && isNeedToSelectTab) {
         tabController?.animateTo(currentScheduleModel.dayOfWeekByAbsoluteIndex(
@@ -180,7 +201,10 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
       initialIndex: initialTabIndex,
       animationDuration: const Duration(milliseconds: 100),
       child: Builder(builder: (context) {
+        /// Инициализация контроллера для выбора текущего дня
+        /// недели после смены расписания
         tabController = DefaultTabController.of(context);
+
         return Column(
           children: [
             if (dropDownList != null)

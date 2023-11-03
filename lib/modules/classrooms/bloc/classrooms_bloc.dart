@@ -127,7 +127,7 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
                     : lesson;
 
                 if (!classroom.contains(RegExp(r"[0-9]"))) {
-                  lessonIndex++;
+                  if (++lessonIndex > 5) break;
                   continue;
                 }
 
@@ -158,14 +158,6 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
                 if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
                   buildingsScheduleMap[building]?.add(currentScheduleModel);
                 }
-
-                //_buildingsScheduleMap[building]![classroom]![dayOfWeekIndex]
-                //    [lessonIndex] = LessonBuilder.createClassroomLesson(
-                //  lessonNumber: lessonIndex + 1,
-                //  lesson:
-                //      '$teacherName ${fullLesson.replaceFirst(classroom, '')}',
-                //);
-                //'$teacherName ${fullLesson.replaceFirst(classroom, '')}',
 
                 if (++lessonIndex > 5) break;
               }

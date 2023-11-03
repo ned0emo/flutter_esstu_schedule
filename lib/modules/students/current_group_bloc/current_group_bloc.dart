@@ -79,7 +79,7 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
           final lessonChecker = lesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
 
           if (lessonChecker.isEmpty) {
-            lessonIndex++;
+            if (++lessonIndex >= numOfLessons) break;
             continue;
           }
 

@@ -87,7 +87,7 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
                   lesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
 
               if (lessonChecker.isEmpty) {
-                lessonIndex++;
+                if (++lessonIndex > 5) break;
                 continue;
               }
 
