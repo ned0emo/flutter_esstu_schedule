@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:schedule/core/models/day_of_week_model.dart';
 import 'package:schedule/core/models/lesson_model.dart';
@@ -8,6 +10,29 @@ class WeekModel {
   final List<DayOfWeekModel> daysOfWeek;
 
   WeekModel({required this.weekNumber, required this.daysOfWeek});
+
+  @override
+  toString() => jsonEncode(toJson());
+
+  Map<String, dynamic> toJson() => {
+        'weekNumber': weekNumber,
+        'daysOfWeek': daysOfWeek,
+      };
+
+  static WeekModel fromJson(Map<String, dynamic> json) {
+    List<DayOfWeekModel> daysOfWeeksFromJson(List<dynamic> list) {
+      final List<DayOfWeekModel> newList = [];
+      for (var dayOfWeek in list) {
+        newList.add(DayOfWeekModel.fromJson(dayOfWeek));
+      }
+      return newList;
+    }
+
+    return WeekModel(
+      weekNumber: json['weekNumber'],
+      daysOfWeek: daysOfWeeksFromJson(json['daysOfWeek']),
+    );
+  }
 
   /// Добавляет пару в день недели.
   /// Если день недели существует, то записывает в него, иначе создает новый.

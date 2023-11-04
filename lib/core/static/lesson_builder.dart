@@ -4,7 +4,7 @@ class LessonBuilder {
   static const teachersRegExp =
       r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.';
   static const classroomsJunkRegExp =
-      r'и/д-*|д/кл-*|д/к-*|н/х-*|\s+мф\s*|\s+св\s*|\s+си\s*|смук-*';
+      r'и/д-*|д/кл-*|д/к-*|н/х-*|\s+мф\s*|\s+и/п\s*|\s+св\s*|\s+си\s*|смук-*';
   static const classroomsRegExp = r'(?:\s*а\.\s*\S+\s*)+';
   static const oneClassroomRegExp = r'а\.\s*\S+';
 

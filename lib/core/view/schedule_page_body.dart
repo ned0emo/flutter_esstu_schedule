@@ -8,15 +8,17 @@ import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/core/view/lesson_section.dart';
 import 'package:schedule/modules/classrooms/bloc/classrooms_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
+import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 import 'package:schedule/modules/search/search_schedule_bloc/search_schedule_bloc.dart';
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_bloc.dart';
 import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart';
 
-//TODO: расписание избранного
 //TODO: удаление лишних настроек
+//TODO: убедиться, что после обновления старое избранное очистится (с автозапуском)
 //TODO: замена ненужных stateful виджетов на stateless
-//TODO: доработка темной темы
+//TODO: убрать стейт ошибки, если только бакалавры не смогли загрузиться
+//TODO: обработать обновление препода, если только одна из ссылок изменилась
 class SchedulePageBody<T1 extends Bloc> extends StatefulWidget {
   const SchedulePageBody({super.key});
 
@@ -160,6 +162,28 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
           }
 
           if (state is SearchScheduleLoaded) {
+            if (state.scheduleModel.isEmpty) {
+              return const Center(child: Text('Расписание отсутствует'));
+            }
+
+            currentScheduleModel = state.scheduleModel;
+
+            isZo = currentScheduleModel.isZo;
+
+            numOfWeeks = currentScheduleModel.numOfWeeks;
+            if (selectedWeekIndex >= numOfWeeks) {
+              selectedWeekIndex = 0;
+            }
+
+            if (!isZo) {
+              initialTabIndex = currentScheduleModel.dayOfWeekByAbsoluteIndex(
+                  selectedWeekIndex, currentDayOfWeekIndex);
+            }
+
+            return _tabController();
+          }
+
+          if (state is FavoriteScheduleLoaded) {
             if (state.scheduleModel.isEmpty) {
               return const Center(child: Text('Расписание отсутствует'));
             }
@@ -414,13 +438,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
               }
 
               if (state is FavoriteDoesNotExist) {
-                Modular.get<FavoriteButtonBloc>().add(SaveSchedule(
-                  name: currentScheduleModel.name,
-                  scheduleType: currentScheduleModel.type,
-                  scheduleList: [],
-                  link1: currentScheduleModel.link1,
-                  link2: currentScheduleModel.link2,
-                ));
+                Modular.get<FavoriteButtonBloc>()
+                    .add(SaveSchedule(scheduleModel: currentScheduleModel));
 
                 if (currentScheduleModel.type == ScheduleType.classroom) {
                   _noUpdateDialog();

@@ -18,7 +18,7 @@ class PrimaryTheme extends ThemeTemplate {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(5)),
         ),
-        foregroundColor: Colors.black87,
+        foregroundColor: Colors.grey[850],
         backgroundColor: Colors.white,
         minimumSize: const Size(150, 46),
         textStyle: const TextStyle(
