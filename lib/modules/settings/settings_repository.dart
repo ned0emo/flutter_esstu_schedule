@@ -12,10 +12,6 @@ class SettingsRepository {
           (storage.getString(SettingsTypes.darkTheme)) ?? 'false',
       SettingsTypes.noUpdateClassroom:
           (storage.getString(SettingsTypes.noUpdateClassroom)) ?? 'false',
-      SettingsTypes.hideSchedule:
-          (storage.getString(SettingsTypes.hideSchedule)) ?? 'false',
-      SettingsTypes.lessonColor:
-          (storage.getString(SettingsTypes.lessonColor)) ?? 'true',
       SettingsTypes.legacyFavoriteDeleted:
           (storage.getString(SettingsTypes.legacyFavoriteDeleted)) ?? 'false',
     };

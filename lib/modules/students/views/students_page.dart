@@ -60,16 +60,30 @@ class StudentsPage extends StatelessWidget {
                   textAlign: TextAlign.left,
                 ),
               ),
-              body: state is AllGroupsLoaded
-                  ? Column(
+              body: Builder(
+                builder: (context) {
+                  if (state is AllGroupsLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (state is AllGroupsLoaded) {
+                    return Column(
                       children: [
                         _dropDownButton(state),
                         Expanded(child: _body()),
                       ],
-                    )
-                  : const Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  if (state is AllGroupsError) {
+                    return Center(child: Text(state.errorMessage));
+                  }
+
+                  return const Center(child: Text('Неизвестная ошибка...'));
+                },
+              ),
               drawer: state is AllGroupsLoaded
-                  ? const Drawer(child: StudentsDrawer())
+                  ? Drawer(child: StudentsDrawer(state: state))
                   : null,
             );
           },

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:schedule/core/models/lesson_model.dart';
 import 'package:schedule/core/static/schedule_time_data.dart';

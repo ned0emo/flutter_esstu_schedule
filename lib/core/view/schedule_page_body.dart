@@ -14,11 +14,6 @@ import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 import 'package:schedule/modules/students/current_group_bloc/current_group_bloc.dart';
 import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart';
 
-//TODO: удаление лишних настроек
-//TODO: убедиться, что после обновления старое избранное очистится (с автозапуском)
-//TODO: замена ненужных stateful виджетов на stateless
-//TODO: убрать стейт ошибки, если только бакалавры не смогли загрузиться
-//TODO: обработать обновление препода, если только одна из ссылок изменилась
 class SchedulePageBody<T1 extends Bloc> extends StatefulWidget {
   const SchedulePageBody({super.key});
 
@@ -139,12 +134,12 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             );
           }
 
-          if (state is CurrentGroupLoaded) {
-            if (state.scheduleModel.isEmpty) {
+          Widget otherTabController(ScheduleModel scheduleModel){
+            if (scheduleModel.isEmpty) {
               return const Center(child: Text('Расписание отсутствует'));
             }
 
-            currentScheduleModel = state.scheduleModel;
+            currentScheduleModel = scheduleModel;
 
             isZo = currentScheduleModel.isZo;
 
@@ -159,50 +154,18 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             }
 
             return _tabController();
+          }
+
+          if (state is CurrentGroupLoaded) {
+            return otherTabController(state.scheduleModel);
           }
 
           if (state is SearchScheduleLoaded) {
-            if (state.scheduleModel.isEmpty) {
-              return const Center(child: Text('Расписание отсутствует'));
-            }
-
-            currentScheduleModel = state.scheduleModel;
-
-            isZo = currentScheduleModel.isZo;
-
-            numOfWeeks = currentScheduleModel.numOfWeeks;
-            if (selectedWeekIndex >= numOfWeeks) {
-              selectedWeekIndex = 0;
-            }
-
-            if (!isZo) {
-              initialTabIndex = currentScheduleModel.dayOfWeekByAbsoluteIndex(
-                  selectedWeekIndex, currentDayOfWeekIndex);
-            }
-
-            return _tabController();
+            return otherTabController(state.scheduleModel);
           }
 
           if (state is FavoriteScheduleLoaded) {
-            if (state.scheduleModel.isEmpty) {
-              return const Center(child: Text('Расписание отсутствует'));
-            }
-
-            currentScheduleModel = state.scheduleModel;
-
-            isZo = currentScheduleModel.isZo;
-
-            numOfWeeks = currentScheduleModel.numOfWeeks;
-            if (selectedWeekIndex >= numOfWeeks) {
-              selectedWeekIndex = 0;
-            }
-
-            if (!isZo) {
-              initialTabIndex = currentScheduleModel.dayOfWeekByAbsoluteIndex(
-                  selectedWeekIndex, currentDayOfWeekIndex);
-            }
-
-            return _tabController();
+            return otherTabController(state.scheduleModel);
           }
 
           return const Center(child: CircularProgressIndicator());
@@ -283,7 +246,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                                                           lessons
                                                               .dayOfWeekIndex &&
                                                       currentLessonIndex ==
-                                                          lesson.lessonIndex,
+                                                          lesson.lessonIndex &&
+                                                      !isZo,
                                             ),
                                           )
                                           .toList(),

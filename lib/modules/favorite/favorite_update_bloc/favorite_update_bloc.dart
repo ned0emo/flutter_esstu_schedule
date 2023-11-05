@@ -10,6 +10,7 @@ import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
 part 'favorite_update_event.dart';
+
 part 'favorite_update_state.dart';
 
 class FavoriteUpdateBloc
@@ -38,14 +39,9 @@ class FavoriteUpdateBloc
         link2: event.scheduleModel.link2,
       );
 
-      final oldLength = pagesList.length;
-      pagesList.removeWhere((element) => !element.contains(
-            event.scheduleModel.name,
-          ));
-
-      if (pagesList.length < oldLength) {
-        ///TODO: сообщение об отстутсвии на странице расписания
-      }
+      //final oldLength = pagesList.length;
+      pagesList.removeWhere(
+          (element) => !element.contains(event.scheduleModel.name));
 
       if (pagesList.isEmpty) {
         emit(FavoriteScheduleUpdateError(Logger.warning(
@@ -55,9 +51,17 @@ class FavoriteUpdateBloc
         return;
       }
 
+      //String? message;
+      //if (pagesList.length < oldLength) {
+      //  message = 'Возможно, расписание обновлено не полностью. '
+      //      'Фамилия и инициалы не найдены на одной из сохраненных страниц';
+      //}
+
       final isThereCustomDaysOfWeeks = event.scheduleModel.isZo;
       final numOfLessons = isThereCustomDaysOfWeeks ? 7 : 6;
+
       ///35 От балды. на неделю больше 28
+      ///А вообще теоретически нужно только для преподов
       final numOfDays = isThereCustomDaysOfWeeks ? 35 : 12;
 
       final scheduleModel = ScheduleModel(

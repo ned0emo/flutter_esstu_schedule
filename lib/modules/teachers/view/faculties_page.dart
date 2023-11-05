@@ -4,14 +4,9 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/modules/teachers/faculties_bloc/faculty_bloc.dart';
 
-class FacultiesPage extends StatefulWidget {
+class FacultiesPage extends StatelessWidget {
   const FacultiesPage({super.key});
 
-  @override
-  State<StatefulWidget> createState() => _FacultiesState();
-}
-
-class _FacultiesState extends State<FacultiesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,16 +16,16 @@ class _FacultiesState extends State<FacultiesPage> {
           BlocProvider.value(
               value: Modular.get<FacultyBloc>()..add(LoadFaculties())),
         ],
-        child: Center(
-          child: SingleChildScrollView(
-            child: BlocListener<FacultyBloc, FacultyState>(
-              listener: (context, state) {
-                if (state is CurrentFacultyState) {
-                  Modular.to.pushNamed(
-                      AppRoutes.teachersRoute + AppRoutes.departmentsRoute,
-                      arguments: state);
-                }
-              },
+        child: BlocListener<FacultyBloc, FacultyState>(
+          listener: (context, state) {
+            if (state is CurrentFacultyState) {
+              Modular.to.pushNamed(
+                  AppRoutes.teachersRoute + AppRoutes.departmentsRoute,
+                  arguments: state);
+            }
+          },
+          child: Center(
+            child: SingleChildScrollView(
               child: BlocBuilder<FacultyBloc, FacultyState>(
                 builder: (context, state) {
                   if (state is FacultiesLoadingState) {
