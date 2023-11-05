@@ -62,8 +62,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   /// нажатие кнопки. Иначе плюсует до тех пор, пока не станет больше равно, чем
   /// [numOfWeeks]. Тогда возвращает к нулю
   void _changeWeekNumber({int? number}) {
+    isNeedToSelectTab = false;
     setState(() {
-      isNeedToSelectTab = false;
       selectedWeekIndex = number ??
           (selectedWeekIndex + 1 >= numOfWeeks ? 0 : selectedWeekIndex + 1);
     });
@@ -134,7 +134,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             );
           }
 
-          Widget otherTabController(ScheduleModel scheduleModel){
+          Widget otherTabController(ScheduleModel scheduleModel) {
             if (scheduleModel.isEmpty) {
               return const Center(child: Text('Расписание отсутствует'));
             }
@@ -208,14 +208,16 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                             ))
                         .toList(),
                     onChanged: (String? value) {
-                      if (value == selectedDropdownElement) return;
+                      if (value == selectedDropdownElement || value == null) {
+                        return;
+                      }
 
+                      isNeedToSelectTab = true;
                       setState(() {
-                        isNeedToSelectTab = true;
                         selectedWeekIndex =
                             ScheduleTimeData.getCurrentWeekIndex();
                         selectedDropdownElement = value;
-                        currentDropdownIndex = dropDownList.indexOf(value!);
+                        currentDropdownIndex = dropDownList.indexOf(value);
                       });
                     },
                     value: selectedDropdownElement ?? dropDownList[0],

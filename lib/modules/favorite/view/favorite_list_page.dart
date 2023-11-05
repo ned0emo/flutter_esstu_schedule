@@ -38,13 +38,16 @@ class FavoriteListPage extends StatelessWidget {
                             style: TextStyle(fontSize: 20),
                             textAlign: TextAlign.center,
                           )
-                        : Column(
-                            children: List.generate(
-                              map.length,
-                              (index) => _favoriteSection(
-                                map.keys.elementAt(index),
-                                map[map.keys.elementAt(index)]!,
-                                context,
+                        : Padding(
+                            padding: const EdgeInsets.only(bottom: 70.0),
+                            child: Column(
+                              children: List.generate(
+                                map.length,
+                                (index) => _favoriteSection(
+                                  map.keys.elementAt(index),
+                                  map[map.keys.elementAt(index)]!,
+                                  context,
+                                ),
                               ),
                             ),
                           ),
@@ -80,7 +83,7 @@ class FavoriteListPage extends StatelessWidget {
         ...List.generate(
             scheduleNameList.length,
             (index) =>
-                _favoriteButton(scheduleNameList[index], sectionName, context))
+                _favoriteButton(scheduleNameList[index], sectionName, context)),
       ],
     );
   }
@@ -98,16 +101,17 @@ class FavoriteListPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     Modular.to.pushNamed(
-                        AppRoutes.favoriteListRoute +
-                            AppRoutes.favoriteScheduleRoute,
-                        arguments: [
-                          scheduleName,
-                          scheduleType,
-                          (await RepositoryProvider.of<SettingsRepository>(
-                                      context)
-                                  .loadSettings())[SettingsTypes.autoUpdate] ==
-                              'true'
-                        ]);
+                      AppRoutes.favoriteListRoute +
+                          AppRoutes.favoriteScheduleRoute,
+                      arguments: [
+                        scheduleName,
+                        scheduleType,
+                        (await RepositoryProvider.of<SettingsRepository>(
+                                    context)
+                                .loadSettings())[SettingsTypes.autoUpdate] ==
+                            'true'
+                      ],
+                    );
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),

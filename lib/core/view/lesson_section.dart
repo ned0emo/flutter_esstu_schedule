@@ -19,37 +19,39 @@ class LessonSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
-                child: Text('${lesson.lessonNumber}.',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
-              const SizedBox(width: 5, child: Divider(thickness: 1)),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
-                child: Text(
-                  ScheduleTimeData.lessonTimeList[lesson.lessonNumber - 1],
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
+          Padding(
+            padding: const EdgeInsets.only(top: 12.0),
+            child: Row(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
+                  child: Text('${lesson.lessonNumber}.',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
-              ),
-              const Expanded(child: Divider(thickness: 1)),
-              if (isCurrentLesson)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: .0, horizontal: 5.0),
+                const SizedBox(width: 5, child: Divider(thickness: 1)),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
                   child: Text(
-                    'Сейчас',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ScheduleTimeData.lessonTimeList[lesson.lessonNumber - 1],
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
-              const SizedBox(width: 5),
-            ],
+                const Expanded(child: Divider(thickness: 1)),
+                if (isCurrentLesson)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: .0, horizontal: 5.0),
+                    child: Text(
+                      'Сейчас',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ),
+                const SizedBox(width: 5),
+              ],
+            ),
           ),
           Card(
             child: Column(
