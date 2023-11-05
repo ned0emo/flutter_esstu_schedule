@@ -28,8 +28,8 @@ class HomePage extends StatelessWidget {
             Modular.to.pushNamed(
               AppRoutes.favoriteListRoute + AppRoutes.favoriteScheduleRoute,
               arguments: [
-                state.scheduleName,
-                state.scheduleType,
+                state.scheduleModel.name,
+                state.scheduleModel.type,
                 (await RepositoryProvider.of<SettingsRepository>(context)
                         .loadSettings())[SettingsTypes.autoUpdate] ==
                     'true',

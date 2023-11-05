@@ -5,30 +5,25 @@ import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/search/search_list_bloc/search_list_bloc.dart';
 
-class SearchListPage extends StatefulWidget {
+class SearchListPage extends StatelessWidget {
   final String scheduleType;
 
   const SearchListPage({super.key, required this.scheduleType});
 
-  @override
-  State<StatefulWidget> createState() => _SearchListPageState();
-}
-
-class _SearchListPageState extends State<SearchListPage> {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
         providers: [
           BlocProvider.value(
               value: Modular.get<SearchListBloc>()
-                ..add(LoadSearchList(widget.scheduleType))),
+                ..add(LoadSearchList(scheduleType))),
         ],
         child: Scaffold(
           appBar: AppBar(
-              title: Text(widget.scheduleType == ScheduleType.teacher
+              title: Text(scheduleType == ScheduleType.teacher
                   ? 'Поиск преподавателя'
                   : 'Поиск учебной группы')),
-          body: _body(context, widget.scheduleType),
+          body: _body(context, scheduleType),
         ));
   }
 
@@ -110,7 +105,7 @@ class _SearchListPageState extends State<SearchListPage> {
       onTap: () {
         Modular.to.pushNamed(
             AppRoutes.searchRoute + AppRoutes.searchingScheduleRoute,
-            arguments: [name, widget.scheduleType, link1, link2]);
+            arguments: [name, scheduleType, link1, link2]);
       },
     );
   }

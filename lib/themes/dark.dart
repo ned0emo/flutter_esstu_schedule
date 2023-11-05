@@ -40,9 +40,9 @@ class DarkTheme extends ThemeTemplate {
           //surfaceTint: Colors.red,
         ),
         cardColor: Colors.grey[900],
-        dialogBackgroundColor: Colors.grey[800],
-        canvasColor: Colors.black87,
-        scaffoldBackgroundColor: Colors.black87,
+        dialogBackgroundColor: const Color(0xFF111111),
+        canvasColor: const Color(0xFF111111),
+        scaffoldBackgroundColor: const Color(0xFF111111),
         textTheme: const TextTheme(
           titleLarge: TextStyle(color: Colors.white),
           titleMedium: TextStyle(color: Colors.white),
@@ -71,16 +71,17 @@ class DarkTheme extends ThemeTemplate {
             foregroundColor: Colors.white,
           ),
         ),
-        textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(
-          foregroundColor: Colors.white
-        )),
+        textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(foregroundColor: Colors.white)),
         snackBarTheme: SnackBarThemeData(
           backgroundColor: Colors.grey[800],
         ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
         ),
-        drawerTheme: const DrawerThemeData(backgroundColor: Colors.black87),
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: Color(0xFF111111),
+        ),
         tabBarTheme: const TabBarTheme(labelColor: Colors.white),
         dividerColor: Colors.grey[700],
       );

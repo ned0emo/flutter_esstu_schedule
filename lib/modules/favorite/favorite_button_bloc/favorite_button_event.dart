@@ -4,21 +4,9 @@ part of 'favorite_button_bloc.dart';
 abstract class FavoriteButtonEvent {}
 
 class SaveSchedule extends FavoriteButtonEvent {
-  final String name;
-  final String scheduleType;
-  final List<List<Lesson>> scheduleList;
-  final String? link1;
-  final String? link2;
-  final List<String>? daysOfWeekList;
+  final ScheduleModel scheduleModel;
 
-  SaveSchedule({
-    required this.name,
-    required this.scheduleType,
-    required this.scheduleList,
-    this.link1,
-    this.link2,
-    this.daysOfWeekList,
-  });
+  SaveSchedule({required this.scheduleModel});
 }
 
 class DeleteSchedule extends FavoriteButtonEvent {

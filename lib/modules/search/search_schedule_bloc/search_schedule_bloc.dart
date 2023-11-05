@@ -3,10 +3,9 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/models/lesson_model.dart';
+import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/lesson_builder.dart';
-import 'package:schedule/core/static/schedule_time_data.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/home/main_repository.dart';
 
@@ -22,12 +21,11 @@ class SearchScheduleBloc
         super(SearchScheduleInitial()) {
     on<SearchScheduleEvent>((event, emit) {});
     on<LoadSearchingSchedule>(_loadSearchingSchedule);
-    on<ChangeOpenedDay>(_changeOpenedDay);
   }
 
   Future<void> _loadSearchingSchedule(
       LoadSearchingSchedule event, Emitter<SearchScheduleState> emit) async {
-    emit(SearchScheduleLoading());
+    emit(SearchScheduleLoading(appBarName: event.scheduleName));
 
     final isZo = event.link1.contains('zo');
     final numOfLessons = isZo ? 7 : 6;
@@ -38,10 +36,15 @@ class SearchScheduleBloc
         if (event.link2 != null) await _repository.loadPage(event.link2!)
       ];
 
-      final List<List<Lesson>> scheduleList = [];
-      List<String>? customDaysOfWeek;
+      //final List<List<Lesson>> scheduleList = [];
+      final ScheduleModel scheduleModel = ScheduleModel(
+        name: event.scheduleName,
+        type: event.scheduleType,
+        weeks: [],
+        link1: event.link1,
+        link2: event.link2,
+      );
 
-      bool isScheduleNeedCreate = true;
       for (String page in pagesList) {
         final scheduleBeginning = event.scheduleType == ScheduleType.teacher
             ? page.split(event.scheduleName).elementAt(1)
@@ -58,49 +61,57 @@ class SearchScheduleBloc
                 .split('SIZE=2><P ALIGN="CENTER">')
                 .skip(1);
 
-        int i = 0;
-        for (String weekSection in splittedPage) {
+        int dayOfWeekIndex = 0;
+        for (String dayOfWeek in splittedPage) {
+          String? dayOfWeekDate;
           if (isZo) {
-            customDaysOfWeek ??= [];
-            customDaysOfWeek
-                .add(weekSection.substring(0, weekSection.indexOf('<')).trim());
+            final lastIndex = dayOfWeek.indexOf('</B>');
+            dayOfWeekDate = lastIndex > 0
+                ? _dateFromZoDayOfWeek(dayOfWeek.substring(0, lastIndex).trim())
+                : null;
           }
+          final lessons = dayOfWeek.split('"CENTER">').skip(1);
 
-          final daysOfWeek = weekSection.split('"CENTER">').skip(1);
-          if (isScheduleNeedCreate) {
-            scheduleList.add(List.generate(numOfLessons, (index) => Lesson(lessonNumber: index + 1)));
-          }
-
-          int j = 0;
-          for (String dayOfWeekSection in daysOfWeek) {
-            final lesson = dayOfWeekSection
-                .substring(0, dayOfWeekSection.indexOf('<'))
+          int lessonIndex = 0;
+          for (String lessonSection in lessons) {
+            final lesson = lessonSection
+                .substring(0, lessonSection.indexOf('</FONT>'))
                 .trim();
 
-            scheduleList[i][j] = LessonBuilder.createLessonIfTitleLonger(scheduleList[i][j], lesson);//.updateLesson(lesson);
+            final lessonChecker =
+                lesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
 
-            j++;
-            if (j >= numOfLessons) {
-              break;
+            if (lessonChecker.isEmpty) {
+              if (++lessonIndex >= numOfLessons) break;
+              continue;
             }
+
+            scheduleModel.updateWeek(
+              dayOfWeekIndex ~/ numOfLessons,
+              dayOfWeekIndex % numOfLessons,
+              lessonIndex,
+              event.scheduleType == ScheduleType.teacher
+                  ? LessonBuilder.createTeacherLesson(
+                      lessonNumber: lessonIndex + 1,
+                      lesson: lesson,
+                    )
+                  : LessonBuilder.createStudentLesson(
+                      lessonNumber: lessonIndex + 1,
+                      lesson: lesson,
+                    ),
+              dayOfWeekDate: dayOfWeekDate,
+            );
+
+            if (++lessonIndex >= numOfLessons) break;
           }
 
-          i++;
+          dayOfWeekIndex++;
         }
-
-        isScheduleNeedCreate = false;
       }
 
       emit(SearchScheduleLoaded(
-        scheduleName: event.scheduleName,
-        scheduleList: scheduleList,
-        scheduleType: event.scheduleType,
-        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
-        currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
-        weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
-        link1: event.link1,
-        link2: event.link2,
-        customDaysOfWeek: customDaysOfWeek,
+        scheduleModel: scheduleModel,
+        appBarName: event.scheduleName,
       ));
     } catch (e, stack) {
       emit(SearchScheduleError(Logger.error(
@@ -111,11 +122,57 @@ class SearchScheduleBloc
     }
   }
 
-  Future<void> _changeOpenedDay(
-      ChangeOpenedDay event, Emitter<SearchScheduleState> emit) async {
-    final currentState = state;
-    if (currentState is SearchScheduleLoaded) {
-      emit(currentState.copyWith(openedDayIndex: event.numOfDay));
+  String? _dateFromZoDayOfWeek(String? dayOfWeek) {
+    if (dayOfWeek == null) return null;
+
+    final splittedDayOfWeek = dayOfWeek.split(RegExp(r'\s+'));
+    if (splittedDayOfWeek.length < 2) return null;
+
+    final day = splittedDayOfWeek[0].contains(',')
+        ? splittedDayOfWeek[0].split(',')[1]
+        : splittedDayOfWeek[0];
+
+    final month = splittedDayOfWeek[1];
+    if (month.contains('янв') || month.contains('ЯНВ')) {
+      return '$day.01';
     }
+    if (month.contains('фев') || month.contains('ФЕВ')) {
+      return '$day.02';
+    }
+    if (month.contains('мар') || month.contains('МАР')) {
+      return '$day.03';
+    }
+    if (month.contains('апр') || month.contains('АПР')) {
+      return '$day.04';
+    }
+    if (month.contains('мая') ||
+        month.contains('МАЯ') ||
+        month.contains('май') ||
+        month.contains('МАЙ')) {
+      return '$day.05';
+    }
+    if (month.contains('июн') || month.contains('ИЮН')) {
+      return '$day.06';
+    }
+    if (month.contains('июл') || month.contains('ИЮЛ')) {
+      return '$day.07';
+    }
+    if (month.contains('авг') || month.contains('АВГ')) {
+      return '$day.08';
+    }
+    if (month.contains('сен') || month.contains('СЕН')) {
+      return '$day.09';
+    }
+    if (month.contains('окт') || month.contains('ОКТ')) {
+      return '$day.10';
+    }
+    if (month.contains('ноя') || month.contains('НОЯ')) {
+      return '$day.11';
+    }
+    if (month.contains('дек') || month.contains('ДЕК')) {
+      return '$day.12';
+    }
+
+    return null;
   }
 }

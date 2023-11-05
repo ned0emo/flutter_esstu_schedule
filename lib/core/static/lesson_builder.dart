@@ -1,82 +1,149 @@
 import 'package:schedule/core/models/lesson_model.dart';
 
 class LessonBuilder {
-  static Lesson createLessonIfTitleLonger(
-    Lesson oldLesson,
-    String fullLesson, {
+  static const teachersRegExp =
+      r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.';
+  static const classroomsJunkRegExp =
+      r'и/д-*|д/кл-*|д/к-*|н/х-*|\s+мф\s+|\s+и/п\s+|\s+св\s+|\s+си\s+|смук-*';
+  static const classroomsRegExp = r'(?:\s*а\.\s*\S+\s*)+';
+  static const oneClassroomRegExp = r'а\.\s*\S+';
+
+  //static const groupsRegExp = r'(?:\s*а\.\s*\S+\s*)+';
+
+  static Lesson createStudentLesson({
+    required int lessonNumber,
+    required String lesson,
     String? title,
-    String? type,
     List<String>? teachers,
     List<String>? groups,
     List<String>? classrooms,
   }) {
-    final lessonChecker = fullLesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
+    final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), ' ');
 
-    if (lessonChecker.isEmpty ||
-        oldLesson.fullLesson.length > fullLesson.length) return oldLesson;
+    final List<Map<String, String>> lessonData = [];
 
-    return Lesson(
-      lessonNumber: oldLesson.lessonNumber,
-      fullLesson: fullLesson,
-      title: title ?? _lessonTitle(fullLesson),
-      teachers: teachers ?? _teacherNames(fullLesson),
-      type: type ?? _lessonType(fullLesson),
-    );
-  }
+    final lessons = clearLesson.split(RegExp(classroomsRegExp));
+    if (lessons.length > 1) lessons.removeLast();
 
-  static Lesson createLesson(
-    int lessonNumber,
-    String fullLesson, {
-    String? title,
-    String? type,
-    List<String>? teachers,
-    List<String>? groups,
-    List<String>? classrooms,
-  }) {
-    final lessonChecker = fullLesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
+    final classrooms = RegExp(classroomsRegExp)
+        .allMatches(clearLesson)
+        .map((e) =>
+            e[0]
+                ?.replaceAll(RegExp(r'а\.\s*'), '')
+                .trim()
+                .replaceAll(RegExp(r'-?\s+'), ', ')
+                .replaceAll(RegExp(r',\s$'), '') ??
+            '')
+        .toList();
+
+    for (int i = 0; i < lessons.length; i++) {
+      final teachers =
+          RegExp(teachersRegExp).allMatches(lessons[i]).map((e) => e[0] ?? '');
+
+      String title = _lessonTitle(lessons[i]);
+      if (title.length < 3 && i > 0) {
+        title = lessonData[i - 1]['title'] ?? 'Ошибка';
+      }
+
+      String type = _lessonType(lessons[i]);
+      if(type == 'Другое' && i > 0){
+        type = lessonData[0][Lesson.type] ?? type;
+      }
+
+      lessonData.add({
+        Lesson.title: title,
+        Lesson.teachers: teachers.join(', '),
+        Lesson.classrooms: i < classrooms.length ? classrooms[i] : '',
+        Lesson.type: type
+      });
+    }
 
     return Lesson(
       lessonNumber: lessonNumber,
-      fullLesson: lessonChecker.isEmpty ? lessonChecker : fullLesson,
-      title: title ?? _lessonTitle(fullLesson),
-      teachers: teachers ?? _teacherNames(fullLesson),
-      type: type ?? _lessonType(fullLesson),
+      lessonData: lessonData,
+      fullLesson: lesson,
+    );
+    /*RegExp(teachersRegExp)
+        .allMatches(clearLesson)
+        .map((e) => e[0] ?? '')
+        .toList();*/
+  }
+
+  static Lesson createTeacherLesson({
+    required int lessonNumber,
+    required String lesson,
+    String? title,
+    List<String>? teachers,
+    List<String>? groups,
+    List<String>? classrooms,
+  }) {
+    final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), ' ');
+
+    return Lesson(
+      lessonNumber: lessonNumber,
+      lessonData: [
+        {
+          Lesson.title: _lessonTitle(clearLesson),
+          Lesson.classrooms: RegExp(oneClassroomRegExp)
+                  .firstMatch(clearLesson)?[0]
+                  ?.replaceAll(RegExp(r'а\.\s*'), '')
+                  .trim() ??
+              '',
+          Lesson.type: _lessonType(clearLesson)
+        }
+      ],
+      fullLesson: lesson,
+    );
+  }
+
+  static Lesson createClassroomLesson({
+    required int lessonNumber,
+    required String lesson,
+    String? title,
+    List<String>? teachers,
+    List<String>? groups,
+    List<String>? classrooms,
+  }) {
+    //final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), '');
+    final teacher = RegExp(teachersRegExp).firstMatch(lesson)?[0] ?? '';
+
+    return Lesson(
+      lessonNumber: lessonNumber,
+      lessonData: [
+        {
+          Lesson.title: _lessonTitle(lesson),
+          Lesson.teachers: teacher,
+          Lesson.type: _lessonType(lesson)
+        }
+      ],
+      fullLesson: lesson,
     );
   }
 
   static String _lessonTitle(String lesson) {
     return lesson
         //приписки аудиторий
-        .replaceAll(RegExp(r'и/д|д/кл|д/к|н/х'), '')
+        .replaceAll(RegExp(classroomsJunkRegExp), '')
         //препод
-        .replaceAll(
-            RegExp(
-                r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.'),
-            '')
+        .replaceAll(RegExp(teachersRegExp), '')
         //тип занятия
-        .replaceAll(RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|экз\.|'), '')
-        //остатки аудитории в расписании аудиторий
-        .replaceAll('а. ', '')
-        //длинные пробелы
-        .replaceAll(RegExp(r'\s{2,}'), ' ')
+        .replaceAll(RegExp(r'лек\.|пр\.|лаб\.|экз\.'), '')
+        //аудитории
+        .replaceAll(RegExp(r'а\.\s*\S+'), '')
+        //Лишние символы в конце (также пустое занятие)
+        .replaceAll(RegExp(r'[^а-яА-Я0-9a-zA-Z)]+$'), '')
         //много точек
         .replaceAll(RegExp(r'\.{2,}'), '.')
+        //длинные пробелы
+        .replaceAll(RegExp(r'\s{2,}'), ' ')
         .trim();
-  }
-
-  static List<String> _teacherNames(String lesson) {
-    return RegExp(
-            r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.')
-        .allMatches(lesson)
-        .map((e) => e[0] ?? '')
-        .toList();
   }
 
   static String _lessonType(String lesson) {
     if (lesson.isEmpty) return '';
 
     final lType =
-        RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура|экз\.')
+        RegExp(r'лек\.|пр\.|лаб\.|ЭК по ФКС|Физическая культура|экз\.|Лаборато')
             .firstMatch(lesson)?[0];
     switch (lType) {
       case 'лек.':
@@ -84,6 +151,8 @@ class LessonBuilder {
       case 'пр.':
         return 'Практика';
       case 'лаб.':
+        return 'Лабораторная';
+      case 'Лаборато':
         return 'Лабораторная';
       case 'ЭК по ФКС':
         return 'Физическая культура';

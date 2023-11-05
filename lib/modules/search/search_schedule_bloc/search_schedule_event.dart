@@ -16,9 +16,3 @@ class LoadSearchingSchedule extends SearchScheduleEvent {
     required this.scheduleType,
   });
 }
-
-class ChangeOpenedDay extends SearchScheduleEvent{
-  final int numOfDay;
-
-  ChangeOpenedDay(this.numOfDay);
-}

@@ -12,10 +12,6 @@ class SettingsRepository {
           (storage.getString(SettingsTypes.darkTheme)) ?? 'false',
       SettingsTypes.noUpdateClassroom:
           (storage.getString(SettingsTypes.noUpdateClassroom)) ?? 'false',
-      SettingsTypes.hideSchedule:
-          (storage.getString(SettingsTypes.hideSchedule)) ?? 'false',
-      SettingsTypes.lessonColor:
-          (storage.getString(SettingsTypes.lessonColor)) ?? 'true',
       SettingsTypes.legacyFavoriteDeleted:
           (storage.getString(SettingsTypes.legacyFavoriteDeleted)) ?? 'false',
     };
@@ -38,11 +34,11 @@ class SettingsRepository {
   Future<void> clearFavorite() async {
     final storage = await SharedPreferences.getInstance();
     final list = storage.getKeys();
+    list.removeWhere(
+        (key) => key.contains('Service') && !key.contains('MainFavService'));
 
     for (var key in list) {
-      if (!key.contains('Service')) {
-        storage.remove(key);
-      }
+      storage.remove(key);
     }
   }
 }

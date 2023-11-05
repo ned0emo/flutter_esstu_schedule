@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:enough_convert/enough_convert.dart';
-import 'package:schedule/modules/favorite/models/favorite_schedule_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:schedule/core/models/schedule_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 ///
@@ -21,14 +23,14 @@ class FavoriteRepository {
     return list;
   }
 
-  Future<FavoriteScheduleModel?> getScheduleModel(String key) async {
+  Future<ScheduleModel?> getScheduleModel(String key) async {
     final storage = await SharedPreferences.getInstance();
     final scheduleString = storage.getString(key);
     if (scheduleString == null) {
       return null;
     }
 
-    return FavoriteScheduleModel.fromString(scheduleString);
+    return ScheduleModel.fromJson(jsonDecode(scheduleString));
   }
 
   Future<void> saveSchedule(String key, String schedule) async {

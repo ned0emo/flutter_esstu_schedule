@@ -11,15 +11,3 @@ class ChangeBuilding extends ClassroomsEvent {
 
   ChangeBuilding(this.buildingName, {this.classroom});
 }
-
-class ChangeOpenedDay extends ClassroomsEvent {
-  final int dayIndex;
-
-  ChangeOpenedDay(this.dayIndex);
-}
-
-class ChangeClassroom extends ClassroomsEvent{
-  final String classroom;
-
-  ChangeClassroom(this.classroom);
-}

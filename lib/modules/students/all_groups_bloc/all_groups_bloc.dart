@@ -15,7 +15,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
 
   AllGroupsBloc(MainRepository repository)
       : _repository = repository,
-        super(AllGroupsLoading()) {
+        super(const AllGroupsLoading()) {
     on<LoadAllGroups>(_loadGroupList);
     on<SelectCourse>(_selectCourse);
     on<SelectGroup>(_selectGroup);
@@ -27,7 +27,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
   /// Заполнение мэпов по курсам с парами "Имя группы - Ссылка"
   Future<void> _loadGroupList(
       LoadAllGroups event, Emitter<AllGroupsState> emit) async {
-    emit(AllGroupsLoading());
+    emit(const AllGroupsLoading());
 
     final bakScheduleMap = <String, Map<String, String>>{
       '1 курс': {},
@@ -137,27 +137,59 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
         return;
       }
 
-      final initCourse = bakScheduleMap.keys.first;
-      if (bakScheduleMap[initCourse]!.keys.isEmpty) {
-        Logger.info(
-          title: Errors.studentsNotFoundError,
-          exception: 'bakScheduleMap[initCourse]!.keys.isEmpty',
-        );
+      ///Для поиска первого существующего расписания
+      final coursesMap = {
+        StudentsType.bak: bakScheduleMap,
+        StudentsType.col: colScheduleMap,
+        StudentsType.mag: magScheduleMap,
+        StudentsType.zo1: zoScheduleMap,
+        //StudentsType.zo2: zoScheduleMap,
+      };
+      Map<String, Map<String, String>>? initialScheduleMap;
+      String? currentCourse;
+      String? initialStudType;
 
-        emit(AllGroupsError(
-            'Хмм... Кажется, здесь нет групп с заполненным расписанием'));
+      void getInitialMap(
+        String studKey,
+        Map<String, Map<String, String>> studMap,
+      ) {
+        for (var key in studMap.keys) {
+          if (studMap[key]!.isNotEmpty) {
+            initialScheduleMap = studMap;
+            currentCourse = key;
+            initialStudType = studKey;
+
+            break;
+          }
+        }
+      }
+
+      for (var key in coursesMap.keys) {
+        coursesMap[key]!.removeWhere((k, v) => coursesMap[key]![k]!.isEmpty);
+        getInitialMap(key, coursesMap[key]!);
+        if (initialScheduleMap != null) break;
+      }
+
+      if (initialScheduleMap == null) {
+        emit(AllGroupsError(Logger.error(
+          title: Errors.studentsNotFoundError,
+          exception: 'initialScheduleMap == null',
+        )));
         return;
       }
 
-      emit(AllGroupsLoaded(
-        bakScheduleMap: bakScheduleMap,
-        magScheduleMap: magScheduleMap,
-        colScheduleMap: colScheduleMap,
-        zoScheduleMap: zoScheduleMap,
-        studType: StudentsType.bak,
-        currentCourse: initCourse,
-        currentGroup: bakScheduleMap[initCourse]!.keys.first,
-      ));
+      emit(
+        AllGroupsLoaded(
+            bakScheduleMap: bakScheduleMap,
+            magScheduleMap: magScheduleMap,
+            colScheduleMap: colScheduleMap,
+            zoScheduleMap: zoScheduleMap,
+            studType: initialStudType!,
+            currentCourse: currentCourse!,
+            currentGroup: initialScheduleMap![currentCourse]!.keys.first,
+            appBarTitle:
+                '${_groupTypeString(initialStudType!)}. $currentCourse'),
+      );
     } catch (e, stack) {
       emit(AllGroupsError(Logger.error(
           title: Errors.scheduleError, exception: e, stack: stack)));
@@ -169,7 +201,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
     final currentState = state;
 
     if (currentState is AllGroupsLoaded) {
-      emit(AllGroupsLoading());
+      emit(AllGroupsLoading(appBarTitle: currentState.appBarTitle));
 
       final courseMap =
           currentState.courseMap(event.courseName, event.studType);
@@ -186,11 +218,11 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
         return;
       }
 
-      final initGroup = courseMap.keys.first;
       emit(currentState.copyWith(
         currentCourse: event.courseName,
         studType: event.studType,
-        currentGroup: initGroup,
+        currentGroup: courseMap.keys.first,
+        appBarTitle: '${_groupTypeString(event.studType)}. ${event.courseName}',
       ));
     }
   }
@@ -202,4 +234,12 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
       emit(currentState.copyWith(currentGroup: event.groupName));
     }
   }
+
+  String _groupTypeString(String type) => type == StudentsType.bak
+      ? 'Бакалавриат'
+      : type == StudentsType.mag
+          ? 'Магистратура'
+          : type == StudentsType.col
+              ? 'Колледж'
+              : 'Заочное';
 }

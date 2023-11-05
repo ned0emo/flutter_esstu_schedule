@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/static/students_type.dart';
 import 'package:schedule/modules/students/all_groups_bloc/all_groups_bloc.dart';
 
 class StudentsDrawer extends StatelessWidget {
-  const StudentsDrawer({super.key});
+  final AllGroupsLoaded state;
+
+  const StudentsDrawer({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +34,14 @@ class StudentsDrawer extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                _bakDrawerSection(context),
-                _magDrawerSection(context),
-                _zoDrawerSection(context),
+                _studTypeSection(
+                    context, StudentsType.bak, state.bakScheduleMap),
+                _studTypeSection(
+                    context, StudentsType.col, state.colScheduleMap),
+                _studTypeSection(
+                    context, StudentsType.mag, state.magScheduleMap),
+                _studTypeSection(
+                    context, StudentsType.zo1, state.zoScheduleMap),
               ],
             ),
           ),
@@ -43,14 +50,23 @@ class StudentsDrawer extends StatelessWidget {
     );
   }
 
-  Widget _bakDrawerSection(BuildContext context) {
+  Widget _studTypeSection(
+    BuildContext context,
+    String studType,
+    Map<String, Map<String, String>> studScheduleMap,
+  ) {
+    final courseCount = studScheduleMap.keys
+        .where((element) => studScheduleMap[element]?.isNotEmpty ?? false)
+        .length;
+    if (courseCount < 1) return const SizedBox();
+
     return Column(
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
           child: Text(
-            'Бакалавриат',
-            style: TextStyle(
+            _studTypeRussian(studType),
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -58,13 +74,15 @@ class StudentsDrawer extends StatelessWidget {
         ),
         Column(
           children: List<ListTile>.generate(
-            6,
+            courseCount,
             (index) => ListTile(
-              title: Text('${index + 1} курс'),
+              title: Text(
+                studScheduleMap.keys.elementAt(index),
+              ),
               onTap: () {
-                BlocProvider.of<AllGroupsBloc>(context).add(SelectCourse(
-                    courseName: '${index + 1} курс',
-                    studType: StudentsType.bak));
+                Modular.get<AllGroupsBloc>().add(SelectCourse(
+                    courseName: studScheduleMap.keys.elementAt(index),
+                    studType: studType));
                 Navigator.pop(context);
               },
             ),
@@ -75,91 +93,16 @@ class StudentsDrawer extends StatelessWidget {
     );
   }
 
-  Widget _magDrawerSection(BuildContext context) {
-    return Column(
-      children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
-          child: Text(
-            'Колледж',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        Column(
-          children: List<ListTile>.generate(
-            4,
-            (index) => ListTile(
-              title: Text('${index + 1} курс'),
-              onTap: () {
-                BlocProvider.of<AllGroupsBloc>(context).add(SelectCourse(
-                    courseName: '${index + 1} курс',
-                    studType: StudentsType.col));
-                Navigator.pop(context);
-              },
-            ),
-          ),
-        ),
-        const Divider(),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
-          child: Text(
-            'Магистратура',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        Column(
-          children: List<ListTile>.generate(
-            2,
-            (index) => ListTile(
-              title: Text('${index + 1} курс'),
-              onTap: () {
-                BlocProvider.of<AllGroupsBloc>(context).add(SelectCourse(
-                    courseName: '${index + 1} курс',
-                    studType: StudentsType.mag));
-                Navigator.pop(context);
-              },
-            ),
-          ),
-        ),
-        const Divider(),
-      ],
-    );
-  }
-
-  Widget _zoDrawerSection(BuildContext context) {
-    return Column(
-      children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
-          child: Text(
-            'Заочное',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        Column(
-          children: List.generate(
-            6,
-            (index) => ListTile(
-              title: Text('${index + 1} курс'),
-              onTap: () {
-                BlocProvider.of<AllGroupsBloc>(context).add(SelectCourse(
-                    courseName: '${index + 1} курс',
-                    studType: StudentsType.zo1));
-                Navigator.pop(context);
-              },
-            ),
-          ),
-        )
-      ],
-    );
+  String _studTypeRussian(String courseType) {
+    switch (courseType) {
+      case (StudentsType.bak):
+        return 'Бакалавриат';
+      case (StudentsType.col):
+        return 'Колледж';
+      case (StudentsType.mag):
+        return 'Магистратура';
+      default:
+        return 'Заочное';
+    }
   }
 }

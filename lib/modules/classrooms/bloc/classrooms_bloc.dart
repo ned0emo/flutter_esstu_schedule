@@ -1,53 +1,20 @@
-import 'dart:collection';
-
 import 'package:bloc/bloc.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:schedule/core/logger.dart';
-import 'package:schedule/core/models/lesson_model.dart';
+import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/lesson_builder.dart';
-import 'package:schedule/core/static/schedule_time_data.dart';
+import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/classrooms/repositories/classrooms_repository.dart';
 
 part 'classrooms_event.dart';
-
 part 'classrooms_state.dart';
 
 class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
   final String facultyLinkBak = 'bakalavriat/craspisanEdt.htm';
   final String facultyLinkMag = 'spezialitet/craspisanEdt.htm';
   final int threadCount = 6;
-
-  /// Карта "корпус" - сортированная карта аудиторий:
-  /// "аудитория" - список дней недели.
-  /// В элементе списка дней недели пары
-  final Map<String, SplayTreeMap<String, List<List<Lesson>>>>
-      _buildingsScheduleMap = {
-    '1 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '2 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '3 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '4 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '5 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '6 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '7 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '8 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '9 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '10 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '11 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '12 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '13 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '14 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    '15 корпус': SplayTreeMap<String, List<List<Lesson>>>(),
-    //'16 корпус': SplayTreeMap<String, List<List<String>>>(),
-    //'17 корпус': SplayTreeMap<String, List<List<String>>>(),
-    //'18 корпус': SplayTreeMap<String, List<List<String>>>(),
-    //'19 корпус': SplayTreeMap<String, List<List<String>>>(),
-    //'20 корпус': SplayTreeMap<String, List<List<String>>>(),
-    //'21 корпус': SplayTreeMap<String, List<List<String>>>(),
-    //'22 корпус': SplayTreeMap<String, List<List<String>>>(),
-    //'23 корпус': SplayTreeMap<String, List<List<String>>>(),
-    //'24 корпус': SplayTreeMap<String, List<List<String>>>(),
-  };
 
   final ClassroomsRepository _classroomsRepository;
 
@@ -57,45 +24,46 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
     on<ClassroomsEvent>((event, emit) {});
     on<LoadClassroomsSchedule>(_loadClassroomsSchedule);
     on<ChangeBuilding>(_changeBuilding);
-    on<ChangeOpenedDay>(_changeOpenedDay);
-    on<ChangeClassroom>(_changeClassroom);
   }
 
   Future<void> _changeBuilding(
       ChangeBuilding event, Emitter<ClassroomsState> emit) async {
     final currentState = state;
-    if (currentState is ClassroomsLoadedState) {
+    if (currentState is ClassroomsLoaded) {
       emit(currentState.copyWith(
           currentBuildingName: event.buildingName,
-          currentClassroom: event.classroom));
-    }
-  }
-
-  Future<void> _changeOpenedDay(
-      ChangeOpenedDay event, Emitter<ClassroomsState> emit) async {
-    final currentState = state;
-    if (currentState is ClassroomsLoadedState) {
-      emit(currentState.copyWith(openedDayIndex: event.dayIndex));
-    }
-  }
-
-  Future<void> _changeClassroom(
-      ChangeClassroom event, Emitter<ClassroomsState> emit) async {
-    final currentState = state;
-    if (currentState is ClassroomsLoadedState) {
-      emit(ClassroomsLoadingState());
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      emit(currentState.copyWith(
-        currentClassroom: event.classroom,
-        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
-      ));
+          initialClassroom: event.classroom));
+    } else {
+      emit(ClassroomsError(Logger.error(
+          title: Errors.scheduleError,
+          exception: 'currentState is not ClassroomLoaded')));
     }
   }
 
   Future<void> _loadClassroomsSchedule(
       LoadClassroomsSchedule event, Emitter<ClassroomsState> emit) async {
-    emit(ClassroomsLoadingState());
+    emit(const ClassroomsLoading());
+
+    /// Карта "корпус" - сортированная карта аудиторий:
+    /// "аудитория" - список дней недели.
+    /// В элементе списка дней недели пары
+    final Map<String, List<ScheduleModel>> buildingsScheduleMap = {
+      '1 корпус': [],
+      '2 корпус': [],
+      '3 корпус': [],
+      '4 корпус': [],
+      '5 корпус': [],
+      '6 корпус': [],
+      '7 корпус': [],
+      '8 корпус': [],
+      '9 корпус': [],
+      '10 корпус': [],
+      '11 корпус': [],
+      '12 корпус': [],
+      '13 корпус': [],
+      '14 корпус': [],
+      '15 корпус': [],
+    };
 
     int progress = 0;
     int errorCount = 0;
@@ -115,38 +83,36 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
                   .skip(1);
 
           for (String teacherSection in splittedDepartmentPage) {
-            String teacherName = '';
-            try {
-              teacherName = teacherSection.substring(
-                  teacherSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
-                  teacherSection.indexOf('</P>'));
-            } catch (e, stack) {
-              Logger.warning(
-                title: Errors.pageParsingError,
-                exception: e,
-                stack: stack,
-              );
-
-              teacherName = 'Не распознано';
-            }
+            final teacherName = teacherSection
+                .substring(0, teacherSection.indexOf('</P>'))
+                .trim();
 
             final daysOfWeekFromPage =
                 teacherSection.split('SIZE=2><P ALIGN="CENTER">').skip(1);
 
-            int j = 0;
+            int dayOfWeekIndex = 0;
             for (String dayOfWeek in daysOfWeekFromPage) {
               final lessons =
                   dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
 
-              int i = 0;
+              int lessonIndex = 0;
               for (String lessonSection in lessons) {
                 if (!lessonSection.contains('а.')) {
-                  i++;
+                  lessonIndex++;
                   continue;
                 }
+
                 final fullLesson = lessonSection
                     .substring(0, lessonSection.indexOf('</FONT>'))
                     .trim();
+                final lessonChecker =
+                    fullLesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
+
+                if (lessonChecker.isEmpty) {
+                  lessonIndex++;
+                  continue;
+                }
+
                 final lesson = fullLesson
                     .substring(fullLesson.indexOf('а.') + 2)
                     .trim()
@@ -161,28 +127,42 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
                     : lesson;
 
                 if (!classroom.contains(RegExp(r"[0-9]"))) {
-                  i++;
+                  if (++lessonIndex > 5) break;
                   continue;
                 }
 
                 final building = '${_getBuildingByClassroom(classroom)} корпус';
-                if (_buildingsScheduleMap[building]![classroom] == null) {
-                  _buildingsScheduleMap[building]![classroom] = List.generate(
-                      12,
-                      (index) => List.generate(
-                          6, (index) => Lesson(lessonNumber: index + 1)));
+
+                bool isScheduleExist = true;
+                var currentScheduleModel = buildingsScheduleMap[building]
+                    ?.firstWhereOrNull((element) => element.name == classroom);
+
+                if (currentScheduleModel == null) {
+                  currentScheduleModel = ScheduleModel(
+                    name: classroom,
+                    type: ScheduleType.classroom,
+                    weeks: [],
+                  );
+                  isScheduleExist = false;
                 }
 
-                _buildingsScheduleMap[building]![classroom]![j][i] =
-                    LessonBuilder.createLessonIfTitleLonger(
-                  _buildingsScheduleMap[building]![classroom]![j][i],
-                  '$teacherName ${fullLesson.replaceFirst(classroom, '')}',
+                currentScheduleModel.updateWeek(
+                  dayOfWeekIndex ~/ 6,
+                  dayOfWeekIndex % 6,
+                  lessonIndex,
+                  LessonBuilder.createClassroomLesson(
+                      lessonNumber: lessonIndex + 1,
+                      lesson: '$teacherName $fullLesson}'),
                 );
 
-                if (++i > 5) break;
+                if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
+                  buildingsScheduleMap[building]?.add(currentScheduleModel);
+                }
+
+                if (++lessonIndex > 5) break;
               }
 
-              if (++j > 11) break;
+              if (++dayOfWeekIndex > 11) break;
             }
           }
 
@@ -254,7 +234,7 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
         if (oldProgress == progress) {
           freezeCount++;
           if (freezeCount > 20) {
-            emit(ClassroomsLoadingState(
+            emit(ClassroomsLoading(
               percents: (progress / linksCount * 100).toInt(),
               message:
                   'Загрузка длится слишком долго. Возможно, что-то пошло не так...',
@@ -265,31 +245,33 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
           oldProgress = progress;
           freezeCount = 0;
         }
-        emit(ClassroomsLoadingState(
-            percents: (progress / linksCount * 100).toInt()));
+        emit(
+            ClassroomsLoading(percents: (progress / linksCount * 100).toInt()));
       } while (completedThreads < threadCount);
 
       if (errorCount > 8) {
-        emit(ClassroomsErrorState(Logger.error(
+        emit(ClassroomsError(Logger.error(
           title: Errors.scheduleError,
           exception: 'errorCount > 8',
         )));
         return;
       }
 
-      _buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
+      buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
+      for (var building in buildingsScheduleMap.keys) {
+        buildingsScheduleMap[building]!
+            .sort((a, b) => a.name.compareTo(b.name));
+      }
 
-      emit(ClassroomsLoadedState(
-        weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
-        currentBuildingName: _buildingsScheduleMap.keys.first,
-        scheduleMap: _buildingsScheduleMap,
-        currentClassroom:
-            _buildingsScheduleMap[_buildingsScheduleMap.keys.first]!.keys.first,
-        openedDayIndex: ScheduleTimeData.getCurrentDayOfWeek(),
-        currentLesson: ScheduleTimeData.getCurrentLessonIndex(),
+      emit(ClassroomsLoaded(
+        appBarTitle: buildingsScheduleMap.keys.first,
+        currentBuildingName: buildingsScheduleMap.keys.first,
+        scheduleMap: buildingsScheduleMap,
+        initialClassroom:
+            buildingsScheduleMap[buildingsScheduleMap.keys.first]![0].name,
       ));
     } catch (e, stack) {
-      emit(ClassroomsErrorState(Logger.error(
+      emit(ClassroomsError(Logger.error(
         title: Errors.scheduleError,
         exception: e,
         stack: stack,

@@ -15,10 +15,4 @@ class LoadFavoriteSchedule extends FavoriteScheduleEvent {
   });
 }
 
-class ChangeOpenedDay extends FavoriteScheduleEvent {
-  final int dayIndex;
-
-  ChangeOpenedDay(this.dayIndex);
-}
-
 class OpenMainFavSchedule extends FavoriteScheduleEvent {}

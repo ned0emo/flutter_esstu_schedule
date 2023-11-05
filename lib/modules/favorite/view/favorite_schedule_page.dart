@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/static/schedule_type.dart';
-import 'package:schedule/core/view/schedule_tab.dart';
+import 'package:schedule/core/view/schedule_page_body.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_list_bloc/favorite_list_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_update_bloc/favorite_update_bloc.dart';
-import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 
 class FavoriteSchedulePage extends StatefulWidget {
   final String scheduleType;
@@ -21,29 +20,18 @@ class FavoriteSchedulePage extends StatefulWidget {
     required this.isAutoUpdateEnabled,
   });
 
+  String get fileName => '$scheduleType|$scheduleName';
+
   @override
   State<StatefulWidget> createState() => _FavoriteScheduleState();
-
-  String get fileName => '$scheduleType|$scheduleName';
 }
 
 class _FavoriteScheduleState extends State<FavoriteSchedulePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late bool hideSchedule;
-  late bool showLessonColor;
 
   @override
   void initState() {
-    final settingsState = BlocProvider.of<SettingsBloc>(context).state;
-    if (settingsState is SettingsLoaded) {
-      hideSchedule = settingsState.hideSchedule;
-      showLessonColor = settingsState.lessonColor;
-    } else {
-      hideSchedule = false;
-      showLessonColor = true;
-    }
-
     _controller = AnimationController(
       duration: const Duration(seconds: 25),
       vsync: this,
@@ -65,12 +53,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
             value: Modular.get<FavoriteScheduleBloc>()
               ..add(LoadFavoriteSchedule(widget.fileName,
                   isNeedUpdate: widget.isAutoUpdateEnabled))),
-        BlocProvider.value(
-            value: Modular.get<FavoriteButtonBloc>()
-              ..add(CheckSchedule(
-                scheduleType: widget.scheduleType,
-                name: widget.scheduleName,
-              ))),
+        BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
         BlocProvider.value(value: Modular.get<FavoriteUpdateBloc>()),
       ],
       child: MultiBlocListener(
@@ -118,212 +101,93 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
               if (state is FavoriteScheduleLoaded) {
                 if (state.isNeedUpdate) {
                   Modular.get<FavoriteUpdateBloc>().add(UpdateSchedule(
-                    scheduleName: state.scheduleName,
-                    scheduleList: state.scheduleList,
-                    scheduleType: state.scheduleType,
+                    scheduleModel: state.scheduleModel,
                     isAutoUpdate: true,
-                    link1: state.link1,
-                    link2: state.link2,
-                    customDaysOfWeek: state.customDaysOfWeek,
                   ));
                 }
               }
             },
           ),
+          BlocListener<FavoriteButtonBloc, FavoriteButtonState>(
+            listener: (context, state) {
+              Modular.get<FavoriteListBloc>().add(LoadFavoriteList());
+              //if(state is FavoriteDoesNotExist){
+              //  Modular.get<FavoriteListBloc>().add(LoadFavoriteList());
+              //}
+            },
+          )
         ],
-        child: BlocBuilder<FavoriteScheduleBloc, FavoriteScheduleState>(
-          builder: (context, state) {
-            if (state is FavoriteScheduleLoading ||
-                state is FavoriteScheduleInitial) {
-              return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()));
-            }
-
-            if (state is FavoriteScheduleLoaded) {
-              return DefaultTabController(
-                length: state.numOfWeeks,
-                initialIndex: state.isZo ? 0 : state.weekNumber,
-                child: Scaffold(
-                  appBar: AppBar(
-                    title: Text(state.scheduleName),
-                    actions: state.link1 == null
-                        ? null
-                        : [
-                            IconButton(
-                              onPressed: () {
-                                Modular.get<FavoriteUpdateBloc>()
-                                    .add(UpdateSchedule(
-                                  scheduleName: state.scheduleName,
-                                  scheduleList: state.scheduleList,
-                                  scheduleType: state.scheduleType,
-                                  isAutoUpdate: false,
-                                  link1: state.link1,
-                                  link2: state.link2,
-                                  customDaysOfWeek: state.customDaysOfWeek,
-                                ));
-                              },
-                              icon: RotationTransition(
-                                turns: Tween(begin: 0.0, end: 30.0)
-                                    .animate(_controller),
-                                child: const Icon(Icons.refresh),
-                              ),
-                            ),
-                          ],
-                  ),
-                  body: TabBarView(
-                      children: List.generate(
-                    state.numOfWeeks,
-                    (index) => ScheduleTab(
-                      tabNum: index,
-                      scheduleName: state.scheduleName,
-                      hideSchedule: hideSchedule,
-                      showLessonColor: showLessonColor,
-                      scheduleList: state.scheduleList,
-                      customDaysOfWeek: state.customDaysOfWeek,
-                    ),
-                  )),
-                  bottomNavigationBar: TabBar(
-                    tabs: List.generate(
-                      state.numOfWeeks,
-                      (index) {
-                        final star = !state.isZo && index == state.weekNumber
-                            ? ' ★'
-                            : '';
-                        return Tab(
-                          child: Text(
-                            '${index + 1} неделя$star',
-                            textAlign: TextAlign.center,
-                          ),
-                        );
-                      },
-                    ),
-                    labelStyle: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                  floatingActionButton: _floatingActionButton(context),
-                ),
-              );
-            }
-
-            if (state is FavoriteScheduleError) {
-              return Scaffold(
-                  body: Center(
-                      child: Text(
-                state.message,
-                textAlign: TextAlign.center,
-              )));
-            }
-
-            return const Scaffold(
-                body: Center(child: Text('Неизвестная ошибка')));
-          },
+        child: Scaffold(
+          appBar: AppBar(
+            title: _appBarText(),
+            actions: [_appBarRefreshButton()],
+          ),
+          body: _body(),
         ),
       ),
     );
   }
 
-  Widget _floatingActionButton(BuildContext context) {
-    return BlocListener<FavoriteButtonBloc, FavoriteButtonState>(
-      listener: (context, state) {
-        Modular.get<FavoriteListBloc>().add(LoadFavoriteList());
-
-        if (state is FavoriteExist && state.isNeedSnackBar) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Добавлено в избранное'),
-              duration: Duration(seconds: 1),
-            ),
-          );
-          return;
+  Widget _body() {
+    return BlocBuilder<FavoriteScheduleBloc, FavoriteScheduleState>(
+      builder: (context, state) {
+        if (state is FavoriteScheduleLoading) {
+          return const Center(child: CircularProgressIndicator());
         }
 
-        if (state is FavoriteDoesNotExist && state.isNeedSnackBar) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Удалено из избранного'),
-              duration: Duration(seconds: 1),
-            ),
-          );
-          return;
+        if (state is FavoriteScheduleLoaded) {
+          return const SchedulePageBody<FavoriteScheduleBloc>();
         }
+
+        if (state is FavoriteScheduleError) {
+          return Center(
+              child: Text(
+            state.message,
+            textAlign: TextAlign.center,
+          ));
+        }
+
+        return const Center(child: Text('Неизвестная ошибка...'));
       },
-      child: BlocBuilder<FavoriteScheduleBloc, FavoriteScheduleState>(
-        builder: (context, favoriteScheduleState) {
-          return BlocBuilder<FavoriteUpdateBloc, FavoriteUpdateState>(
-            builder: (context, favoriteUpdateState) {
-              return BlocBuilder<FavoriteButtonBloc, FavoriteButtonState>(
-                builder: (context, state) {
-                  return FloatingActionButton(
-                    onPressed: favoriteUpdateState is FavoriteScheduleUpdating
-                        ? null
-                        : favoriteScheduleState is FavoriteScheduleLoaded
-                            ? () {
-                                if (state is FavoriteExist) {
-                                  Modular.get<FavoriteButtonBloc>().add(
-                                      DeleteSchedule(
-                                          name: favoriteScheduleState
-                                              .scheduleName,
-                                          scheduleType: favoriteScheduleState
-                                              .scheduleType));
-                                  return;
-                                }
-
-                                if (state is FavoriteDoesNotExist) {
-                                  Modular.get<FavoriteButtonBloc>()
-                                      .add(SaveSchedule(
-                                    name: favoriteScheduleState.scheduleName,
-                                    scheduleType:
-                                        favoriteScheduleState.scheduleType,
-                                    scheduleList:
-                                        favoriteScheduleState.scheduleList,
-                                    link1: favoriteScheduleState.link1,
-                                    link2: favoriteScheduleState.link2,
-                                    daysOfWeekList:
-                                        favoriteScheduleState.customDaysOfWeek,
-                                  ));
-
-                                  _addToMainDialog();
-                                }
-                              }
-                            : null,
-                    child: state is FavoriteExist
-                        ? const Icon(Icons.star)
-                        : const Icon(Icons.star_border),
-                  );
-                },
-              );
-            },
-          );
-        },
-      ),
     );
   }
 
-  Future<void> _addToMainDialog() async {
-    if (widget.scheduleType == ScheduleType.classroom) return;
+  Widget _appBarText() {
+    return BlocBuilder<FavoriteScheduleBloc, FavoriteScheduleState>(
+      builder: (context, state) {
+        if (state is FavoriteScheduleLoaded) {
+          return Text(state.scheduleModel.name);
+        }
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Открывать при запуске приложения?'),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Нет')),
-            TextButton(
-                onPressed: () {
-                  Modular.get<FavoriteButtonBloc>().add(AddFavoriteToMainPage(
-                    scheduleType: widget.scheduleType,
-                    name: widget.scheduleName,
-                  ));
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Да')),
-          ],
-        );
+        if (state is FavoriteScheduleError) {
+          return const Text('Ошибка');
+        }
+
+        return const Text('Загрузка');
+      },
+    );
+  }
+
+  Widget _appBarRefreshButton() {
+    return BlocBuilder<FavoriteScheduleBloc, FavoriteScheduleState>(
+      builder: (context, state) {
+        if (state is FavoriteScheduleLoaded &&
+            widget.scheduleType != ScheduleType.classroom) {
+          return IconButton(
+            onPressed: () {
+              Modular.get<FavoriteUpdateBloc>().add(UpdateSchedule(
+                scheduleModel: state.scheduleModel,
+                isAutoUpdate: false,
+              ));
+            },
+            icon: RotationTransition(
+              turns: Tween(begin: 0.0, end: 30.0).animate(_controller),
+              child: const Icon(Icons.refresh),
+            ),
+          );
+        }
+
+        return const SizedBox();
       },
     );
   }

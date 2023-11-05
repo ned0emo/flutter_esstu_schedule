@@ -8,14 +8,9 @@ import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_b
 import 'package:schedule/modules/favorite/favorite_list_bloc/favorite_list_bloc.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
 
-class FavoriteListPage extends StatefulWidget {
+class FavoriteListPage extends StatelessWidget {
   const FavoriteListPage({super.key});
 
-  @override
-  State<StatefulWidget> createState() => _FavoriteListState();
-}
-
-class _FavoriteListState extends State<FavoriteListPage> {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -43,12 +38,16 @@ class _FavoriteListState extends State<FavoriteListPage> {
                             style: TextStyle(fontSize: 20),
                             textAlign: TextAlign.center,
                           )
-                        : Column(
-                            children: List.generate(
-                              map.length,
-                              (index) => _favoriteSection(
-                                map.keys.elementAt(index),
-                                map[map.keys.elementAt(index)]!,
+                        : Padding(
+                            padding: const EdgeInsets.only(bottom: 70.0),
+                            child: Column(
+                              children: List.generate(
+                                map.length,
+                                (index) => _favoriteSection(
+                                  map.keys.elementAt(index),
+                                  map[map.keys.elementAt(index)]!,
+                                  context,
+                                ),
                               ),
                             ),
                           ),
@@ -57,10 +56,7 @@ class _FavoriteListState extends State<FavoriteListPage> {
 
                 if (state is FavoriteListError) {
                   return Center(
-                      child: Text(
-                    state.message,
-                    textAlign: TextAlign.center,
-                  ));
+                      child: Text(state.message, textAlign: TextAlign.center));
                 }
 
                 return const Center(child: Text('Неизвестная ошибка'));
@@ -73,7 +69,8 @@ class _FavoriteListState extends State<FavoriteListPage> {
     );
   }
 
-  Widget _favoriteSection(String sectionName, List<String> scheduleNameList) {
+  Widget _favoriteSection(
+      String sectionName, List<String> scheduleNameList, BuildContext context) {
     return Column(
       children: <Widget>[
         const SizedBox(height: 20),
@@ -83,13 +80,16 @@ class _FavoriteListState extends State<FavoriteListPage> {
             style: const TextStyle(fontSize: 20),
           ),
         ),
-        ...List.generate(scheduleNameList.length,
-            (index) => _favoriteButton(scheduleNameList[index], sectionName))
+        ...List.generate(
+            scheduleNameList.length,
+            (index) =>
+                _favoriteButton(scheduleNameList[index], sectionName, context)),
       ],
     );
   }
 
-  Widget _favoriteButton(String scheduleName, String scheduleType) {
+  Widget _favoriteButton(
+      String scheduleName, String scheduleType, BuildContext context) {
     return Column(
       children: [
         const SizedBox(height: 8),
@@ -101,16 +101,17 @@ class _FavoriteListState extends State<FavoriteListPage> {
                 child: ElevatedButton(
                   onPressed: () async {
                     Modular.to.pushNamed(
-                        AppRoutes.favoriteListRoute +
-                            AppRoutes.favoriteScheduleRoute,
-                        arguments: [
-                          scheduleName,
-                          scheduleType,
-                          (await RepositoryProvider.of<SettingsRepository>(
-                                      context)
-                                  .loadSettings())[SettingsTypes.autoUpdate] ==
-                              'true'
-                        ]);
+                      AppRoutes.favoriteListRoute +
+                          AppRoutes.favoriteScheduleRoute,
+                      arguments: [
+                        scheduleName,
+                        scheduleType,
+                        (await RepositoryProvider.of<SettingsRepository>(
+                                    context)
+                                .loadSettings())[SettingsTypes.autoUpdate] ==
+                            'true'
+                      ],
+                    );
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
