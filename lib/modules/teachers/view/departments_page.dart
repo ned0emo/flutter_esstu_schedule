@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/view/schedule_page_body.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart';
@@ -49,7 +50,12 @@ class DepartmentsPage extends StatelessWidget {
         }
 
         if (state is DepartmentLoaded) {
-          return const SchedulePageBody<DepartmentBloc>();
+          return Column(
+            children: [
+              _dropDownButton(state),
+              const Expanded(child: SchedulePageBody<DepartmentBloc>()),
+            ],
+          );
         }
 
         if (state is DepartmentError) {
@@ -148,6 +154,37 @@ class DepartmentsPage extends StatelessWidget {
               ),
             ),
           )
+        ],
+      ),
+    );
+  }
+
+  Widget _dropDownButton(DepartmentLoaded state) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        children: [
+          const Text('Аудитория:   ', style: TextStyle(fontSize: 18)),
+          Expanded(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: state.currentTeacherName,
+              items: state.teachersScheduleData
+                  .map<DropdownMenuItem<String>>((ScheduleModel value) {
+                return DropdownMenuItem<String>(
+                  value: value.name,
+                  child: Text(value.name),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value == null) return;
+
+                Modular.get<DepartmentBloc>().add(ChangeTeacher(
+                  teacherName: value,
+                ));
+              },
+            ),
+          ),
         ],
       ),
     );

@@ -15,25 +15,29 @@ class DepartmentLoading extends DepartmentState {
 }
 
 class DepartmentLoaded extends DepartmentState {
-  final String initialTeacherName;
+  final String currentTeacherName;
+  final int currentTeacherIndex;
 
   final List<ScheduleModel> teachersScheduleData;
 
   const DepartmentLoaded({
     String? appBarTitle,
-    required this.initialTeacherName,
+    required this.currentTeacherName,
+    required this.currentTeacherIndex,
     required this.teachersScheduleData,
   }) : super(appBarTitle: appBarTitle);
 
   DepartmentLoaded copyWith({
     String? appBarTitle,
     List<ScheduleModel>? teachersScheduleData,
-    String? initialTeacherName,
+    String? currentTeacherName,
+    int? currentTeacherIndex,
   }) {
     return DepartmentLoaded(
       appBarTitle: appBarTitle ?? this.appBarTitle,
       teachersScheduleData: teachersScheduleData ?? this.teachersScheduleData,
-      initialTeacherName: initialTeacherName ?? this.initialTeacherName,
+      currentTeacherName: currentTeacherName ?? this.currentTeacherName,
+      currentTeacherIndex: currentTeacherIndex ?? this.currentTeacherIndex,
     );
   }
 }

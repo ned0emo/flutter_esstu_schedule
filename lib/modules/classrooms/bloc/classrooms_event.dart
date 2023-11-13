@@ -7,7 +7,12 @@ class LoadClassroomsSchedule extends ClassroomsEvent {}
 
 class ChangeBuilding extends ClassroomsEvent {
   final String buildingName;
-  final String? classroom;
 
-  ChangeBuilding(this.buildingName, {this.classroom});
+  ChangeBuilding(this.buildingName);
+}
+
+class ChangeClassroom extends ClassroomsEvent{
+  final String classroom;
+
+  ChangeClassroom({required this.classroom});
 }

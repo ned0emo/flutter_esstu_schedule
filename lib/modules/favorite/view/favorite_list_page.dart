@@ -6,6 +6,7 @@ import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_list_bloc/favorite_list_bloc.dart';
+import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
 
 class FavoriteListPage extends StatelessWidget {
@@ -100,6 +101,7 @@ class FavoriteListPage extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () async {
+                    Modular.get<FavoriteScheduleBloc>().add(ResetSchedule());
                     Modular.to.pushNamed(
                       AppRoutes.favoriteListRoute +
                           AppRoutes.favoriteScheduleRoute,

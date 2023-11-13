@@ -16,3 +16,5 @@ class LoadFavoriteSchedule extends FavoriteScheduleEvent {
 }
 
 class OpenMainFavSchedule extends FavoriteScheduleEvent {}
+
+class ResetSchedule extends FavoriteScheduleEvent {}

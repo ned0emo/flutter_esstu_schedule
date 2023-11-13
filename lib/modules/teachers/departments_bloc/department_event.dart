@@ -14,3 +14,9 @@ class LoadDepartment extends DepartmentEvent {
     this.link2,
   });
 }
+
+class ChangeTeacher extends DepartmentEvent{
+  final String teacherName;
+
+  ChangeTeacher({required this.teacherName});
+}

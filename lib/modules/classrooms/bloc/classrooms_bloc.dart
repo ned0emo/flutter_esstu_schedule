@@ -9,6 +9,7 @@ import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/classrooms/repositories/classrooms_repository.dart';
 
 part 'classrooms_event.dart';
+
 part 'classrooms_state.dart';
 
 class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
@@ -24,6 +25,7 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
     on<ClassroomsEvent>((event, emit) {});
     on<LoadClassroomsSchedule>(_loadClassroomsSchedule);
     on<ChangeBuilding>(_changeBuilding);
+    on<ChangeClassroom>(_changeClassroom);
   }
 
   Future<void> _changeBuilding(
@@ -31,12 +33,24 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
     final currentState = state;
     if (currentState is ClassroomsLoaded) {
       emit(currentState.copyWith(
-          currentBuildingName: event.buildingName,
-          initialClassroom: event.classroom));
-    } else {
-      emit(ClassroomsError(Logger.error(
-          title: Errors.scheduleError,
-          exception: 'currentState is not ClassroomLoaded')));
+        currentBuildingName: event.buildingName,
+        currentClassroomIndex: 0,
+        currentClassroomName:
+            currentState.scheduleMap[event.buildingName]![0].name,
+      ));
+    }
+  }
+
+  Future<void> _changeClassroom(
+      ChangeClassroom event, Emitter<ClassroomsState> emit) async {
+    final currentState = state;
+    if (currentState is ClassroomsLoaded) {
+      final index = currentState.scheduleMap[currentState.currentBuildingName]!
+          .indexWhere((element) => element.name == event.classroom);
+      emit(currentState.copyWith(
+        currentClassroomIndex: index,
+        currentClassroomName: event.classroom,
+      ));
     }
   }
 
@@ -267,7 +281,8 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
         appBarTitle: buildingsScheduleMap.keys.first,
         currentBuildingName: buildingsScheduleMap.keys.first,
         scheduleMap: buildingsScheduleMap,
-        initialClassroom:
+        currentClassroomIndex: 0,
+        currentClassroomName:
             buildingsScheduleMap[buildingsScheduleMap.keys.first]![0].name,
       ));
     } catch (e, stack) {

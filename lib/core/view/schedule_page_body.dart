@@ -39,13 +39,10 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
 
   int numOfWeeks = 0;
   int initialTabIndex = 0;
-  int currentDropdownIndex = 0;
 
   bool isNeedToSelectTab = false;
 
   bool isZo = false;
-
-  String? selectedDropdownElement;
 
   TabController? tabController;
 
@@ -75,8 +72,10 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
     return BlocListener(
       bloc: Modular.get<T1>(),
       listener: (context, state) {
-        selectedDropdownElement = null;
-        currentDropdownIndex = 0;
+        setState(() {
+          selectedWeekIndex = ScheduleTimeData.getCurrentWeekIndex();
+          currentDayOfWeekIndex = ScheduleTimeData.getCurrentDayOfWeekIndex();
+        });
       },
       child: BlocBuilder(
         bloc: Modular.get<T1>(),
@@ -88,7 +87,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             }
 
             currentScheduleModel =
-                state.teachersScheduleData[currentDropdownIndex];
+                state.teachersScheduleData[state.currentTeacherIndex];
 
             numOfWeeks = currentScheduleModel.numOfWeeks;
             if (selectedWeekIndex >= numOfWeeks) {
@@ -98,11 +97,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             initialTabIndex = currentScheduleModel.dayOfWeekByAbsoluteIndex(
                 selectedWeekIndex, currentDayOfWeekIndex);
 
-            return _tabController(
-              dropDownName: 'Преподаватель:   ',
-              dropDownList:
-                  state.teachersScheduleData.map((e) => e.name).toList(),
-            );
+            return _tabController();
           }
 
           if (state is ClassroomsLoaded) {
@@ -115,8 +110,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
               return const Center(child: Text('Ошибка. Список аудиторий пуст'));
             }
 
-            currentScheduleModel = state
-                .scheduleMap[state.currentBuildingName]![currentDropdownIndex];
+            currentScheduleModel = state.scheduleMap[
+                state.currentBuildingName]![state.currentClassroomIndex];
 
             numOfWeeks = currentScheduleModel.numOfWeeks;
             if (selectedWeekIndex >= numOfWeeks) {
@@ -126,12 +121,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             initialTabIndex = currentScheduleModel.dayOfWeekByAbsoluteIndex(
                 selectedWeekIndex, currentDayOfWeekIndex);
 
-            return _tabController(
-              dropDownName: 'Аудитория:   ',
-              dropDownList: state.scheduleMap[state.currentBuildingName]!
-                  .map((e) => e.name)
-                  .toList(),
-            );
+            return _tabController();
           }
 
           Widget otherTabController(ScheduleModel scheduleModel) {
@@ -174,9 +164,14 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
     );
   }
 
-  Widget _tabController({String? dropDownName, List<String>? dropDownList}) {
+  Widget _tabController(//{String? dropDownName, List<String>? dropDownList}
+      ) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (isCurrentWeek && isNeedToSelectTab) {
+      if (!isNeedToSelectTab) {
+        isNeedToSelectTab = true;
+        return;
+      }
+      if (isCurrentWeek) {
         tabController?.animateTo(currentScheduleModel.dayOfWeekByAbsoluteIndex(
             selectedWeekIndex, currentDayOfWeekIndex));
       }
@@ -194,36 +189,6 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
 
         return Column(
           children: [
-            if (dropDownList != null)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(dropDownName.toString(),
-                      style: const TextStyle(fontSize: 18)),
-                  DropdownButton<String>(
-                    items: dropDownList
-                        .map((el) => DropdownMenuItem<String>(
-                              value: el,
-                              child: Text(el),
-                            ))
-                        .toList(),
-                    onChanged: (String? value) {
-                      if (value == selectedDropdownElement || value == null) {
-                        return;
-                      }
-
-                      isNeedToSelectTab = true;
-                      setState(() {
-                        selectedWeekIndex =
-                            ScheduleTimeData.getCurrentWeekIndex();
-                        selectedDropdownElement = value;
-                        currentDropdownIndex = dropDownList.indexOf(value);
-                      });
-                    },
-                    value: selectedDropdownElement ?? dropDownList[0],
-                  ),
-                ],
-              ),
             Expanded(
               child: Stack(
                 alignment: AlignmentDirectional.bottomStart,
@@ -243,13 +208,12 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                                           .map<Widget>(
                                             (lesson) => LessonSection(
                                               lesson: lesson,
-                                              isCurrentLesson:
+                                              isCurrentLesson: isCurrentWeek &&
                                                   currentDayOfWeekIndex ==
-                                                          lessons
-                                                              .dayOfWeekIndex &&
-                                                      currentLessonIndex ==
-                                                          lesson.lessonIndex &&
-                                                      !isZo,
+                                                      lessons.dayOfWeekIndex &&
+                                                  currentLessonIndex ==
+                                                      lesson.lessonIndex &&
+                                                  !isZo,
                                             ),
                                           )
                                           .toList(),
@@ -291,43 +255,32 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
               controller: tabController,
               tabs: currentScheduleModel.weeks[selectedWeekIndex].daysOfWeek
                   .map(
-                    (e) => e.dayOfWeekDate != null
-                        ? Tab(
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: e.dayOfWeekName,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.color,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: '\n${e.dayOfWeekDate}',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.color,
-                                    ),
-                                  )
-                                ],
+                    (e) => Tab(
+                      iconMargin: EdgeInsets.zero,
+                      child: FittedBox(
+                        fit: BoxFit.none,
+                        child: e.dayOfWeekDate != null
+                            ? Text(
+                                '${e.dayOfWeekName}\n${e.dayOfWeekDate}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12,
+                                ),
+                              )
+                            : Text(
+                                e.dayOfWeekIndex == currentDayOfWeekIndex &&
+                                        isCurrentWeek
+                                    ? '[${e.dayOfWeekName}]'
+                                    : e.dayOfWeekName,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                          )
-                        : Tab(
-                            text: e.dayOfWeekIndex == currentDayOfWeekIndex &&
-                                    isCurrentWeek
-                                ? '[${e.dayOfWeekName}]'
-                                : e.dayOfWeekName,
-                          ),
+                      ),
+                    ),
                   )
                   .toList(),
             ),

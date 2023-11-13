@@ -17,6 +17,7 @@ class FavoriteScheduleBloc
   FavoriteScheduleBloc(FavoriteRepository repository)
       : _favoriteRepository = repository,
         super(FavoriteScheduleInitial()) {
+    on<ResetSchedule>((event, emit) => emit(FavoriteScheduleInitial()));
     on<LoadFavoriteSchedule>(_loadFavoriteSchedule);
     on<OpenMainFavSchedule>(_openMainFavSchedule);
   }

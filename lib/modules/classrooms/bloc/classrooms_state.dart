@@ -27,25 +27,29 @@ class ClassroomsLoading extends ClassroomsState {
 class ClassroomsLoaded extends ClassroomsState {
   final String currentBuildingName;
   final Map<String, List<ScheduleModel>> scheduleMap;
-  final String initialClassroom;
+  final int currentClassroomIndex;
+  final String currentClassroomName;
 
   const ClassroomsLoaded({
     String? appBarTitle,
     required this.currentBuildingName,
     required this.scheduleMap,
-    required this.initialClassroom,
+    required this.currentClassroomIndex,
+    required this.currentClassroomName,
   }) : super(appBarTitle: appBarTitle);
 
   ClassroomsLoaded copyWith({
     String? currentBuildingName,
     Map<String, List<ScheduleModel>>? scheduleMap,
-    String? initialClassroom,
+    int? currentClassroomIndex,
+    String? currentClassroomName,
   }) {
     return ClassroomsLoaded(
       appBarTitle: currentBuildingName ?? appBarTitle,
       currentBuildingName: currentBuildingName ?? this.currentBuildingName,
       scheduleMap: scheduleMap ?? this.scheduleMap,
-      initialClassroom: initialClassroom ?? this.initialClassroom,
+      currentClassroomIndex: currentClassroomIndex ?? this.currentClassroomIndex,
+      currentClassroomName: currentClassroomName ?? this.currentClassroomName,
     );
   }
 }

@@ -22,6 +22,20 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
         super(DepartmentInitial()) {
     on<DepartmentEvent>((event, emit) {});
     on<LoadDepartment>(_loadDepartment);
+    on<ChangeTeacher>(_changeTeacher);
+  }
+
+  Future<void> _changeTeacher(
+      ChangeTeacher event, Emitter<DepartmentState> emit) async {
+    final currentState = state;
+    if (currentState is DepartmentLoaded) {
+      final index = currentState.teachersScheduleData
+          .indexWhere((element) => element.name == event.teacherName);
+      emit(currentState.copyWith(
+        currentTeacherName: event.teacherName,
+        currentTeacherIndex: index,
+      ));
+    }
   }
 
   Future<void> _loadDepartment(
@@ -115,7 +129,7 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
         emit(DepartmentError(
             warningMessage: Logger.warning(
           title: 'Хмм.. Кажется, расписание для данной кафедры отсутствует',
-          exception: 'teachersScheduleMap isEmpty',
+          exception: 'teachersScheduleMap.isEmpty == true',
         )));
 
         return;
@@ -124,7 +138,8 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
       emit(DepartmentLoaded(
         appBarTitle: state.appBarTitle,
         teachersScheduleData: teachersSchedule,
-        initialTeacherName: teachersSchedule[0].name,
+        currentTeacherName: teachersSchedule[0].name,
+        currentTeacherIndex: 0,
       ));
     } catch (e, stack) {
       emit(DepartmentError(

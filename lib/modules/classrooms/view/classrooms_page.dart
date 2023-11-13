@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/view/schedule_page_body.dart';
 import 'package:schedule/modules/classrooms/bloc/classrooms_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
@@ -48,7 +49,12 @@ class ClassroomsPage extends StatelessWidget {
     }
 
     if (state is ClassroomsLoaded) {
-      return const SchedulePageBody<ClassroomsBloc>();
+      return Column(
+        children: [
+          _dropDownButton(state),
+          const Expanded(child: SchedulePageBody<ClassroomsBloc>()),
+        ],
+      );
     }
 
     if (state is ClassroomsError) {
@@ -105,10 +111,10 @@ class ClassroomsPage extends StatelessWidget {
                           onTap: () {
                             final building =
                                 state.scheduleMap.keys.elementAt(index);
-                            final classroom =
-                                state.scheduleMap[building]!.first.name;
-                            Modular.get<ClassroomsBloc>().add(
-                                ChangeBuilding(building, classroom: classroom));
+                            //final classroom =
+                            //    state.scheduleMap[building]!.first.name;
+                            Modular.get<ClassroomsBloc>()
+                                .add(ChangeBuilding(building));
                             Navigator.pop(context);
                           },
                         ),
@@ -127,5 +133,36 @@ class ClassroomsPage extends StatelessWidget {
 
   Widget _appBarText(ClassroomsState state) {
     return Text(state.appBarTitle ?? 'Аудитории', maxLines: 2);
+  }
+
+  Widget _dropDownButton(ClassroomsLoaded state) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        children: [
+          const Text('Аудитория:   ', style: TextStyle(fontSize: 18)),
+          Expanded(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: state.currentClassroomName,
+              items: state.scheduleMap[state.currentBuildingName]!
+                  .map<DropdownMenuItem<String>>((ScheduleModel value) {
+                return DropdownMenuItem<String>(
+                  value: value.name,
+                  child: Text(value.name),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value == null) return;
+
+                Modular.get<ClassroomsBloc>().add(ChangeClassroom(
+                  classroom: value,
+                ));
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
