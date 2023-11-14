@@ -295,7 +295,10 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
               ),
               Padding(
                 padding: EdgeInsets.only(bottom: 60.0, right: 15.0),
-                child: Text('Скрыть пустые дни недели можно в настройках'),
+                child: Text(
+                  'Скрыть пустые дни недели можно в настройках',
+                  textAlign: TextAlign.right,
+                ),
               )
             ],
           );
