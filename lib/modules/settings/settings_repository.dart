@@ -14,6 +14,8 @@ class SettingsRepository {
           (storage.getString(SettingsTypes.noUpdateClassroom)) ?? 'false',
       SettingsTypes.legacyFavoriteDeleted:
           (storage.getString(SettingsTypes.legacyFavoriteDeleted)) ?? 'false',
+      SettingsTypes.hideSchedule:
+          (storage.getString(SettingsTypes.hideSchedule)) ?? 'false',
     };
 
     return settingsMap;

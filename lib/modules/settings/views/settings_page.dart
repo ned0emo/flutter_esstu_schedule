@@ -68,6 +68,24 @@ class SettingsPage extends StatelessWidget {
                       return Colors.grey;
                     }),
                   ),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    title: const Text('Скрывать пустые дни недели'),
+                    subtitle: Text(state.hideScheduleDescription),
+                    value: state.hideSchedule,
+                    onChanged: (value) {
+                      BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
+                          settingType: SettingsTypes.hideSchedule,
+                          value: value.toString()));
+                    },
+                    trackColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.selected)) {
+                            return Theme.of(context).colorScheme.primary;
+                          }
+                          return Colors.grey;
+                        }),
+                  ),
                   const ListTile(
                       title: Text(
                     'Отладка',
@@ -117,7 +135,7 @@ class SettingsPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   )),
                   ListTile(
-                    title: const Text('Версия 3.3.1'),
+                    title: const Text('Версия 3.3.2'),
                     subtitle: RichText(
                       text: TextSpan(
                         children: [

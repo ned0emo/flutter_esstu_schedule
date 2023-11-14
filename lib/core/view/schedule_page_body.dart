@@ -26,6 +26,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   late int selectedWeekIndex;
 
   /// Индекс с учетом отсутствия некоторых дней недели
+  /// Вычисляется в ScheduleModel, либо, если все дни недели показаны,
+  /// равен индексу дня недели в STD
   late int currentDayOfWeekIndex;
 
   /// Абсолютное значение индекса пары, независимо от пустых пар
@@ -40,9 +42,12 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   int numOfWeeks = 0;
   int initialTabIndex = 0;
 
+  /// Для отмены выбора сегодняшнего дня во время смены недели
   bool isNeedToSelectTab = false;
 
   bool isZo = false;
+
+  bool showEmptyDays = true;
 
   TabController? tabController;
 
@@ -53,6 +58,11 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
     selectedWeekIndex = ScheduleTimeData.getCurrentWeekIndex();
     currentDayOfWeekIndex = ScheduleTimeData.getCurrentDayOfWeekIndex();
     currentLessonIndex = ScheduleTimeData.getCurrentLessonIndex();
+
+    final settingsState = BlocProvider.of<SettingsBloc>(context).state;
+    if (settingsState is SettingsLoaded) {
+      showEmptyDays = !settingsState.hideSchedule;
+    }
   }
 
   /// Смена дня недели. [number] нужен для конкретного выбора через длинное
@@ -94,8 +104,10 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
               selectedWeekIndex = 0;
             }
 
-            initialTabIndex = currentScheduleModel.dayOfWeekByAbsoluteIndex(
-                selectedWeekIndex, currentDayOfWeekIndex);
+            initialTabIndex = showEmptyDays
+                ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
+                : currentScheduleModel.dayOfWeekByAbsoluteIndex(
+                    selectedWeekIndex, currentDayOfWeekIndex);
 
             return _tabController();
           }
@@ -118,8 +130,10 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
               selectedWeekIndex = 0;
             }
 
-            initialTabIndex = currentScheduleModel.dayOfWeekByAbsoluteIndex(
-                selectedWeekIndex, currentDayOfWeekIndex);
+            initialTabIndex = showEmptyDays
+                ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
+                : currentScheduleModel.dayOfWeekByAbsoluteIndex(
+                    selectedWeekIndex, currentDayOfWeekIndex);
 
             return _tabController();
           }
@@ -139,8 +153,10 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             }
 
             if (!isZo) {
-              initialTabIndex = currentScheduleModel.dayOfWeekByAbsoluteIndex(
-                  selectedWeekIndex, currentDayOfWeekIndex);
+              initialTabIndex = showEmptyDays
+                  ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
+                  : currentScheduleModel.dayOfWeekByAbsoluteIndex(
+                      selectedWeekIndex, currentDayOfWeekIndex);
             }
 
             return _tabController();
@@ -164,8 +180,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
     );
   }
 
-  Widget _tabController(//{String? dropDownName, List<String>? dropDownList}
-      ) {
+  Widget _tabController() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!isNeedToSelectTab) {
         isNeedToSelectTab = true;
@@ -176,7 +191,11 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             selectedWeekIndex, currentDayOfWeekIndex));
       }
     });
-    final tabCount = currentScheduleModel.weekLength(selectedWeekIndex);
+
+    final tabCount = !showEmptyDays || isZo
+        ? currentScheduleModel.weekLength(selectedWeekIndex)
+        : 6;
+    final daysOfWeek = ScheduleTimeData.daysOfWeekSmall.take(6);
 
     return DefaultTabController(
       length: tabCount,
@@ -194,36 +213,13 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                 alignment: AlignmentDirectional.bottomStart,
                 children: [
                   tabCount > 0
-                      ? TabBarView(
-                          controller: tabController,
-                          children: currentScheduleModel
-                              .weeks[selectedWeekIndex].daysOfWeek
-                              .map(
-                                (lessons) => SingleChildScrollView(
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsets.only(bottom: 50.0),
-                                    child: Column(
-                                      children: lessons.lessons
-                                          .map<Widget>(
-                                            (lesson) => LessonSection(
-                                              lesson: lesson,
-                                              isCurrentLesson: isCurrentWeek &&
-                                                  currentDayOfWeekIndex ==
-                                                      lessons.dayOfWeekIndex &&
-                                                  currentLessonIndex ==
-                                                      lesson.lessonIndex &&
-                                                  !isZo,
-                                            ),
-                                          )
-                                          .toList(),
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        )
-                      : const Center(child: Text('Расписание отсутствует')),
+                      ? _tabBarView(tabCount, daysOfWeek)
+                      : const Center(
+                          child: Text(
+                            'Расписание отсутствует',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                   Container(
                     height: 50,
                     padding: const EdgeInsets.all(5),
@@ -251,42 +247,171 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                 ],
               ),
             ),
-            TabBar(
-              controller: tabController,
-              tabs: currentScheduleModel.weeks[selectedWeekIndex].daysOfWeek
-                  .map(
-                    (e) => Tab(
-                      iconMargin: EdgeInsets.zero,
-                      child: FittedBox(
-                        fit: BoxFit.none,
-                        child: e.dayOfWeekDate != null
-                            ? Text(
-                                '${e.dayOfWeekName}\n${e.dayOfWeekDate}',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                ),
-                              )
-                            : Text(
-                                e.dayOfWeekIndex == currentDayOfWeekIndex &&
-                                        isCurrentWeek
-                                    ? '[${e.dayOfWeekName}]'
-                                    : e.dayOfWeekName,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
-                                ),
-                              ),
+            _tabBar(tabCount, daysOfWeek),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _tabBarView(int tabCount, Iterable<String> daysOfWeek) {
+    if (isZo || !showEmptyDays) {
+      return TabBarView(
+        controller: tabController,
+        children:
+            currentScheduleModel.weeks[selectedWeekIndex].daysOfWeek.map((e) {
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 50.0),
+              child: Column(
+                children: e.lessons
+                    .map<Widget>(
+                      (lesson) => LessonSection(
+                        lesson: lesson,
+                        isCurrentLesson: false,
                       ),
+                    )
+                    .toList(),
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    }
+
+    return TabBarView(
+      controller: tabController,
+      children: daysOfWeek.map((e) {
+        final currentDaySchedule =
+            currentScheduleModel.getDayOfWeekByShortName(e, selectedWeekIndex);
+        if (currentDaySchedule == null) {
+          return const Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Center(
+                  child: Text('Расписание на этот день отсутствует'),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 60.0, right: 15.0),
+                child: Text('Скрыть пустые дни недели можно в настройках'),
+              )
+            ],
+          );
+        }
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 50.0),
+            child: Column(
+              children: currentDaySchedule.lessons
+                  .map<Widget>(
+                    (lesson) => LessonSection(
+                      lesson: lesson,
+                      isCurrentLesson: isCurrentWeek &&
+                          currentDayOfWeekIndex ==
+                              currentDaySchedule.dayOfWeekIndex &&
+                          currentLessonIndex == lesson.lessonIndex &&
+                          !isZo,
                     ),
                   )
                   .toList(),
             ),
-          ],
+          ),
         );
-      }),
+      }).toList(),
+    );
+  }
+
+  Widget _tabBar(int tabCount, Iterable<String> daysOfWeek) {
+    if (isZo || !showEmptyDays) {
+      return TabBar(
+        controller: tabController,
+        tabs: currentScheduleModel.weeks[selectedWeekIndex].daysOfWeek.map((e) {
+          return Tab(
+            iconMargin: EdgeInsets.zero,
+            child: FittedBox(
+              fit: BoxFit.none,
+              child: e.dayOfWeekDate != null
+                  ? Text(
+                      '${e.dayOfWeekName}\n${e.dayOfWeekDate}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                    )
+                  : Text(
+                      e.dayOfWeekIndex == currentDayOfWeekIndex && isCurrentWeek
+                          ? '[${e.dayOfWeekName}]'
+                          : e.dayOfWeekName,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+            ),
+          );
+        }).toList(),
+      );
+    }
+
+    return TabBar(
+      controller: tabController,
+      tabs: daysOfWeek.map((e) {
+        final currentDaySchedule =
+            currentScheduleModel.getDayOfWeekByShortName(e, selectedWeekIndex);
+        if (currentDaySchedule == null) {
+          return Tab(
+            iconMargin: EdgeInsets.zero,
+            child: FittedBox(
+              fit: BoxFit.none,
+              child: Text(
+                ScheduleTimeData.daysOfWeekSmall.indexOf(e) ==
+                            currentDayOfWeekIndex &&
+                        isCurrentWeek
+                    ? '[$e]'
+                    : e,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return Tab(
+          iconMargin: EdgeInsets.zero,
+          child: FittedBox(
+            fit: BoxFit.none,
+            child: currentDaySchedule.dayOfWeekDate != null
+                ? Text(
+                    '${currentDaySchedule.dayOfWeekName}\n${currentDaySchedule.dayOfWeekDate}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                  )
+                : Text(
+                    currentDaySchedule.dayOfWeekIndex ==
+                                currentDayOfWeekIndex &&
+                            isCurrentWeek
+                        ? '[${currentDaySchedule.dayOfWeekName}]'
+                        : currentDaySchedule.dayOfWeekName,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -322,7 +447,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
       name: currentScheduleModel.name,
     ));
 
-    ///Провайдер вызывать из виджеты уровнем выше
+    ///Провайдер вызывать из виджета уровнем выше
     return BlocListener<FavoriteButtonBloc, FavoriteButtonState>(
       listener: (context, state) {
         if (state is FavoriteExist && state.isNeedSnackBar) {

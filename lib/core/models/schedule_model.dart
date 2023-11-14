@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
+import 'package:schedule/core/models/day_of_week_model.dart';
 import 'package:schedule/core/models/lesson_model.dart';
 import 'package:schedule/core/models/week_model.dart';
 
@@ -95,5 +97,12 @@ class ScheduleModel {
     }
 
     return false;
+  }
+
+  /// Если возвращается null, то вкладка с [name] будет пустой
+  DayOfWeekModel? getDayOfWeekByShortName(String name, int weekIndex) {
+    return weeks[weekIndex]
+        .daysOfWeek
+        .firstWhereOrNull((element) => element.dayOfWeekName.contains(name));
   }
 }

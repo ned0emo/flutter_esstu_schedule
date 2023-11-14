@@ -27,11 +27,11 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       final stringSettingsValues = await _settingsRepository.loadSettings();
 
       /// Разовая чистка легаси избранного
-      /// TODO: В следующих обновлениях убрать
-      if (stringSettingsValues[SettingsTypes.legacyFavoriteDeleted] !=
-          'true') {
+      /// TODO: В следующих обновлениях убрать?
+      if (stringSettingsValues[SettingsTypes.legacyFavoriteDeleted] != 'true') {
         await _settingsRepository.clearFavorite();
-        await _settingsRepository.saveSettings(SettingsTypes.legacyFavoriteDeleted, 'true');
+        await _settingsRepository.saveSettings(
+            SettingsTypes.legacyFavoriteDeleted, 'true');
       }
 
       emit(
@@ -40,6 +40,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
           noUpdateClassroom:
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
+          hideSchedule:
+              stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
         ),
       );
     } catch (e, stack) {
@@ -62,6 +64,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
           noUpdateClassroom:
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
+          hideSchedule:
+              stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
         ),
       );
     } catch (e, stack) {
@@ -94,6 +98,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
           noUpdateClassroom:
               stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
+          hideSchedule:
+              stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
         ),
       );
     } catch (e, stack) {
