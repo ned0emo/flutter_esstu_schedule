@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:schedule/core/logger.dart';
+import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';

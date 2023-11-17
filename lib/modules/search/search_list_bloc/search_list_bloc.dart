@@ -2,33 +2,23 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/logger.dart';
+import 'package:schedule/core/main_repository.dart';
+import 'package:schedule/core/parser.dart';
+import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/schedule_type.dart';
-import 'package:schedule/modules/search/search_repository.dart';
 
 part 'search_list_event.dart';
+
 part 'search_list_state.dart';
 
 class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
-  final SearchRepository _searchRepository;
+  final MainRepository _searchRepository;
+  final Parser _parser;
+
   final int _threadCount = 6;
 
-  final List<String> _studentsLinks = [
-    '/bakalavriat/raspisan.htm',
-    '/spezialitet/raspisan.htm',
-    '/zo1/raspisan.htm',
-    '/zo2/raspisan.htm',
-  ];
-
-  final List<String> _studentsScheduleLinks = [
-    '/bakalavriat',
-    '/spezialitet',
-    '/zo1',
-    '/zo2',
-  ];
-
-  final List<String> teachersLinks = [
+  final List<String> _teachersLinks = [
     "/spezialitet/craspisanEdt.htm",
     "/bakalavriat/craspisanEdt.htm",
   ];
@@ -38,14 +28,9 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
     "/bakalavriat",
   ];
 
-  ///Маги, колледж
-  //final magLink = "/spezialitet/craspisanEdt.htm";
-
-  ///Баки, специалитет
-  //final bakLink = "/bakalavriat/craspisanEdt.htm";
-
-  SearchListBloc(SearchRepository repository)
+  SearchListBloc(MainRepository repository, Parser parser)
       : _searchRepository = repository,
+        _parser = parser,
         super(SearchInitial()) {
     on<LoadSearchList>(_loadSearchList);
     on<SearchInList>(_searchInList);
@@ -55,41 +40,15 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
       LoadSearchList event, Emitter<SearchListState> emit) async {
     emit(SearchListLoading());
 
-    final Map<String, List<String>> scheduleLinksMap = {};
+    final Map<String, List<String>>? scheduleLinksMap;
 
     ///Учебные группы
     if (event.scheduleType == ScheduleType.student) {
-      final schedulePages = [];
-
-      try {
-        for (String link in _studentsLinks) {
-          schedulePages.add(await _searchRepository.loadPage(link));
-        }
-
-        int i = 0;
-        for (String page in schedulePages) {
-          final splittedPage = page.split('HREF="').skip(1);
-          for (String groupSection in splittedPage) {
-            if (!groupSection.contains(RegExp(r'[0-9]'))) break;
-
-            final name = groupSection.substring(
-                groupSection.indexOf('n">') + 3, groupSection.indexOf('</F'));
-            if (!name.contains(RegExp(r'[0-9]'))) {
-              continue;
-            }
-            final link =
-                '${_studentsScheduleLinks[i]}/${groupSection.substring(0, groupSection.indexOf('">'))}';
-
-            if (scheduleLinksMap[name] == null) scheduleLinksMap[name] = [];
-            scheduleLinksMap[name]!.add(link);
-          }
-          i++;
-        }
-      } catch (e, stack) {
+      scheduleLinksMap  = await _parser.groupMap();
+      if(scheduleLinksMap == null){
         emit(SearchingError(Logger.error(
           title: Errors.scheduleError,
-          exception: e,
-          stack: stack,
+          exception: _parser.lastError,
         )));
         return;
       }
@@ -97,13 +56,13 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
 
     ///Препода
     else {
+      scheduleLinksMap = {};
       final facultiesPages = [];
       try {
-        for (String link in teachersLinks) {
+        for (String link in _teachersLinks) {
           facultiesPages.add(await _searchRepository.loadPage(link));
         }
-      }
-      catch(e, stack){
+      } catch (e, stack) {
         emit(SearchingError(Logger.error(
           title: Errors.scheduleError,
           exception: e,
@@ -131,7 +90,7 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
                   .substring(0, teacherSection.indexOf('<'))
                   .trim();
 
-              if (scheduleLinksMap[teacherName] == null) {
+              if (scheduleLinksMap![teacherName] == null) {
                 scheduleLinksMap[teacherName] = [];
               }
               scheduleLinksMap[teacherName]!.add(link);
@@ -232,7 +191,7 @@ class SearchListBloc extends Bloc<SearchListEvent, SearchListState> {
         namesList.removeWhere((element) =>
             !element.toUpperCase().contains(event.searchText.toUpperCase()));
         emit(currentState.copyWith(
-            searchedList: namesList.take(10).toList()..sort()));
+            searchedList: namesList.take(15).toList()..sort()));
       } catch (e, stack) {
         emit(SearchingError(Logger.error(
           title: Errors.searchError,

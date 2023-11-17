@@ -1,11 +1,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/logger.dart';
+import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/lesson_builder.dart';
 import 'package:schedule/core/static/schedule_type.dart';
-import 'package:schedule/modules/home/main_repository.dart';
+import 'package:schedule/core/main_repository.dart';
 
 part 'current_group_event.dart';
 

@@ -2,7 +2,6 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/modules/home/home_module.dart';
 import 'package:schedule/modules/search/search_list_bloc/search_list_bloc.dart';
-import 'package:schedule/modules/search/search_repository.dart';
 import 'package:schedule/modules/search/search_schedule_bloc/search_schedule_bloc.dart';
 import 'package:schedule/modules/search/view/search_list_page.dart';
 import 'package:schedule/modules/search/view/search_schedule_page.dart';
@@ -10,7 +9,6 @@ import 'package:schedule/modules/search/view/search_schedule_page.dart';
 class SearchModule extends Module {
   @override
   void binds(i) {
-    i.addSingleton(SearchRepository.new);
     i.addSingleton(SearchListBloc.new);
     i.addSingleton(SearchScheduleBloc.new);
   }

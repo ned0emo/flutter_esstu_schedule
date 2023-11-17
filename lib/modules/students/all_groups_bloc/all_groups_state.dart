@@ -13,10 +13,7 @@ class AllGroupsLoading extends AllGroupsState {
 }
 
 class AllGroupsLoaded extends AllGroupsState {
-  final Map<String, Map<String, String>> bakScheduleMap;
-  final Map<String, Map<String, String>> magScheduleMap;
-  final Map<String, Map<String, String>> colScheduleMap;
-  final Map<String, Map<String, String>> zoScheduleMap;
+  final Map<String, Map<String, Map<String, String>>> scheduleLinksMap;
 
   final String currentCourse;
   final String studType;
@@ -25,10 +22,7 @@ class AllGroupsLoaded extends AllGroupsState {
   final String? warningMessage;
 
   const AllGroupsLoaded({
-    required this.bakScheduleMap,
-    required this.magScheduleMap,
-    required this.colScheduleMap,
-    required this.zoScheduleMap,
+    required this.scheduleLinksMap,
     required this.currentCourse,
     required this.studType,
     required this.currentGroup,
@@ -37,10 +31,7 @@ class AllGroupsLoaded extends AllGroupsState {
   }) : super(appBarTitle: appBarTitle);
 
   AllGroupsLoaded copyWith({
-    Map<String, Map<String, String>>? bakScheduleMap,
-    Map<String, Map<String, String>>? magScheduleMap,
-    Map<String, Map<String, String>>? colScheduleMap,
-    Map<String, Map<String, String>>? zoScheduleMap,
+    Map<String, Map<String, Map<String, String>>>? scheduleLinksMap,
     String? currentCourse,
     String? currentGroup,
     String? studType,
@@ -48,10 +39,7 @@ class AllGroupsLoaded extends AllGroupsState {
     String? appBarTitle,
   }) {
     return AllGroupsLoaded(
-      bakScheduleMap: bakScheduleMap ?? this.bakScheduleMap,
-      magScheduleMap: magScheduleMap ?? this.magScheduleMap,
-      colScheduleMap: colScheduleMap ?? this.colScheduleMap,
-      zoScheduleMap: zoScheduleMap ?? this.zoScheduleMap,
+      scheduleLinksMap: scheduleLinksMap ?? this.scheduleLinksMap,
       currentCourse: currentCourse ?? this.currentCourse,
       currentGroup: currentGroup ?? this.currentGroup,
       studType: studType ?? this.studType,
@@ -60,23 +48,11 @@ class AllGroupsLoaded extends AllGroupsState {
     );
   }
 
-  Map<String, String> get currentCourseMap => studType == StudentsType.bak
-      ? bakScheduleMap[currentCourse]!
-      : studType == StudentsType.mag
-          ? magScheduleMap[currentCourse]!
-          : studType == StudentsType.col
-              ? colScheduleMap[currentCourse]!
-              : zoScheduleMap[currentCourse]!;
+  Map<String, String> get currentCourseMap =>
+      scheduleLinksMap[studType]![currentCourse]!;
 
-  Map<String, String> courseMap(String course, String studType) {
-    return studType == StudentsType.bak
-        ? bakScheduleMap[course]!
-        : studType == StudentsType.mag
-            ? magScheduleMap[course]!
-            : studType == StudentsType.col
-                ? colScheduleMap[course]!
-                : zoScheduleMap[course]!;
-  }
+  Map<String, String> courseMap(String course, String studType) =>
+      scheduleLinksMap[studType]![course]!;
 }
 
 class CourseSelected extends AllGroupsState {
