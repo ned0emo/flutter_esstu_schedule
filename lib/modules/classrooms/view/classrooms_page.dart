@@ -41,7 +41,7 @@ class ClassroomsPage extends StatelessWidget {
           children: [
             const CircularProgressIndicator(),
             const SizedBox(height: 15),
-            if (state.percents > 0) Text('${state.percents}%'),
+            Text('${state.percents}%'),
             Text(state.message, textAlign: TextAlign.center),
           ],
         ),

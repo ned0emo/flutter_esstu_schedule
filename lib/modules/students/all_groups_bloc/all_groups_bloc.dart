@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:schedule/core/main_repository.dart';
-import 'package:schedule/core/parser.dart';
+import 'package:schedule/core/parser/students_parser.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/static/students_type.dart';
@@ -10,9 +10,9 @@ part 'all_groups_event.dart';
 part 'all_groups_state.dart';
 
 class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
-  final Parser _parser;
+  final StudentsParser _parser;
 
-  AllGroupsBloc(MainRepository repository, Parser parser)
+  AllGroupsBloc(MainRepository repository, StudentsParser parser)
       : _parser = parser,
         super(const AllGroupsLoading()) {
     on<LoadAllGroups>(_loadGroupList);
@@ -28,7 +28,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
       LoadAllGroups event, Emitter<AllGroupsState> emit) async {
     emit(const AllGroupsLoading());
 
-    final scheduleMap = await _parser.courseGroupMap();
+    final scheduleMap = await _parser.courseGroupLinkMap();
 
     if (scheduleMap == null) {
       emit(const AllGroupsError(Errors.scheduleError));

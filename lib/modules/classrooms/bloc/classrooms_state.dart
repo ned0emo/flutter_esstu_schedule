@@ -16,12 +16,14 @@ class ClassroomsError extends ClassroomsState {
 }
 
 class ClassroomsLoading extends ClassroomsState {
-  final int percents;
+  final String percents;
   final String message;
 
-  const ClassroomsLoading(
-      {String? appBarTitle, this.percents = 0, this.message = ''})
-      : super(appBarTitle: appBarTitle);
+  const ClassroomsLoading({
+    String? appBarTitle,
+    this.percents = '0',
+    this.message = '',
+  }) : super(appBarTitle: appBarTitle);
 }
 
 class ClassroomsLoaded extends ClassroomsState {
@@ -48,7 +50,8 @@ class ClassroomsLoaded extends ClassroomsState {
       appBarTitle: currentBuildingName ?? appBarTitle,
       currentBuildingName: currentBuildingName ?? this.currentBuildingName,
       scheduleMap: scheduleMap ?? this.scheduleMap,
-      currentClassroomIndex: currentClassroomIndex ?? this.currentClassroomIndex,
+      currentClassroomIndex:
+          currentClassroomIndex ?? this.currentClassroomIndex,
       currentClassroomName: currentClassroomName ?? this.currentClassroomName,
     );
   }

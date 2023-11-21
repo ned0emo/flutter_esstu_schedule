@@ -3,22 +3,22 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/main_repository.dart';
 import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/lesson_builder.dart';
 import 'package:schedule/core/static/schedule_type.dart';
-import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'department_event.dart';
 
 part 'department_state.dart';
 
 class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
-  final TeachersRepository _teachersRepository;
+  final MainRepository _repository;
 
-  DepartmentBloc(TeachersRepository repository)
-      : _teachersRepository = repository,
+  DepartmentBloc(MainRepository repository)
+      : _repository = repository,
         super(DepartmentInitial()) {
     on<DepartmentEvent>((event, emit) {});
     on<LoadDepartment>(_loadDepartment);
@@ -44,8 +44,8 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
 
     List<String> departmentsPages = [];
     try {
-      departmentsPages = await _teachersRepository
-          .loadDepartmentPages(event.link1, link2: event.link2);
+      departmentsPages =
+          await _repository.loadTwoPages(event.link1, link2: event.link2);
     } catch (e, stack) {
       emit(DepartmentError(
           errorMessage: Logger.error(

@@ -1,0 +1,403 @@
+import 'dart:async';
+
+import 'package:collection/collection.dart';
+import 'package:schedule/core/main_repository.dart';
+import 'package:schedule/core/models/schedule_model.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/lesson_builder.dart';
+import 'package:schedule/core/static/logger.dart';
+import 'package:schedule/core/static/schedule_links.dart';
+import 'package:schedule/core/static/schedule_type.dart';
+
+class TeachersParser {
+  final MainRepository _repository;
+
+  String? lastError;
+
+  TeachersParser(MainRepository repository) : _repository = repository;
+
+  /// Создание мэпа корпус - список аудиторий.
+  /// [streamController] - для отслеживания прогресса в блоке, после окончания
+  /// обязательно закрывать
+  Future<Map<String, List<ScheduleModel>>?> buildingsClassroomsMap(
+      StreamController<Map<String, String>> streamController) async {
+    final Map<String, List<ScheduleModel>> buildingsScheduleMap = {
+      '1 корпус': [],
+      '2 корпус': [],
+      '3 корпус': [],
+      '4 корпус': [],
+      '5 корпус': [],
+      '6 корпус': [],
+      '7 корпус': [],
+      '8 корпус': [],
+      '9 корпус': [],
+      '10 корпус': [],
+      '11 корпус': [],
+      '12 корпус': [],
+      '13 корпус': [],
+      '14 корпус': [],
+      '15 корпус': [],
+    };
+
+    /// функция заполнения buildingsScheduleMap
+    void mapCreating(
+      Map<String, List<ScheduleModel>> map,
+      Iterable<String> splittedPage, {
+      String? link,
+    }) {
+      int getBuildingByClassroom(String classroom) {
+        if (classroom.length > 1) {
+          final start = classroom.substring(0, 2);
+          switch (start) {
+            case '11':
+              return 11;
+            case '12':
+              return 12;
+            case '13':
+              return 13;
+            case '14':
+              return 14;
+            case '15':
+              return 15;
+          }
+        }
+        if (classroom.isNotEmpty) {
+          final start = classroom[0];
+          switch (start) {
+            case '0':
+              return 10;
+            case '1':
+              return 1;
+            case '2':
+              return 2;
+            case '3':
+              return 3;
+            case '4':
+              return 4;
+            case '5':
+              return 5;
+            case '6':
+              return 6;
+            case '7':
+              return 7;
+            case '8':
+              return 8;
+            case '9':
+              return 9;
+          }
+        }
+
+        return 1;
+      }
+
+      for (String teacherSection in splittedPage) {
+        final teacherName =
+            teacherSection.substring(0, teacherSection.indexOf('</P>')).trim();
+
+        final daysOfWeekFromPage =
+            teacherSection.split('SIZE=2><P ALIGN="CENTER">').skip(1);
+
+        int dayOfWeekIndex = 0;
+        for (String dayOfWeek in daysOfWeekFromPage) {
+          final lessons = dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
+
+          int lessonIndex = 0;
+          for (String lessonSection in lessons) {
+            if (!lessonSection.contains('а.')) {
+              lessonIndex++;
+              continue;
+            }
+
+            final fullLesson = lessonSection
+                .substring(0, lessonSection.indexOf('</FONT>'))
+                .trim();
+            final lessonChecker =
+                fullLesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
+
+            if (lessonChecker.isEmpty) {
+              lessonIndex++;
+              continue;
+            }
+
+            final lesson = fullLesson
+                .substring(fullLesson.indexOf('а.') + 2)
+                .trim()
+                .replaceAll('и/д', '')
+                .replaceAll('пр.', '')
+                .replaceAll('пр', '')
+                .replaceAll('д/кл', '')
+                .replaceAll('д/к', '');
+
+            final classroom = lesson.contains(' ')
+                ? lesson.substring(0, lesson.indexOf(' '))
+                : lesson;
+
+            if (!classroom.contains(RegExp(r"[0-9]"))) {
+              if (++lessonIndex > 5) break;
+              continue;
+            }
+
+            final building = '${getBuildingByClassroom(classroom)} корпус';
+
+            bool isScheduleExist = true;
+            var currentScheduleModel = map[building]
+                ?.firstWhereOrNull((element) => element.name == classroom);
+
+            if (currentScheduleModel == null) {
+              currentScheduleModel = ScheduleModel(
+                name: classroom,
+                type: ScheduleType.classroom,
+                weeks: [],
+              );
+              isScheduleExist = false;
+            }
+
+            currentScheduleModel.updateWeek(
+              dayOfWeekIndex ~/ 6,
+              dayOfWeekIndex % 6,
+              lessonIndex,
+              LessonBuilder.createClassroomLesson(
+                  lessonNumber: lessonIndex + 1,
+                  lesson: '$teacherName $fullLesson}'),
+            );
+
+            if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
+              map[building]?.add(currentScheduleModel);
+            }
+
+            if (++lessonIndex > 5) break;
+          }
+
+          if (++dayOfWeekIndex > 11) break;
+        }
+      }
+    }
+
+    if (await _parseDepartments(
+      buildingsScheduleMap,
+      streamController,
+      mapCreating,
+    )) {
+      buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
+      for (var building in buildingsScheduleMap.keys) {
+        buildingsScheduleMap[building]!
+            .sort((a, b) => a.name.compareTo(b.name));
+      }
+
+      if (buildingsScheduleMap.isEmpty) {
+        lastError = Logger.error(
+          title: Errors.scheduleError,
+          exception:
+              'Не найдено ни одного расписания кафедры. buildingsScheduleMap.isEmpty',
+        );
+        return null;
+      }
+
+      return buildingsScheduleMap;
+    }
+
+    return null;
+  }
+
+  /// Получения мэпа препод - список ссылок для поиска
+  Future<Map<String, List<String>>?> teachersLinksMap(
+      StreamController<Map<String, String>> streamController) async {
+    final Map<String, List<String>> scheduleLinksMap = {};
+
+    void mapCreating(
+      Map<String, List<String>> map,
+      Iterable<String> splittedPage, {
+      String? link,
+    }) {
+      for (String teacherSection in splittedPage) {
+        final teacherName =
+            teacherSection.substring(0, teacherSection.indexOf('</P>')).trim();
+
+        map[teacherName] ??= [];
+        map[teacherName]!.add(link!);
+      }
+    }
+
+    if (await _parseDepartments(
+      scheduleLinksMap,
+      streamController,
+      mapCreating,
+    )) {
+      if (scheduleLinksMap.isEmpty) {
+        lastError = Logger.error(
+          title: Errors.scheduleError,
+          exception:
+              'Не найдено ни одной ссылки на кафедру. scheduleLinksMap.isEmpty',
+        );
+        return null;
+      }
+      return scheduleLinksMap;
+    }
+
+    return null;
+  }
+
+  /// Парсинг страниц кафедры.
+  /// [map] - мэп, в который будут записаны данные.
+  /// [streamController] - для отслеживания процентов в блоке.
+  /// [mapCreating] - функция заполнения мэпа данными.
+  /// Возвращает true, если все прошло успешно, иначе - false
+  Future<bool> _parseDepartments<T extends Map>(
+    T map,
+    StreamController streamController,
+    void Function(T map, Iterable<String> splittedPage, {String? link})
+        mapCreating,
+  ) async {
+    final List<String> teachersLinks = [
+      ScheduleLinks.allMagFaculties,
+      ScheduleLinks.allBakFaculties,
+    ];
+
+    final List<String> teachersScheduleLinks = [
+      ScheduleLinks.magPrefix,
+      ScheduleLinks.bakPrefix,
+    ];
+
+    final facultiesPages = [];
+    const int threadCount = 6;
+
+    try {
+      for (String link in teachersLinks) {
+        facultiesPages.add(await _repository.loadPage(link));
+      }
+    } catch (e, stack) {
+      lastError = Logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      );
+
+      return false;
+    }
+
+    int progress = 0;
+    int errorCount = 0;
+    int completedThreads = 0;
+    int linksCount = 0;
+
+    Future<void> loadDepartmentPages(List<String> links) async {
+      int localErrorCount = 0;
+
+      ///Загрузка и обработка всех страниц с кафедрами
+      for (String link in links) {
+        try {
+          final splittedPage = (await _repository.loadPage(link))
+              .replaceAll(' COLOR="#0000ff"', '')
+              .split('ff00ff">')
+              .skip(1);
+
+          mapCreating(map, splittedPage, link: link);
+
+          progress++;
+        } catch (e, stack) {
+          Logger.warning(
+              title: Errors.pageLoadingError, exception: e, stack: stack);
+
+          localErrorCount++;
+        }
+
+        if (localErrorCount > 4) {
+          completedThreads++;
+          errorCount += localErrorCount;
+          return;
+        }
+      }
+
+      completedThreads++;
+    }
+
+    ///Создания списка ссылок на кафедры
+    ///
+    /// Список содержит [threadCount] списков ссылок, которые потом асинхронно
+    /// загружаются и формируют мэп по корпусам
+    final List<List<String>> departmentLinks =
+        List.generate(threadCount, (index) => []);
+
+    try {
+      int i = 0;
+      for (String facultyPage in facultiesPages) {
+        Iterable<String> splittedPage = [];
+        if (facultyPage.contains('faculty')) {
+          splittedPage = facultyPage
+              .replaceAll(RegExp(r"<!--.*-->"), '')
+              .split('href="')
+              .skip(1);
+        }
+
+        int j = 0;
+        for (String departmentSection in splittedPage) {
+          departmentLinks[j % threadCount].add(
+            '${teachersScheduleLinks[i]}'
+            '${departmentSection.substring(0, departmentSection.indexOf('">'))}',
+          );
+          j++;
+        }
+        linksCount += j;
+        i++;
+      }
+
+      if (linksCount == 0) {
+        lastError = Logger.error(
+          title: Errors.pageParsingError,
+          exception: 'Не получено ни одной ссылки на кафедры. linksCount == 0',
+        );
+        return false;
+      }
+
+      /// Собственно [threadCount] асинхронных потоков по загрузке страниц. Далее
+      /// ождиание окончания их работы с отображением прогресса.
+      ///
+      /// Если прогресс слишком долго не идет (капитализм как-никак), то выводится
+      /// сообщение об этом. Проверяется зависание счетчиком сравнения предыдущего
+      /// прогресса с нынешним
+      int freezeCount = 0;
+      int oldProgress = progress;
+      for (int i = 0; i < threadCount; i++) {
+        loadDepartmentPages(departmentLinks[i]);
+      }
+      do {
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        if (oldProgress == progress) {
+          freezeCount++;
+          if (freezeCount > 20) {
+            streamController.add({
+              'percents': (progress / linksCount * 100).toInt().toString(),
+              'message':
+                  'Загрузка длится слишком долго. Возможно, что-то пошло не так...',
+            });
+          }
+          continue;
+        } else {
+          oldProgress = progress;
+          freezeCount = 0;
+        }
+        streamController.add({
+          'percents': (progress / linksCount * 100).toInt().toString(),
+        });
+      } while (completedThreads < threadCount);
+
+      if (errorCount > 8) {
+        lastError = Logger.error(
+          title: Errors.scheduleError,
+          exception: 'Большое количество ошибок при загрузке. errorsCount > 8',
+        );
+        return false;
+      }
+
+      return true;
+    } catch (e, stack) {
+      lastError = Logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      );
+      return false;
+    }
+  }
+}

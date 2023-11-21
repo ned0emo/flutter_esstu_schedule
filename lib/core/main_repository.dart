@@ -8,4 +8,14 @@ class MainRepository {
     return codec
         .decode(await http.readBytes(Uri.https('portal.esstu.ru', link)));
   }
+
+  Future<List<String>> loadTwoPages(String link1, {String? link2}) async {
+    final pageText1 = await http.readBytes(Uri.https('portal.esstu.ru', link1));
+    if (link2 == null) {
+      return [codec.decode(pageText1)];
+    }
+
+    final pageText2 = await http.readBytes(Uri.https('portal.esstu.ru', link2));
+    return [codec.decode(pageText1), codec.decode(pageText2)];
+  }
 }

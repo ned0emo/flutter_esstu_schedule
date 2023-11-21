@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/main_repository.dart';
 import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/schedule_time_data.dart';
-import 'package:schedule/modules/teachers/repositories/teachers_repository.dart';
 
 part 'faculty_event.dart';
 
@@ -18,10 +18,10 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
   ///Баки, специалитет
   final bakLink = "/bakalavriat/craspisanEdt.htm";
 
-  final TeachersRepository _teachersRepository;
+  final MainRepository _repository;
 
-  FacultyBloc(TeachersRepository repository)
-      : _teachersRepository = repository,
+  FacultyBloc(MainRepository repository)
+      : _repository = repository,
         super(FacultyInitial()) {
     on<FacultyEvent>((event, emit) {});
     on<LoadFaculties>(_loadFaculties);
@@ -33,7 +33,7 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
     emit(FacultiesLoadingState());
     try {
       final siteTexts =
-          await _teachersRepository.loadFacultiesPages(bakLink, link2: magLink);
+          await _repository.loadTwoPages(bakLink, link2: magLink);
       final facultyDepartmentLinkMap =
           _createFacultyDepartmentLinkMap(siteTexts[0], siteTexts[1]);
 

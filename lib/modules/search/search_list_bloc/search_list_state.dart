@@ -6,10 +6,10 @@ abstract class SearchListState {}
 class SearchInitial extends SearchListState {}
 
 class SearchListLoading extends SearchListState {
-  final int? percents;
-  final String? message;
+  final String percents;
+  final String message;
 
-  SearchListLoading({this.percents, this.message});
+  SearchListLoading({this.percents = '0', this.message = ''});
 }
 
 class SearchListLoaded extends SearchListState {
