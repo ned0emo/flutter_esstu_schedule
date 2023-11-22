@@ -24,6 +24,7 @@ class Parser {
     required String scheduleType,
     bool isZo = false,
   }) async {
+    lastError = null;
     final numOfLessons = isZo ? 7 : 6;
 
     final pagesList = <String>[];
@@ -140,45 +141,24 @@ class Parser {
         : splittedDayOfWeek[0];
 
     final month = splittedDayOfWeek[1];
-    if (month.contains('янв') || month.contains('ЯНВ')) {
-      return '$day.01';
-    }
-    if (month.contains('фев') || month.contains('ФЕВ')) {
-      return '$day.02';
-    }
-    if (month.contains('мар') || month.contains('МАР')) {
-      return '$day.03';
-    }
-    if (month.contains('апр') || month.contains('АПР')) {
-      return '$day.04';
-    }
+
+    if (month.contains('янв') || month.contains('ЯНВ')) return '$day.01';
+    if (month.contains('фев') || month.contains('ФЕВ')) return '$day.02';
+    if (month.contains('мар') || month.contains('МАР')) return '$day.03';
+    if (month.contains('апр') || month.contains('АПР')) return '$day.04';
     if (month.contains('мая') ||
         month.contains('МАЯ') ||
         month.contains('май') ||
         month.contains('МАЙ')) {
       return '$day.05';
     }
-    if (month.contains('июн') || month.contains('ИЮН')) {
-      return '$day.06';
-    }
-    if (month.contains('июл') || month.contains('ИЮЛ')) {
-      return '$day.07';
-    }
-    if (month.contains('авг') || month.contains('АВГ')) {
-      return '$day.08';
-    }
-    if (month.contains('сен') || month.contains('СЕН')) {
-      return '$day.09';
-    }
-    if (month.contains('окт') || month.contains('ОКТ')) {
-      return '$day.10';
-    }
-    if (month.contains('ноя') || month.contains('НОЯ')) {
-      return '$day.11';
-    }
-    if (month.contains('дек') || month.contains('ДЕК')) {
-      return '$day.12';
-    }
+    if (month.contains('июн') || month.contains('ИЮН')) return '$day.06';
+    if (month.contains('июл') || month.contains('ИЮЛ')) return '$day.07';
+    if (month.contains('авг') || month.contains('АВГ')) return '$day.08';
+    if (month.contains('сен') || month.contains('СЕН')) return '$day.09';
+    if (month.contains('окт') || month.contains('ОКТ')) return '$day.10';
+    if (month.contains('ноя') || month.contains('НОЯ')) return '$day.11';
+    if (month.contains('дек') || month.contains('ДЕК')) return '$day.12';
 
     return null;
   }

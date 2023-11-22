@@ -31,7 +31,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
     final scheduleMap = await _parser.courseGroupLinkMap();
 
     if (scheduleMap == null) {
-      emit(const AllGroupsError(Errors.scheduleError));
+      emit(AllGroupsError(_parser.lastError ?? 'Ошибка'));
       return;
     }
 

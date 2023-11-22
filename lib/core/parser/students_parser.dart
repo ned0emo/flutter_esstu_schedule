@@ -1,21 +1,18 @@
 import 'dart:async';
 
-import 'package:schedule/core/main_repository.dart';
+import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/static/schedule_links.dart';
 import 'package:schedule/core/static/students_type.dart';
 
-class StudentsParser {
-  final MainRepository _repository;
-
-  String? lastError;
-
-  StudentsParser(MainRepository repository) : _repository = repository;
+class StudentsParser extends Parser {
+  StudentsParser(super.repository);
 
   ///Мэп группа - ссылка по курсам
   Future<Map<String, Map<String, Map<String, String>>>?>
       courseGroupLinkMap() async {
+    lastError = null;
     final schedulePages = <String>[];
 
     final studentsLinks = [
@@ -56,7 +53,7 @@ class StudentsParser {
 
     try {
       for (String link in studentsLinks) {
-        schedulePages.add(await _repository.loadPage(link));
+        schedulePages.add(await repository.loadPage(link));
       }
 
       _parseStudentGroups(
@@ -110,6 +107,7 @@ class StudentsParser {
 
   ///Просто мэп группа - ссылка
   Future<Map<String, List<String>>?> groupLinkMap() async {
+    lastError = null;
     final schedulePages = <String>[];
 
     final studentsLinks = [
@@ -123,7 +121,7 @@ class StudentsParser {
 
     try {
       for (String link in studentsLinks) {
-        schedulePages.add(await _repository.loadPage(link));
+        schedulePages.add(await repository.loadPage(link));
       }
 
       _parseStudentGroups(scheduleLinksMap, schedulePages,

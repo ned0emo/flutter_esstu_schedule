@@ -1,26 +1,232 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:schedule/core/main_repository.dart';
 import 'package:schedule/core/models/schedule_model.dart';
+import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/core/static/errors.dart';
 import 'package:schedule/core/static/lesson_builder.dart';
 import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/static/schedule_links.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 
-class TeachersParser {
-  final MainRepository _repository;
+class TeachersParser extends Parser {
+  TeachersParser(super.repository);
 
-  String? lastError;
+  /// Список расписаний преподов по страницам кафедр.
+  Future<List<ScheduleModel>?> teachersScheduleList({
+    required String link1,
+    String? link2,
+  }) async {
+    lastError = null;
+    final List<ScheduleModel> teachersSchedule = [];
 
-  TeachersParser(MainRepository repository) : _repository = repository;
+    try {
+      final departmentsPages = [
+        await repository.loadPage(link1),
+        if (link2 != null) await repository.loadPage(link2),
+      ];
+
+      for (String page in departmentsPages) {
+        final splittedPage =
+            page.replaceAll(' COLOR="#0000ff"', '').split('ff00ff">').skip(1);
+
+        for (String teacherSection in splittedPage) {
+          final teacherName = teacherSection
+              .substring(0, teacherSection.indexOf('</P>'))
+              .trim();
+
+          bool isScheduleExist = true;
+          var currentScheduleModel = teachersSchedule
+              .firstWhereOrNull((element) => element.name == teacherName);
+
+          if (currentScheduleModel == null) {
+            currentScheduleModel = ScheduleModel(
+              name: teacherName,
+              type: ScheduleType.teacher,
+              weeks: [],
+              link1: link1,
+              link2: link2,
+            );
+            isScheduleExist = false;
+          }
+
+          final daysOfWeekFromPage =
+              teacherSection.split('SIZE=2><P ALIGN="CENTER">').skip(1);
+
+          int dayOfWeekIndex = 0;
+          for (String dayOfWeek in daysOfWeekFromPage) {
+            final lessons =
+                dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
+
+            int lessonIndex = 0;
+            for (String lessonSection in lessons) {
+              final lesson = lessonSection
+                  .substring(0, lessonSection.indexOf('</FONT>'))
+                  .trim();
+
+              final lessonChecker =
+                  lesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
+
+              if (lessonChecker.isEmpty) {
+                if (++lessonIndex > 5) break;
+                continue;
+              }
+
+              currentScheduleModel.updateWeek(
+                  dayOfWeekIndex ~/ 6,
+                  dayOfWeekIndex % 6,
+                  lessonIndex,
+                  LessonBuilder.createTeacherLesson(
+                    lessonNumber: lessonIndex + 1,
+                    lesson: lesson,
+                  ));
+              if (++lessonIndex > 5) break;
+            }
+
+            if (++dayOfWeekIndex > 11) break;
+          }
+
+          if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
+            teachersSchedule.add(currentScheduleModel);
+          }
+        }
+      }
+
+      if (teachersSchedule.isEmpty) {
+        lastError = Logger.warning(
+          title: 'Хмм.. Кажется, расписание для данной кафедры отсутствует',
+          exception: 'teachersScheduleMap.isEmpty == true',
+        );
+
+        return null;
+      }
+
+      return teachersSchedule;
+    } catch (e, stack) {
+      lastError = Logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      );
+      return null;
+    }
+  }
+
+  /// Мэп факультет - кафедра - список ссылок
+  Future<Map<String, Map<String, List<String>>>?>
+      facultyDepartmentLinksMap() async {
+    lastError = null;
+    try {
+      String bakSiteText =
+          await repository.loadPage(ScheduleLinks.allBakFaculties);
+      String magSiteText =
+          await repository.loadPage(ScheduleLinks.allMagFaculties);
+
+      int facultyWordExistingCheck = 0;
+      Iterable<String> bakSiteList = [], magSiteList = [];
+
+      if (bakSiteText.contains('faculty')) {
+        bakSiteList = bakSiteText
+            .replaceAll(RegExp(r"<!--.*-->"), '')
+            .split('faculty')
+            .skip(1);
+      } else {
+        facultyWordExistingCheck++;
+      }
+
+      if (magSiteText.contains('faculty')) {
+        magSiteList = magSiteText
+            .replaceAll(RegExp(r"<!--.*-->"), '')
+            .split('faculty')
+            .skip(1);
+      } else {
+        facultyWordExistingCheck++;
+      }
+
+      if (facultyWordExistingCheck > 1) {
+        lastError = Logger.error(
+          title: Errors.pageParsingError,
+          exception:
+              'Возможно, проблемы с доступом к сайту\nfacultyWordExistingCheck = 2',
+        );
+
+        return null;
+      }
+
+      final Map<String, Map<String, List<String>>> facultyMap = {};
+
+      void fillMapByOneSiteText(Iterable<String> siteList, String linkName) {
+        for (String facultySection in siteList) {
+          String facultyName = 'Не удалось распознать название факультета';
+
+          try {
+            facultyName = facultySection.contains('id')
+                ? facultySection.substring(
+                    facultySection.indexOf(RegExp(r"[а-я]|[А-Я]")),
+                    facultySection.indexOf('</h2>'))
+                : 'Прочее';
+          } catch (e, stack) {
+            Logger.warning(
+              title: Errors.pageParsingError,
+              exception: e,
+              stack: stack,
+            );
+          }
+
+          final Map<String, List<String>> departmentMap =
+              facultyMap[facultyName] ?? {};
+
+          final departmentsList = facultySection.split('href="').skip(1);
+
+          for (String departmentSection in departmentsList) {
+            String link = '/$linkName/0.htm';
+            String departmentName =
+                'Не удалось распознать ссылку и/или название кафедры';
+
+            try {
+              link =
+                  '/$linkName/${departmentSection.substring(0, departmentSection.indexOf('"'))}';
+              departmentName = departmentSection.substring(
+                  departmentSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
+                  departmentSection.indexOf('<'));
+            } catch (e, stack) {
+              Logger.warning(
+                title: Errors.pageParsingError,
+                exception: e,
+                stack: stack,
+              );
+            }
+
+            if (!departmentMap.keys.contains(departmentName)) {
+              departmentMap[departmentName] = [];
+            }
+            departmentMap[departmentName]!.add(link);
+          }
+
+          facultyMap[facultyName] = departmentMap;
+        }
+      }
+
+      fillMapByOneSiteText(bakSiteList, 'bakalavriat');
+      fillMapByOneSiteText(magSiteList, 'spezialitet');
+
+      return facultyMap;
+    } catch (e, stack) {
+      lastError = Logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      );
+      return null;
+    }
+  }
 
   /// Создание мэпа корпус - список аудиторий.
   /// [streamController] - для отслеживания прогресса в блоке, после окончания
   /// обязательно закрывать
   Future<Map<String, List<ScheduleModel>>?> buildingsClassroomsMap(
       StreamController<Map<String, String>> streamController) async {
+    lastError = null;
     final Map<String, List<ScheduleModel>> buildingsScheduleMap = {
       '1 корпус': [],
       '2 корпус': [],
@@ -202,6 +408,7 @@ class TeachersParser {
   /// Получения мэпа препод - список ссылок для поиска
   Future<Map<String, List<String>>?> teachersLinksMap(
       StreamController<Map<String, String>> streamController) async {
+    lastError = null;
     final Map<String, List<String>> scheduleLinksMap = {};
 
     void mapCreating(
@@ -237,7 +444,7 @@ class TeachersParser {
     return null;
   }
 
-  /// Парсинг страниц кафедры.
+  /// Парсинг всех страниц кафедр.
   /// [map] - мэп, в который будут записаны данные.
   /// [streamController] - для отслеживания процентов в блоке.
   /// [mapCreating] - функция заполнения мэпа данными.
@@ -263,7 +470,7 @@ class TeachersParser {
 
     try {
       for (String link in teachersLinks) {
-        facultiesPages.add(await _repository.loadPage(link));
+        facultiesPages.add(await repository.loadPage(link));
       }
     } catch (e, stack) {
       lastError = Logger.error(
@@ -286,7 +493,7 @@ class TeachersParser {
       ///Загрузка и обработка всех страниц с кафедрами
       for (String link in links) {
         try {
-          final splittedPage = (await _repository.loadPage(link))
+          final splittedPage = (await repository.loadPage(link))
               .replaceAll(' COLOR="#0000ff"', '')
               .split('ff00ff">')
               .skip(1);

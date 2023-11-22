@@ -1,21 +1,22 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/static/logger.dart';
-import 'package:schedule/core/models/schedule_model.dart';
-import 'package:schedule/core/static/errors.dart';
-import 'package:schedule/core/static/lesson_builder.dart';
-import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/core/main_repository.dart';
+import 'package:schedule/core/models/schedule_model.dart';
+import 'package:schedule/core/parser/students_parser.dart';
+import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/logger.dart';
+import 'package:schedule/core/static/schedule_type.dart';
 
 part 'current_group_event.dart';
-
 part 'current_group_state.dart';
 
 class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
   final MainRepository _repository;
+  final StudentsParser _parser;
 
-  CurrentGroupBloc(MainRepository repository)
+  CurrentGroupBloc(MainRepository repository, StudentsParser parser)
       : _repository = repository,
+        _parser = parser,
         super(CurrentGroupInitial()) {
     on<LoadGroup>(_loadGroup);
   }
@@ -26,6 +27,18 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
 
     try {
       final page = await _repository.loadPage(event.link);
+      final currentScheduleModel = await _parser.scheduleModel(
+        link1: event.link,
+        page1: page,
+        scheduleName: event.scheduleName,
+        scheduleType: ScheduleType.student,
+        isZo: event.isZo,
+      );
+
+      if(currentScheduleModel == null){
+        emit(CurrentGroupError(_parser.lastError ?? 'Неизвестная ошибка'));
+        return;
+      }
 
       String? groupNameOnPage = RegExp(r'#ff00ff">.*</P').firstMatch(page)?[0];
       if (groupNameOnPage != null) {
@@ -41,65 +54,6 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
               'Выбранная группа: ${event.scheduleName}\n'
               'Загруженная группа: $groupNameOnPage';
 
-      final currentScheduleModel = ScheduleModel(
-        name: event.scheduleName,
-        type: ScheduleType.student,
-        weeks: [],
-        link1: event.link,
-      );
-
-      final isThereCustomDaysOfWeeks = event.isZo;
-      final numOfLessons = event.isZo ? 7 : 6;
-
-      final scheduleSection = page
-          .substring(page.indexOf('ff00ff">'))
-          .replaceAll(' COLOR="#0000ff"', '');
-
-      final daysOfWeekFromPage =
-          scheduleSection.split('SIZE=2><P ALIGN="CENTER">').skip(1);
-
-      int dayOfWeekIndex = 0;
-      for (String dayOfWeek in daysOfWeekFromPage) {
-        String? dayOfWeekDate;
-        if (isThereCustomDaysOfWeeks) {
-          final lastIndex = dayOfWeek.indexOf('</B>');
-          dayOfWeekDate = lastIndex > 0
-              ? _dateFromZoDayOfWeek(dayOfWeek.substring(0, lastIndex).trim())
-              : null;
-        }
-
-        final lessons = dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
-
-        int lessonIndex = 0;
-        for (String lessonSection in lessons) {
-          final lesson = lessonSection
-              .substring(0, lessonSection.indexOf('</FONT>'))
-              .trim();
-
-          final lessonChecker = lesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
-
-          if (lessonChecker.isEmpty) {
-            if (++lessonIndex >= numOfLessons) break;
-            continue;
-          }
-
-          currentScheduleModel.updateWeek(
-            dayOfWeekIndex ~/ numOfLessons,
-            dayOfWeekIndex % numOfLessons,
-            lessonIndex,
-            LessonBuilder.createStudentLesson(
-              lessonNumber: lessonIndex + 1,
-              lesson: lesson,
-            ),
-            dayOfWeekDate: dayOfWeekDate,
-          );
-
-          if (++lessonIndex >= numOfLessons) break;
-        }
-
-        dayOfWeekIndex++;
-      }
-
       emit(CurrentGroupLoaded(
         name: event.scheduleName,
         scheduleModel: currentScheduleModel,
@@ -112,59 +66,5 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
         stack: stack,
       )));
     }
-  }
-
-  String? _dateFromZoDayOfWeek(String? dayOfWeek) {
-    if (dayOfWeek == null) return null;
-
-    final splittedDayOfWeek = dayOfWeek.split(RegExp(r'\s+'));
-    if (splittedDayOfWeek.length < 2) return null;
-
-    final day = splittedDayOfWeek[0].contains(',')
-        ? splittedDayOfWeek[0].split(',')[1]
-        : splittedDayOfWeek[0];
-
-    final month = splittedDayOfWeek[1];
-    if (month.contains('янв') || month.contains('ЯНВ')) {
-      return '$day.01';
-    }
-    if (month.contains('фев') || month.contains('ФЕВ')) {
-      return '$day.02';
-    }
-    if (month.contains('мар') || month.contains('МАР')) {
-      return '$day.03';
-    }
-    if (month.contains('апр') || month.contains('АПР')) {
-      return '$day.04';
-    }
-    if (month.contains('мая') ||
-        month.contains('МАЯ') ||
-        month.contains('май') ||
-        month.contains('МАЙ')) {
-      return '$day.05';
-    }
-    if (month.contains('июн') || month.contains('ИЮН')) {
-      return '$day.06';
-    }
-    if (month.contains('июл') || month.contains('ИЮЛ')) {
-      return '$day.07';
-    }
-    if (month.contains('авг') || month.contains('АВГ')) {
-      return '$day.08';
-    }
-    if (month.contains('сен') || month.contains('СЕН')) {
-      return '$day.09';
-    }
-    if (month.contains('окт') || month.contains('ОКТ')) {
-      return '$day.10';
-    }
-    if (month.contains('ноя') || month.contains('НОЯ')) {
-      return '$day.11';
-    }
-    if (month.contains('дек') || month.contains('ДЕК')) {
-      return '$day.12';
-    }
-
-    return null;
   }
 }
