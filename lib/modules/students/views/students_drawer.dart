@@ -35,13 +35,13 @@ class StudentsDrawer extends StatelessWidget {
             child: Column(
               children: [
                 _studTypeSection(
-                    context, StudentsType.bak, state.bakScheduleMap),
+                    context, StudentsType.bak, state.scheduleLinksMap[StudentsType.bak] ?? {}),
                 _studTypeSection(
-                    context, StudentsType.col, state.colScheduleMap),
+                    context, StudentsType.col, state.scheduleLinksMap[StudentsType.col] ?? {}),
                 _studTypeSection(
-                    context, StudentsType.mag, state.magScheduleMap),
+                    context, StudentsType.mag, state.scheduleLinksMap[StudentsType.mag] ?? {}),
                 _studTypeSection(
-                    context, StudentsType.zo1, state.zoScheduleMap),
+                    context, StudentsType.zo1, state.scheduleLinksMap[StudentsType.zo1] ?? {}),
               ],
             ),
           ),

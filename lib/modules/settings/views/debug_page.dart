@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:schedule/core/logger.dart';
+import 'package:schedule/core/static/logger.dart';
 
 class DebugPage extends StatefulWidget {
   const DebugPage({super.key});

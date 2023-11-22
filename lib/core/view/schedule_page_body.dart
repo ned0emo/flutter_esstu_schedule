@@ -186,9 +186,12 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
         isNeedToSelectTab = true;
         return;
       }
+
       if (isCurrentWeek) {
-        tabController?.animateTo(currentScheduleModel.dayOfWeekByAbsoluteIndex(
-            selectedWeekIndex, currentDayOfWeekIndex));
+        tabController?.animateTo(showEmptyDays
+            ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
+            : currentScheduleModel.dayOfWeekByAbsoluteIndex(
+                selectedWeekIndex, currentDayOfWeekIndex));
       }
     });
 
@@ -284,6 +287,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
       children: daysOfWeek.map((e) {
         final currentDaySchedule =
             currentScheduleModel.getDayOfWeekByShortName(e, selectedWeekIndex);
+
         if (currentDaySchedule == null) {
           return const Column(
             crossAxisAlignment: CrossAxisAlignment.end,

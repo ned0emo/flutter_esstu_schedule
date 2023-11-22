@@ -32,19 +32,16 @@ class SearchListPage extends StatelessWidget {
       builder: (context, state) {
         if (state is SearchListLoading) {
           return Center(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 15),
-              if (state.percents != null) Text('${state.percents}%'),
-              if (state.message != null)
-                Text(
-                  state.message!,
-                  textAlign: TextAlign.center,
-                ),
-            ],
-          ));
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 15),
+                Text('${state.percents}%'),
+                Text(state.message, textAlign: TextAlign.center),
+              ],
+            ),
+          );
         }
 
         if (state is SearchListLoaded) {
