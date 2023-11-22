@@ -16,7 +16,6 @@ class SearchScheduleBloc
   SearchScheduleBloc(Parser parser)
       : _parser = parser,
         super(SearchScheduleInitial()) {
-    on<SearchScheduleEvent>((event, emit) {});
     on<LoadSearchingSchedule>(_loadSearchingSchedule);
   }
 

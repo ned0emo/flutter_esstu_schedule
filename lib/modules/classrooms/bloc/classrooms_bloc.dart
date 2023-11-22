@@ -17,7 +17,6 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
   ClassroomsBloc(MainRepository repository, TeachersParser parser)
       : _parser = parser,
         super(ClassroomsInitial()) {
-    on<ClassroomsEvent>((event, emit) {});
     on<LoadClassroomsSchedule>(_loadClassroomsSchedule);
     on<ChangeBuilding>(_changeBuilding);
     on<ChangeClassroom>(_changeClassroom);

@@ -14,7 +14,6 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
   FacultyBloc(TeachersParser parser)
       : _parser = parser,
         super(FacultyInitial()) {
-    on<FacultyEvent>((event, emit) {});
     on<LoadFaculties>(_loadFaculties);
     on<ChooseFaculty>(_chooseFaculty);
   }

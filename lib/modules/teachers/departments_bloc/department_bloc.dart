@@ -14,7 +14,6 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
   DepartmentBloc(TeachersParser parser)
       : _parser = parser,
         super(DepartmentInitial()) {
-    on<DepartmentEvent>((event, emit) {});
     on<LoadDepartment>(_loadDepartment);
     on<ChangeTeacher>(_changeTeacher);
   }

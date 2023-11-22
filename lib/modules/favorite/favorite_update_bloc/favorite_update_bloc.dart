@@ -21,7 +21,6 @@ class FavoriteUpdateBloc
       : _favoriteRepository = repository,
         _parser = parser,
         super(FavoriteUpdateInitial()) {
-    on<FavoriteUpdateEvent>((event, emit) {});
     on<UpdateSchedule>(_updateSchedule);
   }
 
