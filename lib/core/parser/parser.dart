@@ -55,9 +55,16 @@ class Parser {
 
     try {
       for (String page in pagesList) {
-        final scheduleBeginning = scheduleType == ScheduleType.teacher
-            ? page.split(scheduleName).elementAt(1)
-            : page;
+        String? scheduleBeginning;
+        if (scheduleType == ScheduleType.teacher) {
+          if (page.contains(scheduleName)) {
+            scheduleBeginning = page.split(scheduleName).elementAt(1);
+          }
+        } else {
+          scheduleBeginning = page;
+        }
+
+        if (scheduleBeginning == null) continue;
 
         final splittedPage = scheduleType == ScheduleType.teacher
             ? scheduleBeginning
@@ -118,10 +125,18 @@ class Parser {
         }
       }
 
+      if (scheduleModel.isEmpty) {
+        lastError = Logger.warning(
+          title: Errors.scheduleModelError,
+          exception: 'Модель расписания пуста. scheduleModel.isEmpty',
+        );
+        return null;
+      }
+
       return scheduleModel;
     } catch (e, stack) {
       lastError = Logger.error(
-        title: Errors.scheduleError,
+        title: Errors.scheduleModelError,
         exception: e,
         stack: stack,
       );
