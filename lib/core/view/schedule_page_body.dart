@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -48,6 +49,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   bool isZo = false;
 
   bool showEmptyDays = true;
+  bool showEmptyLessons = true;
 
   TabController? tabController;
 
@@ -62,6 +64,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
     final settingsState = BlocProvider.of<SettingsBloc>(context).state;
     if (settingsState is SettingsLoaded) {
       showEmptyDays = !settingsState.hideSchedule;
+      showEmptyLessons = !settingsState.hideLesson;
     }
   }
 
@@ -266,16 +269,42 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 50.0),
-              child: Column(
-                children: e.lessons
-                    .map<Widget>(
-                      (lesson) => LessonSection(
-                        lesson: lesson,
-                        isCurrentLesson: false,
-                      ),
+              child: showEmptyLessons
+                  ? Column(
+                      children: List.generate(
+                        isZo ? 7 : 6,
+                        (index) {
+                          return LessonSection(
+                            lesson: e.lessons.firstWhereOrNull(
+                                (element) => element.lessonNumber == index + 1),
+                            isCurrentLesson: false,
+                            lessonNumber: index + 1,
+                          );
+                        },
+                      )..add(
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 15.0,
+                              vertical: 5.0,
+                            ),
+                            child: const Text(
+                              'Скрыть пустые занятия можно в настройках',
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                        ),
                     )
-                    .toList(),
-              ),
+                  : Column(
+                      children: e.lessons
+                          .map<Widget>(
+                            (lesson) => LessonSection(
+                              lesson: lesson,
+                              isCurrentLesson: false,
+                            ),
+                          )
+                          .toList(),
+                    ),
             ),
           );
         }).toList(),
@@ -311,20 +340,48 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
         return SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 50.0),
-            child: Column(
-              children: currentDaySchedule.lessons
-                  .map<Widget>(
-                    (lesson) => LessonSection(
-                      lesson: lesson,
-                      isCurrentLesson: isCurrentWeek &&
-                          currentDayOfWeekIndex ==
-                              currentDaySchedule.dayOfWeekIndex &&
-                          currentLessonIndex == lesson.lessonIndex &&
-                          !isZo,
-                    ),
+            child: showEmptyLessons
+                ? Column(
+                    children: List.generate(
+                      6,
+                      (index) {
+                        return LessonSection(
+                          lesson: currentDaySchedule.lessons.firstWhereOrNull(
+                              (element) => element.lessonNumber == index + 1),
+                          isCurrentLesson: isCurrentWeek &&
+                              currentDayOfWeekIndex ==
+                                  currentDaySchedule.dayOfWeekIndex &&
+                              currentLessonIndex == index,
+                          lessonNumber: index + 1,
+                        );
+                      },
+                    )..add(
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15.0,
+                            vertical: 5.0,
+                          ),
+                          child: const Text(
+                            'Скрыть пустые занятия можно в настройках',
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ),
                   )
-                  .toList(),
-            ),
+                : Column(
+                    children: currentDaySchedule.lessons
+                        .map<Widget>(
+                          (lesson) => LessonSection(
+                            lesson: lesson,
+                            isCurrentLesson: isCurrentWeek &&
+                                currentDayOfWeekIndex ==
+                                    currentDaySchedule.dayOfWeekIndex &&
+                                currentLessonIndex == lesson.lessonIndex,
+                          ),
+                        )
+                        .toList(),
+                  ),
           ),
         );
       }).toList(),
@@ -433,13 +490,16 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: List.generate(
               numOfWeeks,
-              (index) => TextButton(
-                onPressed: () {
-                  setState(() => _changeWeekNumber(number: index));
-                  Navigator.of(context).pop();
-                },
-                child: Text('${index + 1} неделя'
-                    '${index == ScheduleTimeData.getCurrentWeekIndex() && !isZo ? ' (Сейчас)' : ''}'),
+              (index) => SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () {
+                    setState(() => _changeWeekNumber(number: index));
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('${index + 1} неделя'
+                      '${index == ScheduleTimeData.getCurrentWeekIndex() && !isZo ? ' (Сейчас)' : ''}'),
+                ),
               ),
             ),
           ),

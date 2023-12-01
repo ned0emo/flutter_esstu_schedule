@@ -21,7 +21,10 @@ class FavoriteListPage extends StatelessWidget {
         BlocProvider.value(value: Modular.get<FavoriteButtonBloc>())
       ],
       child: Scaffold(
-        appBar: AppBar(title: const Text('Избранное')),
+        appBar: AppBar(
+          title: const Text('Избранное'),
+          actions: [_clearButton(context)],
+        ),
         body: Center(
           child: SingleChildScrollView(
             child: BlocBuilder<FavoriteListBloc, FavoriteListState>(
@@ -40,7 +43,7 @@ class FavoriteListPage extends StatelessWidget {
                             textAlign: TextAlign.center,
                           )
                         : Padding(
-                            padding: const EdgeInsets.only(bottom: 70.0),
+                            padding: const EdgeInsets.only(bottom: 20.0),
                             child: Column(
                               children: List.generate(
                                 map.length,
@@ -65,7 +68,6 @@ class FavoriteListPage extends StatelessWidget {
             ),
           ),
         ),
-        floatingActionButton: _clearFloatingButton(context),
       ),
     );
   }
@@ -140,10 +142,10 @@ class FavoriteListPage extends StatelessWidget {
     );
   }
 
-  Widget _clearFloatingButton(BuildContext context) {
+  Widget _clearButton(BuildContext context) {
     return BlocBuilder<FavoriteListBloc, FavoriteListState>(
       builder: (context, state) {
-        return FloatingActionButton(
+        return IconButton(
           onPressed: state is FavoriteListLoaded
               ? () {
                   if (state.favoriteListMap.isNotEmpty) {
@@ -172,7 +174,7 @@ class FavoriteListPage extends StatelessWidget {
                   }
                 }
               : null,
-          child: const Icon(Icons.delete, color: Colors.white),
+          icon: const Icon(Icons.delete, color: Colors.white),
         );
       },
     );

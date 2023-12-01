@@ -3,164 +3,198 @@ import 'package:schedule/core/models/lesson_model.dart';
 import 'package:schedule/core/static/schedule_time_data.dart';
 
 class LessonSection extends StatelessWidget {
-  final Lesson lesson;
+  final Lesson? lesson;
   final bool isCurrentLesson;
+  final int lessonNumber;
 
   const LessonSection({
     super.key,
     required this.lesson,
     required this.isCurrentLesson,
+    this.lessonNumber = 0,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 12.0),
-            child: Row(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
-                  child: Text('${lesson.lessonNumber}.',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
-                const SizedBox(width: 5, child: Divider(thickness: 1)),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
-                  child: Text(
-                    ScheduleTimeData.lessonTimeList[lesson.lessonNumber - 1],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 5.0),
+          child: Row(
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
+                child: Text('${lesson?.lessonNumber ?? lessonNumber}.',
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16),
+                        fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+              const SizedBox(width: 5, child: Divider(thickness: 1)),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
+                child: Text(
+                  ScheduleTimeData
+                      .lessonTimeList[(lesson?.lessonNumber ?? lessonNumber) - 1],
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+              const Expanded(child: Divider(thickness: 1)),
+              if (isCurrentLesson)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: .0, horizontal: 5.0),
+                  child: Text(
+                    'Сейчас',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
-                const Expanded(child: Divider(thickness: 1)),
-                if (isCurrentLesson)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: .0, horizontal: 5.0),
-                    child: Text(
-                      'Сейчас',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                const SizedBox(width: 5),
-              ],
-            ),
+              const SizedBox(width: 5),
+            ],
           ),
-          Card(
-            child: Column(
-              children: lesson.lessonData!
-                  .map(
-                    (lessonPart) => IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 10,
-                            decoration: BoxDecoration(
-                              color: _lessonColor(
-                                  lessonPart[Lesson.type].toString()),
-                              borderRadius: lesson.lessonData!.length < 2
-                                  ? const BorderRadius.horizontal(
-                                      left: Radius.circular(4),
-                                    )
-                                  : lesson.lessonData!.first == lessonPart
-                                      ? const BorderRadius.only(
-                                          topLeft: Radius.circular(4),
+        ),
+        Card(
+          child: lesson != null
+              ? Column(
+                  children: lesson!.lessonData!
+                      .map(
+                        (lessonPart) => IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 10,
+                                decoration: BoxDecoration(
+                                  color: _lessonColor(
+                                      lessonPart[Lesson.type].toString()),
+                                  borderRadius: lesson!.lessonData!.length < 2
+                                      ? const BorderRadius.horizontal(
+                                          left: Radius.circular(4),
                                         )
-                                      : lesson.lessonData!.last == lessonPart
+                                      : lesson!.lessonData!.first == lessonPart
                                           ? const BorderRadius.only(
-                                              bottomLeft: Radius.circular(4),
+                                              topLeft: Radius.circular(4),
                                             )
-                                          : null,
-                            ),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    lessonPart[Lesson.type].toString(),
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    lessonPart[Lesson.title].toString(),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: isCurrentLesson
-                                          ? FontWeight.bold
-                                          : null,
-                                    ),
-                                  ),
-                                  if (lessonPart[Lesson.teachers]?.isNotEmpty ??
-                                      false)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            lessonPart[Lesson.teachers]!
-                                                    .contains(',')
-                                                ? 'Преподаватели: '
-                                                : 'Преподаватель: ',
-                                          ),
-                                          Expanded(
-                                              child: Text(
-                                            lessonPart[Lesson.teachers]!,
-                                          )),
-                                        ],
-                                      ),
-                                    ),
-                                  if (lessonPart[Lesson.classrooms]
-                                          ?.isNotEmpty ??
-                                      false)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            lessonPart[Lesson.classrooms]!
-                                                    .contains(',')
-                                                ? 'Аудитории: '
-                                                : 'Аудитория: ',
-                                          ),
-                                          Expanded(
-                                              child: Text(
-                                            lessonPart[Lesson.classrooms]!,
-                                          )),
-                                        ],
-                                      ),
-                                    ),
-                                ],
+                                          : lesson!.lessonData!.last ==
+                                                  lessonPart
+                                              ? const BorderRadius.only(
+                                                  bottomLeft:
+                                                      Radius.circular(4),
+                                                )
+                                              : null,
+                                ),
                               ),
-                            ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        lessonPart[Lesson.type].toString(),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        lessonPart[Lesson.title].toString(),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: isCurrentLesson
+                                              ? FontWeight.bold
+                                              : null,
+                                        ),
+                                      ),
+                                      if (lessonPart[Lesson.teachers]
+                                              ?.isNotEmpty ??
+                                          false)
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 8.0),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                lessonPart[Lesson.teachers]!
+                                                        .contains(',')
+                                                    ? 'Преподаватели: '
+                                                    : 'Преподаватель: ',
+                                              ),
+                                              Expanded(
+                                                  child: Text(
+                                                lessonPart[Lesson.teachers]!,
+                                              )),
+                                            ],
+                                          ),
+                                        ),
+                                      if (lessonPart[Lesson.classrooms]
+                                              ?.isNotEmpty ??
+                                          false)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              top: 8.0),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                lessonPart[Lesson.classrooms]!
+                                                        .contains(',')
+                                                    ? 'Аудитории: '
+                                                    : 'Аудитория: ',
+                                              ),
+                                              Expanded(
+                                                  child: Text(
+                                                lessonPart[Lesson.classrooms]!,
+                                              )),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                      )
+                      .toList(),
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 30,
+                      decoration: const BoxDecoration(
+                        color: Color.fromARGB(255, 121, 234, 0),
+                        borderRadius: BorderRadius.horizontal(
+                          left: Radius.circular(4),
+                        ),
                       ),
                     ),
-                  )
-                  .toList(),
-            ),
-          ),
-        ],
-      ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          'Занятие отсутсвует',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: isCurrentLesson ? FontWeight.bold : null,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ],
     );
   }
 

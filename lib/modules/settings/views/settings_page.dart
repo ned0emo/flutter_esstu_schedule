@@ -50,7 +50,6 @@ class SettingsPage extends StatelessWidget {
                       return Colors.grey;
                     }),
                   ),
-                  const SizedBox(height: 8),
                   SwitchListTile(
                     title: const Text('Автоматическое обновление'),
                     subtitle: Text(state.autoUpdateDescription),
@@ -68,7 +67,6 @@ class SettingsPage extends StatelessWidget {
                       return Colors.grey;
                     }),
                   ),
-                  const SizedBox(height: 8),
                   SwitchListTile(
                     title: const Text('Скрывать пустые дни недели'),
                     subtitle: Text(state.hideScheduleDescription),
@@ -76,6 +74,23 @@ class SettingsPage extends StatelessWidget {
                     onChanged: (value) {
                       BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
                           settingType: SettingsTypes.hideSchedule,
+                          value: value.toString()));
+                    },
+                    trackColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.selected)) {
+                            return Theme.of(context).colorScheme.primary;
+                          }
+                          return Colors.grey;
+                        }),
+                  ),
+                  SwitchListTile(
+                    title: const Text('Скрывать пустые занятия'),
+                    subtitle: Text(state.hideLessonDescription),
+                    value: state.hideLesson,
+                    onChanged: (value) {
+                      BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
+                          settingType: SettingsTypes.hideLesson,
                           value: value.toString()));
                     },
                     trackColor: MaterialStateProperty.resolveWith<Color>(
@@ -98,7 +113,6 @@ class SettingsPage extends StatelessWidget {
                           AppRoutes.settingsRoute + AppRoutes.debugRoute);
                     },
                   ),
-                  const SizedBox(height: 8),
                   ListTile(
                     title: const Text('Очистить данные'),
                     onTap: () {
@@ -135,7 +149,7 @@ class SettingsPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   )),
                   ListTile(
-                    title: const Text('Версия 3.4.1'),
+                    title: const Text('Версия 3.5'),
                     subtitle: RichText(
                       text: TextSpan(
                         children: [
