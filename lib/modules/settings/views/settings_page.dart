@@ -42,13 +42,6 @@ class SettingsPage extends StatelessWidget {
                           settingType: SettingsTypes.darkTheme,
                           value: value.toString()));
                     },
-                    trackColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                      if (states.contains(MaterialState.selected)) {
-                        return Theme.of(context).colorScheme.primary;
-                      }
-                      return Colors.grey;
-                    }),
                   ),
                   SwitchListTile(
                     title: const Text('Автоматическое обновление'),
@@ -59,13 +52,6 @@ class SettingsPage extends StatelessWidget {
                           settingType: SettingsTypes.autoUpdate,
                           value: value.toString()));
                     },
-                    trackColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                      if (states.contains(MaterialState.selected)) {
-                        return Theme.of(context).colorScheme.primary;
-                      }
-                      return Colors.grey;
-                    }),
                   ),
                   SwitchListTile(
                     title: const Text('Скрывать пустые дни недели'),
@@ -76,13 +62,6 @@ class SettingsPage extends StatelessWidget {
                           settingType: SettingsTypes.hideSchedule,
                           value: value.toString()));
                     },
-                    trackColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.selected)) {
-                            return Theme.of(context).colorScheme.primary;
-                          }
-                          return Colors.grey;
-                        }),
                   ),
                   SwitchListTile(
                     title: const Text('Скрывать пустые занятия'),
@@ -93,13 +72,6 @@ class SettingsPage extends StatelessWidget {
                           settingType: SettingsTypes.hideLesson,
                           value: value.toString()));
                     },
-                    trackColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.selected)) {
-                            return Theme.of(context).colorScheme.primary;
-                          }
-                          return Colors.grey;
-                        }),
                   ),
                   const ListTile(
                       title: Text(

@@ -515,68 +515,45 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
     ));
 
     ///Провайдер вызывать из виджета уровнем выше
-    return BlocListener<FavoriteButtonBloc, FavoriteButtonState>(
-      listener: (context, state) {
-        if (state is FavoriteExist && state.isNeedSnackBar) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Добавлено в избранное'),
-              duration: Duration(seconds: 1),
-            ),
-          );
-          return;
-        }
+    return BlocBuilder<FavoriteButtonBloc, FavoriteButtonState>(
+      builder: (context, state) {
+        return FilledButton(
+          onPressed: () {
+            if (state is FavoriteExist) {
+              Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
+                  name: currentScheduleModel.name,
+                  scheduleType: currentScheduleModel.type));
+              return;
+            }
 
-        if (state is FavoriteDoesNotExist && state.isNeedSnackBar) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Удалено из избранного'),
-              duration: Duration(seconds: 1),
-            ),
-          );
-          return;
-        }
+            if (state is FavoriteDoesNotExist) {
+              Modular.get<FavoriteButtonBloc>()
+                  .add(SaveSchedule(scheduleModel: currentScheduleModel));
+
+              if (currentScheduleModel.type == ScheduleType.classroom) {
+                _noUpdateDialog();
+              } else {
+                _addToMainDialog();
+              }
+            }
+          },
+          child: state is FavoriteExist
+              ? const Row(
+                  children: [
+                    Icon(Icons.star),
+                    SizedBox(width: 5),
+                    Text('Из избранного'),
+                  ],
+                )
+              : const Row(
+                  children: [
+                    Icon(Icons.star_border),
+                    SizedBox(width: 5),
+                    Text('В избранное'),
+                  ],
+                ),
+        );
       },
-      child: BlocBuilder<FavoriteButtonBloc, FavoriteButtonState>(
-        builder: (context, state) {
-          return FilledButton(
-            onPressed: () {
-              if (state is FavoriteExist) {
-                Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
-                    name: currentScheduleModel.name,
-                    scheduleType: currentScheduleModel.type));
-                return;
-              }
-
-              if (state is FavoriteDoesNotExist) {
-                Modular.get<FavoriteButtonBloc>()
-                    .add(SaveSchedule(scheduleModel: currentScheduleModel));
-
-                if (currentScheduleModel.type == ScheduleType.classroom) {
-                  _noUpdateDialog();
-                } else {
-                  _addToMainDialog();
-                }
-              }
-            },
-            child: state is FavoriteExist
-                ? const Row(
-                    children: [
-                      Icon(Icons.star),
-                      SizedBox(width: 5),
-                      Text('Из избранного'),
-                    ],
-                  )
-                : const Row(
-                    children: [
-                      Icon(Icons.star_border),
-                      SizedBox(width: 5),
-                      Text('В избранное'),
-                    ],
-                  ),
-          );
-        },
-      ),
     );
   }
 

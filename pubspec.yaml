@@ -79,6 +79,7 @@ flutter:
   assets:
     - assets/newlogo.png
     - assets/newlogo_dark.png
+    - assets/newlogo_warm.png
     - assets/hmmm.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

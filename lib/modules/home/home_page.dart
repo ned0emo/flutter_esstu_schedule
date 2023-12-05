@@ -20,7 +20,6 @@ class HomePage extends StatelessWidget {
           value: Modular.get<FavoriteScheduleBloc>()
             ..add(OpenMainFavSchedule()),
         ),
-        BlocProvider.value(value: BlocProvider.of<SettingsBloc>(context)),
       ],
       child: BlocListener<FavoriteScheduleBloc, FavoriteScheduleState>(
         listener: (context, state) async {
@@ -47,108 +46,37 @@ class HomePage extends StatelessWidget {
                 },
                 icon: const Icon(Icons.settings),
               ),
-              IconButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text('Поиск расписания'),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                  onPressed: () {
-                                    Modular.to.popAndPushNamed(
-                                      AppRoutes.searchRoute,
-                                      arguments: [ScheduleType.student],
-                                    );
-                                  },
-                                  child: const Text(
-                                    'Учебная группа',
-                                    style: TextStyle(fontSize: 20),
-                                  )),
-                            ),
-                            const SizedBox(height: 15),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                  onPressed: () {
-                                    Modular.to.popAndPushNamed(
-                                      AppRoutes.searchRoute,
-                                      arguments: [ScheduleType.teacher],
-                                    );
-                                  },
-                                  child: const Text(
-                                    'Преподаватель',
-                                    style: TextStyle(fontSize: 20),
-                                  )),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-                icon: const Icon(Icons.search),
-              ),
             ],
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 30),
-                BlocBuilder<SettingsBloc, SettingsState>(
+          body: Stack(
+            alignment: AlignmentDirectional.topCenter,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: BlocBuilder<SettingsBloc, SettingsState>(
                   builder: (context, state) {
                     return Image.asset(
                       state is SettingsLoaded && state.darkTheme
                           ? 'assets/newlogo_dark.png'
-                          : 'assets/newlogo.png',
-                      width: 180,
-                      height: 180,
+                          : 'assets/newlogo_warm.png',
+                      width: 300,
+                      height: 300,
                     );
                   },
                 ),
-                const SizedBox(height: 20),
-                GridView.count(
-                  padding: const EdgeInsets.all(15),
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 15,
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  primary: false,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Modular.to.pushNamed(AppRoutes.studentsRoute);
-                      },
-                      child: _homeElevatedButtonContent(
-                        'Учебные группы',
-                        FontAwesomeIcons.userGroup,
-                      ),
+              ),
+              ListView(
+                reverse: true,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 70.0,
+                  horizontal: 30.0,
+                ),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10.0,
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Modular.to.pushNamed(AppRoutes.teachersRoute);
-                      },
-                      child: _homeElevatedButtonContent(
-                        'Преподаватели',
-                        FontAwesomeIcons.graduationCap,
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Modular.to.pushNamed(AppRoutes.classesRoute);
-                      },
-                      child: _homeElevatedButtonContent(
-                        'Аудитории',
-                        FontAwesomeIcons.bookOpen,
-                      ),
-                    ),
-                    ElevatedButton(
+                    child: ElevatedButton(
                       onPressed: () {
                         Modular.to.pushNamed(AppRoutes.favoriteListRoute);
                       },
@@ -157,10 +85,82 @@ class HomePage extends StatelessWidget {
                         FontAwesomeIcons.solidStar,
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10.0,
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Modular.to.pushNamed(AppRoutes.classesRoute);
+                      },
+                      child: _homeElevatedButtonContent(
+                        'Аудитории',
+                        FontAwesomeIcons.bookOpen,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10.0,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Modular.to.pushNamed(AppRoutes.teachersRoute);
+                            },
+                            child: _homeElevatedButtonContent(
+                              'Преподаватели',
+                              FontAwesomeIcons.graduationCap,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Modular.to.pushNamed(
+                              AppRoutes.searchRoute,
+                              arguments: [ScheduleType.teacher],
+                            );
+                          },
+                          icon: const Icon(Icons.search),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10.0,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Modular.to.pushNamed(AppRoutes.studentsRoute);
+                            },
+                            child: _homeElevatedButtonContent(
+                              'Учебные группы',
+                              FontAwesomeIcons.userGroup,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Modular.to.pushNamed(
+                              AppRoutes.searchRoute,
+                              arguments: [ScheduleType.student],
+                            );
+                          },
+                          icon: const Icon(Icons.search),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -168,17 +168,17 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _homeElevatedButtonContent(String text, IconData icon) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(height: 30),
-        FaIcon(icon, size: 70),
+        const SizedBox(height: 50),
+        FaIcon(icon),
         Expanded(
-          child: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 20.0),
             child: Text(
               text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 18),
             ),
           ),
         ),

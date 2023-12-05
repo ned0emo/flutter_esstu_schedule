@@ -93,52 +93,48 @@ class FavoriteListPage extends StatelessWidget {
 
   Widget _favoriteButton(
       String scheduleName, String scheduleType, BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-          child: Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    Modular.get<FavoriteScheduleBloc>().add(ResetSchedule());
-                    Modular.to.pushNamed(
-                      AppRoutes.favoriteListRoute +
-                          AppRoutes.favoriteScheduleRoute,
-                      arguments: [
-                        scheduleName,
-                        scheduleType,
-                        (await RepositoryProvider.of<SettingsRepository>(
-                                    context)
-                                .loadSettings())[SettingsTypes.autoUpdate] ==
-                            'true'
-                      ],
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(scheduleName, textAlign: TextAlign.center),
-                  ),
-                ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: 10.0,
+        horizontal: 30.0
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () async {
+                Modular.get<FavoriteScheduleBloc>().add(ResetSchedule());
+                Modular.to.pushNamed(
+                    AppRoutes.favoriteListRoute +
+                        AppRoutes.favoriteScheduleRoute,
+                    arguments: [
+                    scheduleName,
+                    scheduleType,
+                    (await RepositoryProvider.of<SettingsRepository>(
+                        context)
+                        .loadSettings())[SettingsTypes.autoUpdate] ==
+                    'true'
+                ],
+                );
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 50.0),
+                  Text(scheduleName, textAlign: TextAlign.center),
+                ],
               ),
-              const SizedBox(width: 10),
-              IconButton(
-                  onPressed: () {
-                    Modular.get<FavoriteListBloc>().add(
-                        DeleteScheduleFromList(scheduleName, scheduleType));
-                  },
-                  icon: Icon(
-                    Icons.delete,
-                    color: Theme.of(context).textTheme.titleLarge?.color ??
-                        Colors.black87,
-                  ))
-            ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-      ],
+          IconButton(
+            onPressed: () {
+              Modular.get<FavoriteListBloc>().add(
+                  DeleteScheduleFromList(scheduleName, scheduleType));
+            },
+            icon: const Icon(Icons.delete),
+          ),
+        ],
+      ),
     );
   }
 
@@ -174,7 +170,7 @@ class FavoriteListPage extends StatelessWidget {
                   }
                 }
               : null,
-          icon: const Icon(Icons.delete, color: Colors.white),
+          icon: const Icon(Icons.delete_forever),
         );
       },
     );
