@@ -1,25 +1,20 @@
 part of 'settings_bloc.dart';
 
 class SettingsState {
-  final String _darkThemeEnableDescription =
-      'Интерфейс приложения оформлен в темных цветах';
-  final String _darkThemeDisableDescription =
-      'Интерфейс приложения оформлен в светлых цветах';
-
   final String _autoUpdateEnableDescription =
-      'Расписание в избранном будет проверять обновления автоматически при открытии';
+      'Расписание в избранном проверяет обновления автоматически при открытии';
   final String _autoUpdateDisableDescription =
-      'Расписание в избранном не будет проверять обновления автоматически';
+      'Расписание в избранном не проверяет обновления автоматически';
 
   final String _hideScheduleEnableDescription =
-      'Дни недели без занятий будут скрыты';
+      'Дни недели без занятий скрыты';
   final String _hideScheduleDisableDescription =
-      'Будут отображены все дни недели';
+      'Отображены все дни недели';
 
   final String _hideLessonEnableDescription =
-      'Пустые занятия будут скрыты';
+      'Пустые занятия скрыты';
   final String _hideLessonDisableDescription =
-      'Пустые занятия будут отображены';
+      'Пустые занятия отображены';
 }
 
 class SettingsInitial extends SettingsState {}
@@ -40,9 +35,6 @@ class SettingsLoaded extends SettingsState {
     required this.hideSchedule,
     required this.hideLesson,
   });
-
-  String get darkThemeDescription =>
-      darkTheme ? _darkThemeEnableDescription : _darkThemeDisableDescription;
 
   String get autoUpdateDescription =>
       autoUpdate ? _autoUpdateEnableDescription : _autoUpdateDisableDescription;

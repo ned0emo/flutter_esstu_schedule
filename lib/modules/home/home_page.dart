@@ -41,6 +41,10 @@ class HomePage extends StatelessWidget {
             title: const Text('Расписание ВСГУТУ'),
             actions: [
               IconButton(
+                onPressed: () => _searchDialog(context),
+                icon: const Icon(Icons.search),
+              ),
+              IconButton(
                 onPressed: () {
                   Modular.to.pushNamed(AppRoutes.settingsRoute);
                 },
@@ -52,15 +56,14 @@ class HomePage extends StatelessWidget {
             alignment: AlignmentDirectional.topCenter,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 40, horizontal: 50),
                 child: BlocBuilder<SettingsBloc, SettingsState>(
                   builder: (context, state) {
                     return Image.asset(
                       state is SettingsLoaded && state.darkTheme
                           ? 'assets/newlogo_dark.png'
                           : 'assets/newlogo_warm.png',
-                      width: 300,
-                      height: 300,
                     );
                   },
                 ),
@@ -68,7 +71,7 @@ class HomePage extends StatelessWidget {
               ListView(
                 reverse: true,
                 padding: const EdgeInsets.symmetric(
-                  vertical: 70.0,
+                  vertical: 50.0,
                   horizontal: 30.0,
                 ),
                 children: [
@@ -104,58 +107,28 @@ class HomePage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                       vertical: 10.0,
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Modular.to.pushNamed(AppRoutes.teachersRoute);
-                            },
-                            child: _homeElevatedButtonContent(
-                              'Преподаватели',
-                              FontAwesomeIcons.graduationCap,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            Modular.to.pushNamed(
-                              AppRoutes.searchRoute,
-                              arguments: [ScheduleType.teacher],
-                            );
-                          },
-                          icon: const Icon(Icons.search),
-                        ),
-                      ],
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Modular.to.pushNamed(AppRoutes.teachersRoute);
+                      },
+                      child: _homeElevatedButtonContent(
+                        'Преподаватели',
+                        FontAwesomeIcons.graduationCap,
+                      ),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       vertical: 10.0,
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Modular.to.pushNamed(AppRoutes.studentsRoute);
-                            },
-                            child: _homeElevatedButtonContent(
-                              'Учебные группы',
-                              FontAwesomeIcons.userGroup,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            Modular.to.pushNamed(
-                              AppRoutes.searchRoute,
-                              arguments: [ScheduleType.student],
-                            );
-                          },
-                          icon: const Icon(Icons.search),
-                        ),
-                      ],
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Modular.to.pushNamed(AppRoutes.studentsRoute);
+                      },
+                      child: _homeElevatedButtonContent(
+                        'Учебные группы',
+                        FontAwesomeIcons.userGroup,
+                      ),
                     ),
                   ),
                 ],
@@ -183,6 +156,54 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void _searchDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Поиск расписания'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                height: 60,
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: ElevatedButton(
+                    onPressed: () {
+                      Modular.to.popAndPushNamed(
+                        AppRoutes.searchRoute,
+                        arguments: [ScheduleType.student],
+                      );
+                    },
+                    child: const Text(
+                      'Учебная группа',
+                      style: TextStyle(fontSize: 20),
+                    )),
+              ),
+              Container(
+                width: double.infinity,
+                height: 60,
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: ElevatedButton(
+                    onPressed: () {
+                      Modular.to.popAndPushNamed(
+                        AppRoutes.searchRoute,
+                        arguments: [ScheduleType.teacher],
+                      );
+                    },
+                    child: const Text(
+                      'Преподаватель',
+                      style: TextStyle(fontSize: 20),
+                    )),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

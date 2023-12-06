@@ -130,7 +130,7 @@ class Parser {
           title: Errors.scheduleModelError,
           exception: 'Модель расписания пуста. scheduleModel.isEmpty',
         );
-        return null;
+        //return null;
       }
 
       return scheduleModel;

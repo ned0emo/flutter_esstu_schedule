@@ -12,7 +12,6 @@ class PrimaryTheme extends ThemeTemplate {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.grey[850],
-            minimumSize: const Size(150, 46),
             textStyle: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,

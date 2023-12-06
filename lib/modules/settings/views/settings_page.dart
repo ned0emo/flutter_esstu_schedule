@@ -35,7 +35,7 @@ class SettingsPage extends StatelessWidget {
                   )),
                   SwitchListTile(
                     title: const Text('Темная тема'),
-                    subtitle: Text(state.darkThemeDescription),
+                    //subtitle: Text(state.darkThemeDescription),
                     value: state.darkTheme,
                     onChanged: (value) {
                       BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
@@ -121,7 +121,7 @@ class SettingsPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   )),
                   ListTile(
-                    title: const Text('Версия 3.5'),
+                    title: const Text('Версия 3.6'),
                     subtitle: RichText(
                       text: TextSpan(
                         children: [

@@ -160,11 +160,14 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                         ),
                   Container(
                     height: 50,
-                    padding: const EdgeInsets.all(5),
+                    padding: const EdgeInsets.symmetric(vertical: 5.0),
                     child: ListView(
                       reverse: true,
                       scrollDirection: Axis.horizontal,
                       children: [
+                        /// Здесь SizedBox'ы потому что паддинг отображает
+                        /// "пустоту", когда кнопка за экраном
+                        const SizedBox(width: 5),
                         _favoriteButton(),
                         const SizedBox(width: 15),
                         FilledButton(
@@ -179,6 +182,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                             ],
                           ),
                         ),
+                        const SizedBox(width: 5),
                       ],
                     ),
                   ),
