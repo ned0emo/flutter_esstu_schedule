@@ -21,6 +21,9 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
   Future<void> _changeTeacher(
       ChangeTeacher event, Emitter<DepartmentState> emit) async {
     final currentState = state;
+    //emit(DepartmentLoading(appBarTitle: currentState.appBarTitle));
+    //await Future.delayed(Duration(milliseconds: 100));
+
     if (currentState is DepartmentLoaded) {
       final index = currentState.teachersScheduleData
           .indexWhere((element) => element.name == event.teacherName);

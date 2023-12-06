@@ -100,7 +100,9 @@ class StudentsPage extends StatelessWidget {
       }
 
       if (state is CurrentGroupLoaded) {
-        return const SchedulePageBody<CurrentGroupBloc>();
+        return SchedulePageBody<CurrentGroupBloc>(
+          scheduleModel: state.scheduleModel,
+        );
       }
 
       if (state is CurrentGroupError) {

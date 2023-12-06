@@ -136,7 +136,9 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
         }
 
         if (state is FavoriteScheduleLoaded) {
-          return const SchedulePageBody<FavoriteScheduleBloc>();
+          return SchedulePageBody<FavoriteScheduleBloc>(
+            scheduleModel: state.scheduleModel,
+          );
         }
 
         if (state is FavoriteScheduleError) {

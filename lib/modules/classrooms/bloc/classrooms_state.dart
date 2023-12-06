@@ -55,4 +55,6 @@ class ClassroomsLoaded extends ClassroomsState {
       currentClassroomName: currentClassroomName ?? this.currentClassroomName,
     );
   }
+
+  ScheduleModel? get scheduleModel => scheduleMap[currentBuildingName]?[currentClassroomIndex];
 }

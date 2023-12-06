@@ -44,6 +44,8 @@ class DepartmentLoaded extends DepartmentState {
       currentTeacherIndex: currentTeacherIndex ?? this.currentTeacherIndex,
     );
   }
+
+  ScheduleModel get scheduleModel => teachersScheduleData[currentTeacherIndex];
 }
 
 class DepartmentError extends DepartmentState {

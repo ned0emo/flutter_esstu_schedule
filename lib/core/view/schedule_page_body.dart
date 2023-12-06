@@ -7,16 +7,13 @@ import 'package:schedule/core/static/schedule_time_data.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/core/view/lesson_section.dart';
-import 'package:schedule/modules/classrooms/bloc/classrooms_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
-import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
-import 'package:schedule/modules/search/search_schedule_bloc/search_schedule_bloc.dart';
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
-import 'package:schedule/modules/students/current_group_bloc/current_group_bloc.dart';
-import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart';
 
 class SchedulePageBody<T1 extends Bloc> extends StatefulWidget {
-  const SchedulePageBody({super.key});
+  final ScheduleModel? scheduleModel;
+
+  const SchedulePageBody({super.key, required this.scheduleModel});
 
   @override
   State<StatefulWidget> createState() => SchedulePageBodyState<T1>();
@@ -34,8 +31,12 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   /// Абсолютное значение индекса пары, независимо от пустых пар
   late int currentLessonIndex;
 
-  /// Модель текущего расписания (со всеми неделями разумеется)
-  late ScheduleModel currentScheduleModel;
+  /// Необходимое количество вкладок в зависимости от очного/заочного
+  /// или от настройки "скрывать пустые дни недели"
+  late int tabCount;
+
+  /// Список дней недели для показа всех дней недели включая пустые
+  late Iterable<String> daysOfWeek;
 
   bool get isCurrentWeek =>
       selectedWeekIndex == ScheduleTimeData.getCurrentWeekIndex();
@@ -51,7 +52,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   bool showEmptyDays = true;
   bool showEmptyLessons = true;
 
-  TabController? tabController;
+  TabController? _tabController;
 
   @override
   void initState() {
@@ -82,127 +83,52 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    if (widget.scheduleModel == null) {
+      return const Center(child: Text('Ошибка загрузки расписания'));
+    }
+
     return BlocListener(
       bloc: Modular.get<T1>(),
-      listener: (context, state) {
+      listener: (context, state) async {
+        isNeedToSelectTab = true;
         setState(() {
           selectedWeekIndex = ScheduleTimeData.getCurrentWeekIndex();
           currentDayOfWeekIndex = ScheduleTimeData.getCurrentDayOfWeekIndex();
         });
       },
-      child: BlocBuilder(
-        bloc: Modular.get<T1>(),
-        builder: (context, state) {
-          if (state is DepartmentLoaded) {
-            if (state.teachersScheduleData.isEmpty) {
-              return const Center(
-                  child: Text('Ошибка. Список преподавателй пуст'));
-            }
+      child: Builder(
+        builder: (context) {
+          if (widget.scheduleModel!.isEmpty) {
+            return const Center(child: Text('Расписание отсутствует'));
+          }
 
-            currentScheduleModel =
-                state.teachersScheduleData[state.currentTeacherIndex];
+          isZo = widget.scheduleModel!.isZo;
 
-            numOfWeeks = currentScheduleModel.numOfWeeks;
-            if (selectedWeekIndex >= numOfWeeks) {
-              selectedWeekIndex = 0;
-            }
+          numOfWeeks = widget.scheduleModel!.numOfWeeks;
+          if (selectedWeekIndex >= numOfWeeks) {
+            selectedWeekIndex = 0;
+          }
 
+          if (!isZo) {
             initialTabIndex = showEmptyDays
                 ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
-                : currentScheduleModel.dayOfWeekByAbsoluteIndex(
+                : widget.scheduleModel!.dayOfWeekByAbsoluteIndex(
                     selectedWeekIndex, currentDayOfWeekIndex);
-
-            return _tabController();
           }
 
-          if (state is ClassroomsLoaded) {
-            if (state.scheduleMap.isEmpty) {
-              return const Center(child: Text('Ошибка. Список корпусов пуст'));
-            }
+          tabCount = !showEmptyDays || isZo
+              ? widget.scheduleModel!.weekLength(selectedWeekIndex)
+              : 6;
+          daysOfWeek = ScheduleTimeData.daysOfWeekSmall.take(6);
 
-            if (state.scheduleMap[state.currentBuildingName] == null ||
-                state.scheduleMap[state.currentBuildingName]!.isEmpty) {
-              return const Center(child: Text('Ошибка. Список аудиторий пуст'));
-            }
-
-            currentScheduleModel = state.scheduleMap[
-                state.currentBuildingName]![state.currentClassroomIndex];
-
-            numOfWeeks = currentScheduleModel.numOfWeeks;
-            if (selectedWeekIndex >= numOfWeeks) {
-              selectedWeekIndex = 0;
-            }
-
-            initialTabIndex = showEmptyDays
-                ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
-                : currentScheduleModel.dayOfWeekByAbsoluteIndex(
-                    selectedWeekIndex, currentDayOfWeekIndex);
-
-            return _tabController();
-          }
-
-          Widget otherTabController(ScheduleModel scheduleModel) {
-            if (scheduleModel.isEmpty) {
-              return const Center(child: Text('Расписание отсутствует'));
-            }
-
-            currentScheduleModel = scheduleModel;
-
-            isZo = currentScheduleModel.isZo;
-
-            numOfWeeks = currentScheduleModel.numOfWeeks;
-            if (selectedWeekIndex >= numOfWeeks) {
-              selectedWeekIndex = 0;
-            }
-
-            if (!isZo) {
-              initialTabIndex = showEmptyDays
-                  ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
-                  : currentScheduleModel.dayOfWeekByAbsoluteIndex(
-                      selectedWeekIndex, currentDayOfWeekIndex);
-            }
-
-            return _tabController();
-          }
-
-          if (state is CurrentGroupLoaded) {
-            return otherTabController(state.scheduleModel);
-          }
-
-          if (state is SearchScheduleLoaded) {
-            return otherTabController(state.scheduleModel);
-          }
-
-          if (state is FavoriteScheduleLoaded) {
-            return otherTabController(state.scheduleModel);
-          }
-
-          return const Center(child: CircularProgressIndicator());
+          return _defaultTabController();
         },
       ),
     );
   }
 
-  Widget _tabController() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!isNeedToSelectTab) {
-        isNeedToSelectTab = true;
-        return;
-      }
-
-      if (isCurrentWeek) {
-        tabController?.animateTo(showEmptyDays
-            ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
-            : currentScheduleModel.dayOfWeekByAbsoluteIndex(
-                selectedWeekIndex, currentDayOfWeekIndex));
-      }
-    });
-
-    final tabCount = !showEmptyDays || isZo
-        ? currentScheduleModel.weekLength(selectedWeekIndex)
-        : 6;
-    final daysOfWeek = ScheduleTimeData.daysOfWeekSmall.take(6);
-
+  Widget _defaultTabController() {
     return DefaultTabController(
       length: tabCount,
       initialIndex: initialTabIndex,
@@ -210,7 +136,13 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
       child: Builder(builder: (context) {
         /// Инициализация контроллера для выбора текущего дня
         /// недели после смены расписания
-        tabController = DefaultTabController.of(context);
+        _tabController = DefaultTabController.of(context);
+        if (isNeedToSelectTab) {
+          _tabController?.animateTo(showEmptyDays
+              ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
+              : widget.scheduleModel!.dayOfWeekByAbsoluteIndex(
+                  selectedWeekIndex, currentDayOfWeekIndex));
+        }
 
         return Column(
           children: [
@@ -219,7 +151,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                 alignment: AlignmentDirectional.bottomStart,
                 children: [
                   tabCount > 0
-                      ? _tabBarView(tabCount, daysOfWeek)
+                      ? _tabBarView()
                       : const Center(
                           child: Text(
                             'Расписание отсутствует',
@@ -253,47 +185,48 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                 ],
               ),
             ),
-            _tabBar(tabCount, daysOfWeek),
+            _tabBar(),
           ],
         );
       }),
     );
   }
 
-  Widget _tabBarView(int tabCount, Iterable<String> daysOfWeek) {
+  Widget _tabBarView() {
     if (isZo || !showEmptyDays) {
       return TabBarView(
-        controller: tabController,
+        controller: _tabController,
         children:
-            currentScheduleModel.weeks[selectedWeekIndex].daysOfWeek.map((e) {
+            widget.scheduleModel!.weeks[selectedWeekIndex].daysOfWeek.map((e) {
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 50.0),
               child: showEmptyLessons
                   ? Column(
-                      children: List.generate(
-                        isZo ? 7 : 6,
-                        (index) {
-                          return LessonSection(
-                            lesson: e.lessons.firstWhereOrNull(
-                                (element) => element.lessonNumber == index + 1),
-                            isCurrentLesson: false,
-                            lessonNumber: index + 1,
-                          );
-                        },
-                      )..add(
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 15.0,
-                              vertical: 5.0,
-                            ),
-                            child: const Text(
-                              'Скрыть пустые занятия можно в настройках',
-                              textAlign: TextAlign.right,
-                            ),
+                      children: [
+                        ...List.generate(
+                          isZo ? 7 : 6,
+                          (index) {
+                            return LessonSection(
+                              lesson: e.lessons.firstWhereOrNull((element) =>
+                                  element.lessonNumber == index + 1),
+                              isCurrentLesson: false,
+                              lessonNumber: index + 1,
+                            );
+                          },
+                        ),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15.0,
+                            vertical: 5.0,
+                          ),
+                          child: const Text(
+                            'Скрыть пустые занятия можно в настройках',
+                            textAlign: TextAlign.right,
                           ),
                         ),
+                      ],
                     )
                   : Column(
                       children: e.lessons
@@ -312,87 +245,87 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
     }
 
     return TabBarView(
-      controller: tabController,
-      children: daysOfWeek.map((e) {
-        final currentDaySchedule =
-            currentScheduleModel.getDayOfWeekByShortName(e, selectedWeekIndex);
+      controller: _tabController,
+      children: daysOfWeek.map(
+        (e) {
+          final currentDaySchedule = widget.scheduleModel!
+              .getDayOfWeekByShortName(e, selectedWeekIndex);
 
-        if (currentDaySchedule == null) {
-          return const Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Center(
-                  child: Text('Расписание на этот день отсутствует'),
+          if (currentDaySchedule == null) {
+            return const Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text('Расписание на этот день отсутствует'),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 60.0, right: 15.0),
-                child: Text(
-                  'Скрыть пустые дни недели можно в настройках',
-                  textAlign: TextAlign.right,
-                ),
-              )
-            ],
-          );
-        }
+                Padding(
+                  padding: EdgeInsets.only(bottom: 60.0, right: 15.0),
+                  child: Text(
+                    'Скрыть пустые дни недели можно в настройках',
+                    textAlign: TextAlign.right,
+                  ),
+                )
+              ],
+            );
+          }
 
-        return SingleChildScrollView(
-          child: Padding(
+          return Padding(
             padding: const EdgeInsets.only(bottom: 50.0),
-            child: showEmptyLessons
-                ? Column(
-                    children: List.generate(
-                      6,
-                      (index) {
-                        return LessonSection(
-                          lesson: currentDaySchedule.lessons.firstWhereOrNull(
-                              (element) => element.lessonNumber == index + 1),
-                          isCurrentLesson: isCurrentWeek &&
-                              currentDayOfWeekIndex ==
-                                  currentDaySchedule.dayOfWeekIndex &&
-                              currentLessonIndex == index,
-                          lessonNumber: index + 1,
-                        );
-                      },
-                    )..add(
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 15.0,
-                            vertical: 5.0,
-                          ),
-                          child: const Text(
-                            'Скрыть пустые занятия можно в настройках',
-                            textAlign: TextAlign.right,
-                          ),
-                        ),
-                      ),
-                  )
-                : Column(
-                    children: currentDaySchedule.lessons
-                        .map<Widget>(
-                          (lesson) => LessonSection(
-                            lesson: lesson,
+            child: ListView(
+              children: showEmptyLessons
+                  ? [
+                      ...List.generate(
+                        6,
+                        (index) {
+                          return LessonSection(
+                            lesson: currentDaySchedule.lessons.firstWhereOrNull(
+                                (element) => element.lessonNumber == index + 1),
                             isCurrentLesson: isCurrentWeek &&
                                 currentDayOfWeekIndex ==
                                     currentDaySchedule.dayOfWeekIndex &&
-                                currentLessonIndex == lesson.lessonIndex,
-                          ),
-                        )
-                        .toList(),
-                  ),
-          ),
-        );
-      }).toList(),
+                                currentLessonIndex == index,
+                            lessonNumber: index + 1,
+                          );
+                        },
+                      ),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 15.0,
+                          vertical: 5.0,
+                        ),
+                        child: const Text(
+                          'Скрыть пустые занятия можно в настройках',
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ]
+                  : currentDaySchedule.lessons
+                      .map<Widget>(
+                        (lesson) => LessonSection(
+                          lesson: lesson,
+                          isCurrentLesson: isCurrentWeek &&
+                              currentDayOfWeekIndex ==
+                                  currentDaySchedule.dayOfWeekIndex &&
+                              currentLessonIndex == lesson.lessonIndex,
+                        ),
+                      )
+                      .toList(),
+            ),
+          );
+        },
+      ).toList(),
     );
   }
 
-  Widget _tabBar(int tabCount, Iterable<String> daysOfWeek) {
+  Widget _tabBar() {
     if (isZo || !showEmptyDays) {
       return TabBar(
-        controller: tabController,
-        tabs: currentScheduleModel.weeks[selectedWeekIndex].daysOfWeek.map((e) {
+        controller: _tabController,
+        tabs:
+            widget.scheduleModel!.weeks[selectedWeekIndex].daysOfWeek.map((e) {
           return Tab(
             iconMargin: EdgeInsets.zero,
             child: FittedBox(
@@ -423,10 +356,10 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
     }
 
     return TabBar(
-      controller: tabController,
+      controller: _tabController,
       tabs: daysOfWeek.map((e) {
         final currentDaySchedule =
-            currentScheduleModel.getDayOfWeekByShortName(e, selectedWeekIndex);
+            widget.scheduleModel!.getDayOfWeekByShortName(e, selectedWeekIndex);
         if (currentDaySchedule == null) {
           return Tab(
             iconMargin: EdgeInsets.zero,
@@ -510,8 +443,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
 
   Widget _favoriteButton() {
     Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
-      scheduleType: currentScheduleModel.type,
-      name: currentScheduleModel.name,
+      scheduleType: widget.scheduleModel!.type,
+      name: widget.scheduleModel!.name,
     ));
 
     ///Провайдер вызывать из виджета уровнем выше
@@ -521,16 +454,16 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
           onPressed: () {
             if (state is FavoriteExist) {
               Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
-                  name: currentScheduleModel.name,
-                  scheduleType: currentScheduleModel.type));
+                  name: widget.scheduleModel!.name,
+                  scheduleType: widget.scheduleModel!.type));
               return;
             }
 
             if (state is FavoriteDoesNotExist) {
               Modular.get<FavoriteButtonBloc>()
-                  .add(SaveSchedule(scheduleModel: currentScheduleModel));
+                  .add(SaveSchedule(scheduleModel: widget.scheduleModel!));
 
-              if (currentScheduleModel.type == ScheduleType.classroom) {
+              if (widget.scheduleModel!.type == ScheduleType.classroom) {
                 _noUpdateDialog();
               } else {
                 _addToMainDialog();
@@ -572,8 +505,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
             TextButton(
                 onPressed: () {
                   Modular.get<FavoriteButtonBloc>().add(AddFavoriteToMainPage(
-                    scheduleType: currentScheduleModel.type,
-                    name: currentScheduleModel.name,
+                    scheduleType: widget.scheduleModel!.type,
+                    name: widget.scheduleModel!.name,
                   ));
                   Navigator.of(context).pop();
                 },

@@ -48,7 +48,9 @@ class SearchSchedulePage extends StatelessWidget {
         }
 
         if (state is SearchScheduleLoaded) {
-          return const SchedulePageBody<SearchScheduleBloc>();
+          return SchedulePageBody<SearchScheduleBloc>(
+            scheduleModel: state.scheduleModel,
+          );
         }
 
         if (state is SearchScheduleError) {
