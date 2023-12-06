@@ -69,62 +69,49 @@ class ClassroomsPage extends StatelessWidget {
   Widget? _drawer(ClassroomsState state, BuildContext context) {
     if (state is ClassroomsLoaded) {
       return Drawer(
-        child: Column(
-          children: [
-            Container(
-              color: Theme.of(context).colorScheme.primary,
-              child: const SafeArea(
-                child: DrawerHeader(
-                  margin: EdgeInsets.zero,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Расписание\nаудиторий',
-                          style: TextStyle(color: Colors.white, fontSize: 32),
-                        ),
-                      ),
-                    ],
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+          child: ListView(
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
+                child: Text(
+                  'Учебные корпуса',
+                  style: TextStyle(fontSize: 24),
                 ),
               ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(0, 15, 0, 15),
-                      child: Text(
-                        'Корпуса',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Column(
-                      children: List<ListTile>.generate(
-                        state.scheduleMap.length,
-                        (index) => ListTile(
-                          title: Text(state.scheduleMap.keys.elementAt(index)),
-                          onTap: () {
-                            final building =
-                                state.scheduleMap.keys.elementAt(index);
-                            //final classroom =
-                            //    state.scheduleMap[building]!.first.name;
-                            Modular.get<ClassroomsBloc>()
-                                .add(ChangeBuilding(building));
+              ...List.generate(
+                state.scheduleMap.length,
+                (index) {
+                  final handlingBuildingName =
+                      state.scheduleMap.keys.elementAt(index);
+                  return state.currentBuildingName == handlingBuildingName
+                      ? FilledButton(
+                          style: const ButtonStyle(
+                              alignment: AlignmentDirectional.centerStart),
+                          child: Text(handlingBuildingName),
+                          onPressed: () {
                             Navigator.pop(context);
                           },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                        )
+                      : OutlinedButton(
+                          style: const ButtonStyle(
+                            alignment: AlignmentDirectional.centerStart,
+                            side: MaterialStatePropertyAll(
+                              BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                          child: Text(handlingBuildingName),
+                          onPressed: () {
+                            Modular.get<ClassroomsBloc>()
+                                .add(ChangeBuilding(handlingBuildingName));
+                            Navigator.pop(context);
+                          },
+                        );
+                },
               ),
-            )
-          ],
+            ],
+          ),
         ),
       );
     }

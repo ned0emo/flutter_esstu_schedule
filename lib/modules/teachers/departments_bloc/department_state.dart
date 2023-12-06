@@ -16,6 +16,7 @@ class DepartmentLoading extends DepartmentState {
 
 class DepartmentLoaded extends DepartmentState {
   final String currentTeacherName;
+  final String currentDepartmentName;
   final int currentTeacherIndex;
 
   final List<ScheduleModel> teachersScheduleData;
@@ -23,6 +24,7 @@ class DepartmentLoaded extends DepartmentState {
   const DepartmentLoaded({
     String? appBarTitle,
     required this.currentTeacherName,
+    required this.currentDepartmentName,
     required this.currentTeacherIndex,
     required this.teachersScheduleData,
   }) : super(appBarTitle: appBarTitle);
@@ -31,12 +33,14 @@ class DepartmentLoaded extends DepartmentState {
     String? appBarTitle,
     List<ScheduleModel>? teachersScheduleData,
     String? currentTeacherName,
+    String? currentDepartmentName,
     int? currentTeacherIndex,
   }) {
     return DepartmentLoaded(
       appBarTitle: appBarTitle ?? this.appBarTitle,
       teachersScheduleData: teachersScheduleData ?? this.teachersScheduleData,
       currentTeacherName: currentTeacherName ?? this.currentTeacherName,
+      currentDepartmentName: currentDepartmentName ?? this.currentDepartmentName,
       currentTeacherIndex: currentTeacherIndex ?? this.currentTeacherIndex,
     );
   }

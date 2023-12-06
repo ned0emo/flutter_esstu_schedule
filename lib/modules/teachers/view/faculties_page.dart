@@ -29,9 +29,7 @@ class FacultiesPage extends StatelessWidget {
               child: BlocBuilder<FacultyBloc, FacultyState>(
                 builder: (context, state) {
                   if (state is FacultiesLoadingState) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
+                    return const Center(child: CircularProgressIndicator());
                   }
 
                   if (state is FacultiesLoadedState ||
@@ -77,31 +75,30 @@ class FacultiesPage extends StatelessWidget {
 
   Widget _facultyButton(String facultyName,
       Map<String, List<String>> departmentsMap, BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-          child: Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Modular.get<FacultyBloc>().add(ChooseFaculty(
-                        facultyName: facultyName,
-                        departmentsMap: departmentsMap));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(facultyName, textAlign: TextAlign.center),
-                  ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                Modular.get<FacultyBloc>().add(ChooseFaculty(
+                    facultyName: facultyName, departmentsMap: departmentsMap));
+              },
+              child: Container(
+                height: 50.0,
+                alignment: AlignmentDirectional.center,
+                child: Text(
+                  facultyName,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-      ],
+        ],
+      ),
     );
   }
 }

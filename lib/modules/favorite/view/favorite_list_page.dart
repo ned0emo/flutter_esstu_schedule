@@ -84,9 +84,10 @@ class FavoriteListPage extends StatelessWidget {
           ),
         ),
         ...List.generate(
-            scheduleNameList.length,
-            (index) =>
-                _favoriteButton(scheduleNameList[index], sectionName, context)),
+          scheduleNameList.length,
+          (index) =>
+              _favoriteButton(scheduleNameList[index], sectionName, context),
+        ),
       ],
     );
   }
@@ -94,10 +95,7 @@ class FavoriteListPage extends StatelessWidget {
   Widget _favoriteButton(
       String scheduleName, String scheduleType, BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 10.0,
-        horizontal: 30.0
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
       child: Row(
         children: [
           Expanded(
@@ -105,31 +103,32 @@ class FavoriteListPage extends StatelessWidget {
               onPressed: () async {
                 Modular.get<FavoriteScheduleBloc>().add(ResetSchedule());
                 Modular.to.pushNamed(
-                    AppRoutes.favoriteListRoute +
-                        AppRoutes.favoriteScheduleRoute,
-                    arguments: [
+                  AppRoutes.favoriteListRoute + AppRoutes.favoriteScheduleRoute,
+                  arguments: [
                     scheduleName,
                     scheduleType,
-                    (await RepositoryProvider.of<SettingsRepository>(
-                        context)
-                        .loadSettings())[SettingsTypes.autoUpdate] ==
-                    'true'
-                ],
+                    (await RepositoryProvider.of<SettingsRepository>(context)
+                            .loadSettings())[SettingsTypes.autoUpdate] ==
+                        'true'
+                  ],
                 );
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 50.0),
-                  Text(scheduleName, textAlign: TextAlign.center),
-                ],
+              child: Container(
+                height: 50.0,
+                alignment: AlignmentDirectional.center,
+                child: Text(
+                  scheduleName,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ),
           IconButton(
             onPressed: () {
-              Modular.get<FavoriteListBloc>().add(
-                  DeleteScheduleFromList(scheduleName, scheduleType));
+              Modular.get<FavoriteListBloc>()
+                  .add(DeleteScheduleFromList(scheduleName, scheduleType));
             },
             icon: const Icon(Icons.delete),
           ),

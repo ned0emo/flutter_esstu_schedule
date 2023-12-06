@@ -93,68 +93,74 @@ class DepartmentsPage extends StatelessWidget {
 
   Widget _drawer(BuildContext context) {
     return Drawer(
-      child: Column(
-        children: [
-          Container(
-            color: Theme.of(context).colorScheme.primary,
-            child: SafeArea(
-              child: DrawerHeader(
-                margin: EdgeInsets.zero,
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Text(
-                      facultyState.facultyName,
-                      style: const TextStyle(color: Colors.white, fontSize: 24),
-                    )),
-                  ],
-                ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+        child: ListView(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Text(
+                facultyState.facultyName,
+                style: const TextStyle(fontSize: 24),
               ),
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(0, 15, 0, 15),
-                    child: Text(
-                      'Кафедры',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Column(
-                    children: List<ListTile>.generate(
-                      facultyState.departmentsMap.length,
-                      (index) => ListTile(
-                        title: Text(
-                            facultyState.departmentsMap.keys.elementAt(index)),
-                        onTap: () {
-                          final department =
-                              facultyState.departmentsMap.keys.elementAt(index);
-                          Modular.get<DepartmentBloc>().add(LoadDepartment(
-                            departmentName: department,
-                            link1: facultyState.departmentsMap[department]![0],
-                            link2: facultyState
-                                        .departmentsMap[department]!.length >
-                                    1
-                                ? facultyState.departmentsMap[department]![1]
-                                : null,
-                          ));
-
+            ...List.generate(
+              facultyState.departmentsMap.length,
+              (index) => SizedBox(
+                width: double.infinity,
+                child: BlocBuilder<DepartmentBloc, DepartmentState>(
+                  builder: (context, state) {
+                    if (state is DepartmentLoaded &&
+                        state.currentDepartmentName ==
+                            facultyState.departmentsMap.keys.elementAt(index)) {
+                      return FilledButton(
+                        style: const ButtonStyle(
+                            alignment: AlignmentDirectional.centerStart),
+                        child: Text(
+                          facultyState.departmentsMap.keys.elementAt(index),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onPressed: () {
                           Navigator.pop(context);
                         },
+                      );
+                    }
+
+                    return OutlinedButton(
+                      style: const ButtonStyle(
+                        alignment: AlignmentDirectional.centerStart,
+                        side: MaterialStatePropertyAll(
+                          BorderSide(color: Colors.transparent),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                      child: Text(
+                        facultyState.departmentsMap.keys.elementAt(index),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onPressed: () {
+                        final department =
+                            facultyState.departmentsMap.keys.elementAt(index);
+                        Modular.get<DepartmentBloc>().add(LoadDepartment(
+                          departmentName: department,
+                          link1: facultyState.departmentsMap[department]![0],
+                          link2:
+                              facultyState.departmentsMap[department]!.length >
+                                      1
+                                  ? facultyState.departmentsMap[department]![1]
+                                  : null,
+                        ));
+
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

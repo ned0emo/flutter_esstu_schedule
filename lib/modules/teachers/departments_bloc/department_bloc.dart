@@ -52,6 +52,7 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
       appBarTitle: state.appBarTitle,
       teachersScheduleData: teachersSchedule,
       currentTeacherName: teachersSchedule[0].name,
+      currentDepartmentName: event.departmentName,
       currentTeacherIndex: 0,
     ));
   }

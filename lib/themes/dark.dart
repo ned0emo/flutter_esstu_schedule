@@ -4,7 +4,7 @@ import 'package:schedule/themes/theme.dart';
 class DarkTheme extends ThemeTemplate {
   @override
   ThemeData get data => ThemeData(
-      colorScheme: const ColorScheme.dark(primary: Color(0xffad3d19)),
+      colorScheme: const ColorScheme.dark(primary: Color(0xffa92c00)),
       cardTheme: CardTheme(surfaceTintColor: Colors.grey[700]),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -21,6 +21,11 @@ class DarkTheme extends ThemeTemplate {
       snackBarTheme: SnackBarThemeData(
         backgroundColor: Colors.grey[800],
         contentTextStyle: const TextStyle(color: Colors.white),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+        ),
       ),
       tabBarTheme: const TabBarTheme(labelColor: Colors.white),
       filledButtonTheme: FilledButtonThemeData(
