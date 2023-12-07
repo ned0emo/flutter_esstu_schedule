@@ -161,6 +161,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                   Container(
                     height: 50,
                     padding: const EdgeInsets.symmetric(vertical: 5.0),
+                    //color: Colors.transparent,
                     child: ListView(
                       reverse: true,
                       scrollDirection: Axis.horizontal,

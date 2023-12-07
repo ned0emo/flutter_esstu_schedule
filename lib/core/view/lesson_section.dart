@@ -35,8 +35,8 @@ class LessonSection extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
                 child: Text(
-                  ScheduleTimeData
-                      .lessonTimeList[(lesson?.lessonNumber ?? lessonNumber) - 1],
+                  ScheduleTimeData.lessonTimeList[
+                      (lesson?.lessonNumber ?? lessonNumber) - 1],
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 16),
                 ),
@@ -136,8 +136,8 @@ class LessonSection extends StatelessWidget {
                                               ?.isNotEmpty ??
                                           false)
                                         Padding(
-                                          padding: const EdgeInsets.only(
-                                              top: 8.0),
+                                          padding:
+                                              const EdgeInsets.only(top: 8.0),
                                           child: Row(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -165,33 +165,18 @@ class LessonSection extends StatelessWidget {
                       )
                       .toList(),
                 )
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 30,
-                      decoration: const BoxDecoration(
-                        color: Color.fromARGB(255, 121, 234, 0),
-                        borderRadius: BorderRadius.horizontal(
-                          left: Radius.circular(4),
-                        ),
+              : SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 5.0),
+                    child: Text(
+                      'Занятие отсутствует',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: isCurrentLesson ? FontWeight.bold : null,
                       ),
                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          'Занятие отсутсвует',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: isCurrentLesson ? FontWeight.bold : null,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
         ),
       ],

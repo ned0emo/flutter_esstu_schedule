@@ -121,7 +121,7 @@ class SettingsPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   )),
                   ListTile(
-                    title: const Text('Версия 3.6'),
+                    title: const Text('Версия 3.6.1'),
                     subtitle: RichText(
                       text: TextSpan(
                         children: [
