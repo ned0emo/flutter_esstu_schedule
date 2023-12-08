@@ -71,14 +71,12 @@ class HomePage extends StatelessWidget {
               ListView(
                 reverse: true,
                 padding: const EdgeInsets.symmetric(
-                  vertical: 50.0,
+                  vertical: 30.0,
                   horizontal: 30.0,
                 ),
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10.0,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: ElevatedButton(
                       onPressed: () {
                         Modular.to.pushNamed(AppRoutes.favoriteListRoute);
@@ -90,9 +88,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10.0,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: ElevatedButton(
                       onPressed: () {
                         Modular.to.pushNamed(AppRoutes.classesRoute);
@@ -104,9 +100,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10.0,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: ElevatedButton(
                       onPressed: () {
                         Modular.to.pushNamed(AppRoutes.teachersRoute);
@@ -118,9 +112,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10.0,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: ElevatedButton(
                       onPressed: () {
                         Modular.to.pushNamed(AppRoutes.studentsRoute);
@@ -171,7 +163,7 @@ class HomePage extends StatelessWidget {
               Container(
                 width: double.infinity,
                 height: 60,
-                padding: EdgeInsets.symmetric(vertical: 5.0),
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: ElevatedButton(
                     onPressed: () {
                       Modular.to.popAndPushNamed(
@@ -187,7 +179,7 @@ class HomePage extends StatelessWidget {
               Container(
                 width: double.infinity,
                 height: 60,
-                padding: EdgeInsets.symmetric(vertical: 5.0),
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: ElevatedButton(
                     onPressed: () {
                       Modular.to.popAndPushNamed(

@@ -170,7 +170,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                         /// "пустоту", когда кнопка за экраном
                         const SizedBox(width: 5),
                         _favoriteButton(),
-                        const SizedBox(width: 15),
+                        const SizedBox(width: 5),
                         FilledButton(
                           onPressed: () => _changeWeekNumber(),
                           onLongPress: () => _changeWeekDialog(context),

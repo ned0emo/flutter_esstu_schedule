@@ -25,48 +25,41 @@ class FavoriteListPage extends StatelessWidget {
           title: const Text('Избранное'),
           actions: [_clearButton(context)],
         ),
-        body: Center(
-          child: SingleChildScrollView(
-            child: BlocBuilder<FavoriteListBloc, FavoriteListState>(
-              builder: (context, state) {
-                if (state is FavoriteListLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+        body: BlocBuilder<FavoriteListBloc, FavoriteListState>(
+          builder: (context, state) {
+            if (state is FavoriteListLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-                if (state is FavoriteListLoaded) {
-                  final map = state.favoriteListMap;
-                  return Center(
-                    child: state.favoriteListMap.isEmpty
-                        ? const Text(
-                            'В избранное пока ничего не добавлено',
-                            style: TextStyle(fontSize: 20),
-                            textAlign: TextAlign.center,
-                          )
-                        : Padding(
-                            padding: const EdgeInsets.only(bottom: 20.0),
-                            child: Column(
-                              children: List.generate(
-                                map.length,
-                                (index) => _favoriteSection(
-                                  map.keys.elementAt(index),
-                                  map[map.keys.elementAt(index)]!,
-                                  context,
-                                ),
-                              ),
-                            ),
+            if (state is FavoriteListLoaded) {
+              final map = state.favoriteListMap;
+              return Center(
+                child: state.favoriteListMap.isEmpty
+                    ? const Text(
+                        'В избранное пока ничего не добавлено',
+                        style: TextStyle(fontSize: 20),
+                        textAlign: TextAlign.center,
+                      )
+                    : ListView(
+                        children: List.generate(
+                          map.length,
+                          (index) => _favoriteSection(
+                            map.keys.elementAt(index),
+                            map[map.keys.elementAt(index)]!,
+                            context,
                           ),
-                  );
-                }
+                        ),
+                      ),
+              );
+            }
 
-                if (state is FavoriteListError) {
-                  return Center(
-                      child: Text(state.message, textAlign: TextAlign.center));
-                }
+            if (state is FavoriteListError) {
+              return Center(
+                  child: Text(state.message, textAlign: TextAlign.center));
+            }
 
-                return const Center(child: Text('Неизвестная ошибка'));
-              },
-            ),
-          ),
+            return const Center(child: Text('Неизвестная ошибка'));
+          },
         ),
       ),
     );
@@ -75,9 +68,10 @@ class FavoriteListPage extends StatelessWidget {
   Widget _favoriteSection(
       String sectionName, List<String> scheduleNameList, BuildContext context) {
     return Column(
-      children: <Widget>[
-        const SizedBox(height: 20),
-        Center(
+      children: [
+        Container(
+          alignment: AlignmentDirectional.center,
+          padding: const EdgeInsets.only(top: 20.0),
           child: Text(
             ScheduleType.scheduleTypeRussian(sectionName),
             style: const TextStyle(fontSize: 20),
