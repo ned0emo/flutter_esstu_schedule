@@ -7,4 +7,7 @@ class Errors {
   static const String settingsError = 'Ошибка загрузки настроек (лол)';
   static const String studentsNotFoundError = 'Список учебных групп пуст';
   static const String pageParsingError = 'Ошибка получения данных со страницы';
+
+  static const String zoClassroomsError =
+      'Ошибка загрузки расписания аудиторий заочного отделения';
 }

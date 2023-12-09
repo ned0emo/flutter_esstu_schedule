@@ -13,10 +13,6 @@ class LessonBuilder {
   static Lesson createStudentLesson({
     required int lessonNumber,
     required String lesson,
-    String? title,
-    List<String>? teachers,
-    List<String>? groups,
-    List<String>? classrooms,
   }) {
     final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), ' ');
 
@@ -46,7 +42,7 @@ class LessonBuilder {
       }
 
       String type = _lessonType(lessons[i]);
-      if(type == 'Другое' && i > 0){
+      if (type == 'Другое' && i > 0) {
         type = lessonData[0][Lesson.type] ?? type;
       }
 
@@ -69,13 +65,52 @@ class LessonBuilder {
         .toList();*/
   }
 
+  static Lesson createZoClassroomLesson({
+    required int lessonNumber,
+    required String lesson,
+  }) {
+    final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), ' ');
+
+    final List<Map<String, String>> lessonData = [];
+
+    final lessons = clearLesson.split(RegExp(classroomsRegExp));
+    if (lessons.length > 1) lessons.removeLast();
+
+    for (int i = 0; i < lessons.length; i++) {
+      final teachers =
+      RegExp(teachersRegExp).allMatches(lessons[i]).map((e) => e[0] ?? '');
+
+      String title = _lessonTitle(lessons[i]);
+      if (title.length < 3 && i > 0) {
+        title = lessonData[i - 1]['title'] ?? 'Ошибка';
+      }
+
+      String type = _lessonType(lessons[i]);
+      if (type == 'Другое' && i > 0) {
+        type = lessonData[0][Lesson.type] ?? type;
+      }
+
+      lessonData.add({
+        Lesson.title: title,
+        Lesson.teachers: teachers.join(', '),
+        Lesson.type: type
+      });
+    }
+
+    return Lesson(
+      lessonNumber: lessonNumber,
+      lessonData: lessonData,
+      fullLesson: lesson,
+    );
+    /*RegExp(teachersRegExp)
+        .allMatches(clearLesson)
+        .map((e) => e[0] ?? '')
+        .toList();*/
+  }
+
   static Lesson createTeacherLesson({
     required int lessonNumber,
     required String lesson,
-    String? title,
-    List<String>? teachers,
-    List<String>? groups,
-    List<String>? classrooms,
   }) {
     final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), ' ');
 
@@ -99,10 +134,6 @@ class LessonBuilder {
   static Lesson createClassroomLesson({
     required int lessonNumber,
     required String lesson,
-    String? title,
-    List<String>? teachers,
-    List<String>? groups,
-    List<String>? classrooms,
   }) {
     //final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), '');
     final teacher = RegExp(teachersRegExp).firstMatch(lesson)?[0] ?? '';

@@ -38,6 +38,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   /// Список дней недели для показа всех дней недели включая пустые
   late Iterable<String> daysOfWeek;
 
+  late List<String?> weekDates;
+
   bool get isCurrentWeek =>
       selectedWeekIndex == ScheduleTimeData.getCurrentWeekIndex();
 
@@ -122,6 +124,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
               : 6;
           daysOfWeek = ScheduleTimeData.daysOfWeekSmall.take(6);
 
+          weekDates = widget.scheduleModel!.weekDates;
+
           return _defaultTabController();
         },
       ),
@@ -137,7 +141,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
         /// Инициализация контроллера для выбора текущего дня
         /// недели после смены расписания
         _tabController = DefaultTabController.of(context);
-        if (isNeedToSelectTab) {
+        if (isNeedToSelectTab && !isZo) {
           _tabController?.animateTo(showEmptyDays
               ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
               : widget.scheduleModel!.dayOfWeekByAbsoluteIndex(
@@ -178,8 +182,9 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                             children: [
                               const Icon(Icons.calendar_month),
                               const SizedBox(width: 5),
-                              Text('${selectedWeekIndex + 1} неделя'
-                                  '${isCurrentWeek && !isZo ? ' (Сейчас)' : ''}'),
+                              Text(weekDates[selectedWeekIndex] ??
+                                  ('${selectedWeekIndex + 1} неделя'
+                                      '${isCurrentWeek && !isZo ? ' (Сейчас)' : ''}')),
                             ],
                           ),
                         ),
@@ -435,8 +440,9 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                     setState(() => _changeWeekNumber(number: index));
                     Navigator.of(context).pop();
                   },
-                  child: Text('${index + 1} неделя'
-                      '${index == ScheduleTimeData.getCurrentWeekIndex() && !isZo ? ' (Сейчас)' : ''}'),
+                  child: Text(weekDates[index] ??
+                      ('${index + 1} неделя'
+                          '${index == ScheduleTimeData.getCurrentWeekIndex() && !isZo ? ' (Сейчас)' : ''}')),
                 ),
               ),
             ),

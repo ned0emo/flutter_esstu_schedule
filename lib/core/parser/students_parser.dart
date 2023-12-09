@@ -1,9 +1,13 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
+import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/static/lesson_builder.dart';
 import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/static/schedule_links.dart';
+import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/core/static/students_type.dart';
 
 class StudentsParser extends Parser {
@@ -105,7 +109,8 @@ class StudentsParser extends Parser {
     return null;
   }
 
-  ///Просто мэп группа - ссылка
+  /// Просто мэп группа - список ссылок. Список нужен для преподов, у студентов
+  /// всегда можно вызывать 0 элемент
   Future<Map<String, List<String>>?> groupLinkMap({
     List<String>? defaultStudentsLinks,
     List<String>? defaultScheduleLinks,
@@ -216,11 +221,12 @@ class StudentsParser extends Parser {
     }
   }
 
-  /*/// Создание мэпа корпус - список аудиторий.
+  /// Создание мэпа корпус - список аудиторий.
   /// [streamController] - для отслеживания прогресса в блоке, после окончания
   /// обязательно закрывать
-  Future<Map<String, List<ScheduleModel>>?> buildingsClassroomsMap(
-      StreamController<Map<String, String>> streamController) async {
+  Future<Map<String, List<ScheduleModel>>?> buildingsZoClassroomsMap(
+    StreamController<Map<String, String>> streamController,
+  ) async {
     lastError = null;
     final Map<String, List<ScheduleModel>> buildingsScheduleMap = {
       '1 корпус': [],
@@ -239,11 +245,6 @@ class StudentsParser extends Parser {
       '14 корпус': [],
       '15 корпус': [],
     };
-
-    final studentsScheduleLinks = [
-      ScheduleLinks.zo1Prefix,
-      //ScheduleLinks.zo2Prefix,
-    ];
 
     int getBuildingByClassroom(String classroom) {
       if (classroom.length > 1) {
@@ -290,114 +291,240 @@ class StudentsParser extends Parser {
       return 1;
     }
 
-    final pagesList = [
-      await repository.loadPage(ScheduleLinks.allZo1Groups),
-      //await repository.loadPage(ScheduleLinks.allZo2Groups),
-    ];
+    final groupLinkMap1 = await groupLinkMap(
+      defaultStudentsLinks: [
+        ScheduleLinks.allZo1Groups,
+        ScheduleLinks.allZo2Groups,
+      ],
+      defaultScheduleLinks: [
+        ScheduleLinks.zo1Prefix,
+        ScheduleLinks.zo2Prefix,
+      ],
+      defaultStudentsTypes: [
+        StudentsType.zo1,
+        StudentsType.zo1,
+      ],
+    );
 
-    final groupLinkMap = await this.groupLinkMap(defaultStudentsLinks: [
-      ScheduleLinks.zo1Prefix,
-      //ScheduleLinks.zo2Prefix,
-    ], defaultScheduleLinks: [
-      ScheduleLinks.zo1Prefix,
-      //ScheduleLinks.zo2Prefix,
-    ], defaultStudentsTypes: [
-      StudentsType.zo1,
-    ]);
-
-    if(groupLinkMap == null) return null;
-
-    for (var pair in groupLinkMap) {
-      final page = await repository.loadPage(link);
-
-      String? groupName = RegExp(r'#ff00ff">.*</P').firstMatch(page)?[0];
-      if (groupName != null) {
-        groupName =
-            groupName.replaceAll('#ff00ff">', '').replaceAll('</P', '').trim();
-      }
-      final teacherName =
-          teacherSection.substring(0, teacherSection.indexOf('</P>')).trim();
-
-      final daysOfWeekFromPage =
-          teacherSection.split('SIZE=2><P ALIGN="CENTER">').skip(1);
-
-      int dayOfWeekIndex = 0;
-      for (String dayOfWeek in daysOfWeekFromPage) {
-        final lessons = dayOfWeek.split('SIZE=1><P ALIGN="CENTER">').skip(1);
-
-        int lessonIndex = 0;
-        for (String lessonSection in lessons) {
-          if (!lessonSection.contains('а.')) {
-            lessonIndex++;
-            continue;
-          }
-
-          final fullLesson = lessonSection
-              .substring(0, lessonSection.indexOf('</FONT>'))
-              .trim();
-          final lessonChecker =
-              fullLesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
-
-          if (lessonChecker.isEmpty) {
-            lessonIndex++;
-            continue;
-          }
-
-          final lesson = fullLesson
-              .substring(fullLesson.indexOf('а.') + 2)
-              .trim()
-              .replaceAll('и/д', '')
-              .replaceAll('пр.', '')
-              .replaceAll('пр', '')
-              .replaceAll('д/кл', '')
-              .replaceAll('д/к', '');
-
-          final classroom = lesson.contains(' ')
-              ? lesson.substring(0, lesson.indexOf(' '))
-              : lesson;
-
-          if (!classroom.contains(RegExp(r"[0-9]"))) {
-            if (++lessonIndex > 5) break;
-            continue;
-          }
-
-          final building = '${getBuildingByClassroom(classroom)} корпус';
-
-          bool isScheduleExist = true;
-          var currentScheduleModel = map[building]
-              ?.firstWhereOrNull((element) => element.name == classroom);
-
-          if (currentScheduleModel == null) {
-            currentScheduleModel = ScheduleModel(
-              name: classroom,
-              type: ScheduleType.classroom,
-              weeks: [],
-            );
-            isScheduleExist = false;
-          }
-
-          currentScheduleModel.updateWeek(
-            dayOfWeekIndex ~/ 6,
-            dayOfWeekIndex % 6,
-            lessonIndex,
-            LessonBuilder.createClassroomLesson(
-                lessonNumber: lessonIndex + 1,
-                lesson: '$teacherName $fullLesson}'),
-          );
-
-          if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
-            map[building]?.add(currentScheduleModel);
-          }
-
-          if (++lessonIndex > 5) break;
-        }
-
-        if (++dayOfWeekIndex > 11) break;
-      }
+    if (groupLinkMap1 == null) {
+      lastError = Logger.error(
+        title: Errors.zoClassroomsError,
+        exception: 'Невозможно получить список заочных групп. '
+            'groupLinkMap == null',
+      );
+      return null;
     }
 
-    return null;
-  }
+    String warnings = '';
 
-   */
+    /// Данные для парллельной загрузки
+    int progress = 0;
+    int globalErrorsCount = 0;
+    int completeThreads = 0;
+
+    const threadsCount = 6;
+    final linksCount = groupLinkMap1.length;
+
+    final threadsMaps =
+        List.generate(threadsCount, (index) => <String, List<String>>{});
+
+    int i = 0;
+    for (var key in groupLinkMap1.keys) {
+      threadsMaps[i++ % threadsCount][key] = groupLinkMap1[key]!;
+    }
+
+    /// Функция загрузки и обработки заочников.
+    /// [map] - "Группа" - ["Ссылка"]
+    Future<void> parseSchedulePages(Map<String, List<String>> map) async {
+      int errorsCount = 0;
+      for (var group in map.keys) {
+        progress++;
+
+        ///Если один из потоков сдох, то обрубать все
+        if (globalErrorsCount > 0) break;
+
+        try {
+          final page = await repository.loadPage(map[group]![0]);
+
+          String? groupName = RegExp(r'#ff00ff">.*</P').firstMatch(page)?[0];
+          if (groupName != null) {
+            groupName = groupName
+                .replaceAll('#ff00ff">', '')
+                .replaceAll('</P', '')
+                .trim();
+          }
+
+          if (groupName != group) {
+            warnings += 'Несовпадение назвний группы: $groupName - $group\n';
+            continue;
+          }
+
+          final weekNames = <String>[];
+          try {
+            final mondays = RegExp('Пнд.*[а-я|А-Я]').allMatches(page);
+            final sundays = RegExp('Вск.*[а-я|А-Я]').allMatches(page);
+
+            for (int i = 0; i < mondays.length; i++) {
+              weekNames.add('${dateFromZoDayOfWeek(mondays.elementAt(i)[0])} '
+                  '- ${dateFromZoDayOfWeek(sundays.elementAt(i)[0])}');
+            }
+          } catch (e) {
+            warnings += 'Невозможно определить дату недели: $group - $e\n';
+            continue;
+          }
+
+          final splittedPage = page
+              .replaceAll(' COLOR="#0000ff"', '')
+              .split('SIZE=2><P ALIGN="CENTER">')
+              .skip(1);
+
+          int dayOfWeekIndex = 0;
+          for (String dayOfWeek in splittedPage) {
+            String? dayOfWeekDate;
+            final lastIndex = dayOfWeek.indexOf('</B>');
+            dayOfWeekDate = lastIndex > 0
+                ? dateFromZoDayOfWeek(dayOfWeek.substring(0, lastIndex).trim())
+                : null;
+
+            if (dayOfWeekDate == null) {
+              dayOfWeekIndex++;
+              continue;
+            }
+
+            final lessons = dayOfWeek.split('"CENTER">').skip(1);
+
+            int lessonIndex = 0;
+            for (String lessonSection in lessons) {
+              if (!lessonSection.contains('а.')) {
+                lessonIndex++;
+                continue;
+              }
+
+              final fullLesson =
+                  '$group ${lessonSection.substring(0, lessonSection.indexOf('</FONT>')).trim()}';
+
+              final lessonChecker =
+                  fullLesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
+
+              if (lessonChecker.isEmpty) {
+                lessonIndex++;
+                continue;
+              }
+
+              final lesson = fullLesson
+                  .substring(fullLesson.indexOf('а.') + 2)
+                  .trim()
+                  .replaceAll('и/д', '')
+                  .replaceAll('пр.', '')
+                  .replaceAll('пр', '')
+                  .replaceAll('д/кл', '')
+                  .replaceAll('д/к', '');
+
+              final classroom = lesson.contains(' ')
+                  ? lesson.substring(0, lesson.indexOf(' '))
+                  : lesson;
+
+              if (!classroom.contains(RegExp(r"[0-9]"))) {
+                if (++lessonIndex > 5) break;
+                continue;
+              }
+
+              final building = '${getBuildingByClassroom(classroom)} корпус';
+              final zoClassroom = '$classroom Заоч.';
+
+              bool isScheduleExist = true;
+              var currentScheduleModel = buildingsScheduleMap[building]
+                  ?.firstWhereOrNull((element) => element.name == zoClassroom);
+
+              if (currentScheduleModel == null) {
+                currentScheduleModel = ScheduleModel(
+                  name: zoClassroom,
+                  type: ScheduleType.classroom,
+                  weeks: [],
+                );
+                isScheduleExist = false;
+              }
+
+              currentScheduleModel.updateWeekByDate(
+                weekNames[dayOfWeekIndex ~/ 7],
+                dayOfWeekIndex % 7,
+                lessonIndex,
+                LessonBuilder.createZoClassroomLesson(
+                    lessonNumber: lessonIndex + 1, lesson: fullLesson),
+                dayOfWeekDate: dayOfWeekDate,
+              );
+
+              if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
+                buildingsScheduleMap[building]?.add(currentScheduleModel);
+              }
+
+              if (++lessonIndex >= 7) break;
+            }
+
+            dayOfWeekIndex++;
+          }
+        } catch (e, stack) {
+          Logger.error(
+            title: Errors.pageLoadingError,
+            exception: e,
+            stack: stack,
+          );
+          errorsCount++;
+        }
+
+        if (errorsCount > 8) {
+          globalErrorsCount++;
+          break;
+        }
+      }
+
+      completeThreads++;
+    }
+
+    /// Запуск [threadCount] асинхронных операций
+    for (var map in threadsMaps) {
+      parseSchedulePages(map);
+    }
+
+    /// Ожидание завершения всех потоков
+    while (completeThreads < threadsCount) {
+      streamController.add({
+        'percents': (progress / linksCount * 100).toInt().toString(),
+      });
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+
+    /// Если хотя бы один поток вернул больше 8 ошибок, то обрубать
+    if (globalErrorsCount > 0) {
+      lastError = Logger.error(
+        title: Errors.zoClassroomsError,
+        exception: 'Большое количество ошибок при загрузке страниц '
+            'расписания заочных групп. globalErrorsCount > 1',
+      );
+      return null;
+    }
+
+    if (warnings.isNotEmpty) {
+      Logger.warning(
+        title: Errors.zoClassroomsError,
+        exception: warnings,
+      );
+    }
+
+    buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
+    for (var building in buildingsScheduleMap.keys) {
+      buildingsScheduleMap[building]!.sort((a, b) => a.name.compareTo(b.name));
+    }
+
+    if (buildingsScheduleMap.isEmpty) {
+      lastError = Logger.error(
+        title: Errors.zoClassroomsError,
+        exception: 'Не найдено ни одного расписания заочных групп. '
+            'buildingsScheduleMap.isEmpty',
+      );
+      return null;
+    }
+
+    return buildingsScheduleMap;
+  }
 }

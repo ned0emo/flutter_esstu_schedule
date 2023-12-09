@@ -61,12 +61,40 @@ class ScheduleModel {
   }) {
     if (weekIndex >= weeks.length) {
       for (int i = weeks.length; i <= weekIndex; i++) {
-        weeks.add(WeekModel(weekNumber: weekIndex + 1, daysOfWeek: []));
+        weeks.add(WeekModel(weekNumber: i + 1, daysOfWeek: []));
       }
     }
 
     weeks[weekIndex]
         .updateDayOfWeek(dayOfWeekIndex, lesson, dayOfWeekDate: dayOfWeekDate);
+  }
+
+  void updateWeekByDate(
+    String weekDate,
+    int dayOfWeekIndex,
+    int lessonIndex,
+    Lesson lesson, {
+    String? dayOfWeekDate,
+  }) {
+    WeekModel? currentWeek =
+        weeks.firstWhereOrNull((element) => element.weekDate == weekDate);
+
+    int currentIndex = 0;
+    if (currentWeek == null) {
+      currentIndex = weeks.isEmpty ? 1 : weeks.length + 1;
+      currentWeek = WeekModel(
+        weekNumber: currentIndex,
+        daysOfWeek: [],
+        weekDate: weekDate,
+      );
+      weeks.add(currentWeek);
+    }
+
+    currentWeek.updateDayOfWeek(
+      dayOfWeekIndex,
+      lesson,
+      dayOfWeekDate: dayOfWeekDate,
+    );
   }
 
   /// Если [weekIndex] за пределами массива, выдаст исключение
@@ -80,15 +108,6 @@ class ScheduleModel {
 
   int get numOfWeeks => weeks.length;
 
-  /// Индекс дня недели для вкладки с учетом возможного отсутствия некоторых
-  /// дней недели. [weekIndex] - номер недели, в которой ищем день.
-  /// [dayOfWeekIndex] - индекс дня недели с ScheduleTimeData.
-  /// Если индекс не найден, возвращает 0
-  int dayOfWeekByAbsoluteIndex(int weekIndex, int dayOfWeekIndex) =>
-      weeks[weekIndex].dayOfWeekByAbsoluteIndex(dayOfWeekIndex);
-
-  int weekLength(int weekIndex) => weeks[weekIndex].weekLength;
-
   bool get isZo {
     for (var week in weeks) {
       for (var dayOfWeek in week.daysOfWeek) {
@@ -98,6 +117,19 @@ class ScheduleModel {
 
     return false;
   }
+
+  List<String?> get weekDates {
+    return weeks.map((e) => e.weekDate).toList();
+  }
+
+  /// Индекс дня недели для вкладки с учетом возможного отсутствия некоторых
+  /// дней недели. [weekIndex] - номер недели, в которой ищем день.
+  /// [dayOfWeekIndex] - индекс дня недели с ScheduleTimeData.
+  /// Если индекс не найден, возвращает 0
+  int dayOfWeekByAbsoluteIndex(int weekIndex, int dayOfWeekIndex) =>
+      weeks[weekIndex].dayOfWeekByAbsoluteIndex(dayOfWeekIndex);
+
+  int weekLength(int weekIndex) => weeks[weekIndex].weekLength;
 
   /// Если возвращается null, то вкладка с [name] будет пустой
   DayOfWeekModel? getDayOfWeekByShortName(String name, int weekIndex) {

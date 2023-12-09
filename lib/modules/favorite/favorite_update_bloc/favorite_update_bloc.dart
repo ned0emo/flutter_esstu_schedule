@@ -40,6 +40,7 @@ class FavoriteUpdateBloc
         scheduleName: event.scheduleModel.name,
         scheduleType: event.scheduleModel.type,
         isZo: event.scheduleModel.isZo,
+        defaultErrorTitle: Errors.updateError,
       );
 
       if (scheduleModel == null) {

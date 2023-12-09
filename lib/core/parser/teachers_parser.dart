@@ -296,6 +296,7 @@ class TeachersParser extends Parser {
         return 1;
       }
 
+      ///12 дней каждого препода
       for (String teacherSection in splittedPage) {
         final teacherName =
             teacherSection.substring(0, teacherSection.indexOf('</P>')).trim();

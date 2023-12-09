@@ -23,6 +23,7 @@ class Parser {
     required String scheduleName,
     required String scheduleType,
     bool isZo = false,
+    String? defaultErrorTitle,
   }) async {
     lastError = null;
     final numOfLessons = isZo ? 7 : 6;
@@ -37,7 +38,7 @@ class Parser {
       }
     } catch (e, stack) {
       lastError = Logger.error(
-        title: Errors.pageLoadingError,
+        title: defaultErrorTitle ?? Errors.pageLoadingError,
         exception: e,
         stack: stack,
       );
@@ -83,7 +84,7 @@ class Parser {
           if (isZo) {
             final lastIndex = dayOfWeek.indexOf('</B>');
             dayOfWeekDate = lastIndex > 0
-                ? _dateFromZoDayOfWeek(dayOfWeek.substring(0, lastIndex).trim())
+                ? dateFromZoDayOfWeek(dayOfWeek.substring(0, lastIndex).trim())
                 : null;
           }
           final lessons = dayOfWeek.split('"CENTER">').skip(1);
@@ -145,7 +146,7 @@ class Parser {
     }
   }
 
-  String? _dateFromZoDayOfWeek(String? dayOfWeek) {
+  String? dateFromZoDayOfWeek(String? dayOfWeek) {
     if (dayOfWeek == null) return null;
 
     final splittedDayOfWeek = dayOfWeek.split(RegExp(r'\s+'));

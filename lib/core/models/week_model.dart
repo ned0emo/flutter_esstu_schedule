@@ -9,7 +9,13 @@ class WeekModel {
   final int weekNumber;
   final List<DayOfWeekModel> daysOfWeek;
 
-  WeekModel({required this.weekNumber, required this.daysOfWeek});
+  final String? weekDate;
+
+  WeekModel({
+    required this.weekNumber,
+    required this.daysOfWeek,
+    this.weekDate,
+  });
 
   @override
   toString() => jsonEncode(toJson());
@@ -17,6 +23,7 @@ class WeekModel {
   Map<String, dynamic> toJson() => {
         'weekNumber': weekNumber,
         'daysOfWeek': daysOfWeek,
+        'weekDate': weekDate,
       };
 
   static WeekModel fromJson(Map<String, dynamic> json) {
@@ -31,6 +38,7 @@ class WeekModel {
     return WeekModel(
       weekNumber: json['weekNumber'],
       daysOfWeek: daysOfWeeksFromJson(json['daysOfWeek']),
+      weekDate: json['weekDate'],
     );
   }
 

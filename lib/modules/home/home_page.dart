@@ -91,7 +91,7 @@ class HomePage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        Modular.to.pushNamed(AppRoutes.classesRoute);
+                        _classroomsDialog(context);
                       },
                       child: _homeElevatedButtonContent(
                         'Аудитории',
@@ -174,6 +174,7 @@ class HomePage extends StatelessWidget {
                     child: const Text(
                       'Учебная группа',
                       style: TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
                     )),
               ),
               Container(
@@ -190,6 +191,51 @@ class HomePage extends StatelessWidget {
                     child: const Text(
                       'Преподаватель',
                       style: TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
+                    )),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _classroomsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Расписание аудиторий'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                height: 60,
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
+                child: ElevatedButton(
+                    onPressed: () {
+                      Modular.to.popAndPushNamed(AppRoutes.classesRoute);
+                    },
+                    child: const Text(
+                      'Очное отделение',
+                      style: TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
+                    )),
+              ),
+              Container(
+                width: double.infinity,
+                height: 60,
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
+                child: ElevatedButton(
+                    onPressed: () {
+                      Modular.to.popAndPushNamed(AppRoutes.zoClassesRoute);
+                    },
+                    child: const Text(
+                      'Заочное отделение (beta)',
+                      style: TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
                     )),
               ),
             ],
