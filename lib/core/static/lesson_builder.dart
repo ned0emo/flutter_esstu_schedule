@@ -65,47 +65,49 @@ class LessonBuilder {
         .toList();*/
   }
 
-  static Lesson createZoClassroomLesson({
+  /// Возвращает список пар, так как для учебной группы, где есть несколько
+  /// аудиторий, приходится для каждой из аудиторий создавать свою пару.
+  /// Занятие прост объединяется со всех частей
+  static List<Lesson> createZoClassroomLessons({
     required int lessonNumber,
     required String lesson,
   }) {
     final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), ' ');
 
-    final List<Map<String, String>> lessonData = [];
+    final classrooms = RegExp(oneClassroomRegExp).allMatches(clearLesson);
 
     final lessons = clearLesson.split(RegExp(classroomsRegExp));
     if (lessons.length > 1) lessons.removeLast();
+    final mergedLesson = lessons.join('; ');
 
-    for (int i = 0; i < lessons.length; i++) {
-      final teachers =
-      RegExp(teachersRegExp).allMatches(lessons[i]).map((e) => e[0] ?? '');
+    final teachers = RegExp(teachersRegExp)
+        .allMatches(mergedLesson)
+        .map((e) => e[0] ?? '')
+        .join(', ');
+    final lessonTitle = _lessonTitle(mergedLesson);
+    final lessonType = _lessonType(mergedLesson);
 
-      String title = _lessonTitle(lessons[i]);
-      if (title.length < 3 && i > 0) {
-        title = lessonData[i - 1]['title'] ?? 'Ошибка';
-      }
+    final lessonList = <Lesson>[];
 
-      String type = _lessonType(lessons[i]);
-      if (type == 'Другое' && i > 0) {
-        type = lessonData[0][Lesson.type] ?? type;
-      }
-
-      lessonData.add({
-        Lesson.title: title,
-        Lesson.teachers: teachers.join(', '),
-        Lesson.type: type
-      });
+    for (var classroom in classrooms) {
+      lessonList.add(Lesson(
+        fullLesson: lesson,
+        lessonNumber: lessonNumber,
+        lessonData: [
+          {
+            Lesson.title: lessonTitle,
+            Lesson.teachers: teachers,
+            Lesson.type: lessonType,
+            Lesson.classrooms: classroom[0]!
+                .replaceAll(RegExp(r'а\.\s*'), '')
+                .trim()
+                .replaceAll(RegExp(r'-$'), ''),
+          }
+        ],
+      ));
     }
 
-    return Lesson(
-      lessonNumber: lessonNumber,
-      lessonData: lessonData,
-      fullLesson: lesson,
-    );
-    /*RegExp(teachersRegExp)
-        .allMatches(clearLesson)
-        .map((e) => e[0] ?? '')
-        .toList();*/
+    return lessonList;
   }
 
   static Lesson createTeacherLesson({

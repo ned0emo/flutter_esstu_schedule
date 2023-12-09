@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:schedule/core/models/lesson_model.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/core/static/errors.dart';
@@ -411,51 +412,45 @@ class StudentsParser extends Parser {
                 continue;
               }
 
-              final lesson = fullLesson
-                  .substring(fullLesson.indexOf('а.') + 2)
-                  .trim()
-                  .replaceAll('и/д', '')
-                  .replaceAll('пр.', '')
-                  .replaceAll('пр', '')
-                  .replaceAll('д/кл', '')
-                  .replaceAll('д/к', '');
+              final lessonsList = LessonBuilder.createZoClassroomLessons(
+                  lessonNumber: lessonIndex + 1, lesson: fullLesson);
 
-              final classroom = lesson.contains(' ')
-                  ? lesson.substring(0, lesson.indexOf(' '))
-                  : lesson;
+              for(var builtLesson in lessonsList){
+                final currentClassroom = builtLesson.lessonData?[0][Lesson.classrooms];
+                if(currentClassroom == null) continue;
 
-              if (!classroom.contains(RegExp(r"[0-9]"))) {
-                if (++lessonIndex > 5) break;
-                continue;
-              }
+                if (!currentClassroom.contains(RegExp(r"[0-9]"))) {
+                  //if (++lessonIndex > 5) break;
+                  continue;
+                }
 
-              final building = '${getBuildingByClassroom(classroom)} корпус';
-              final zoClassroom = '$classroom Заоч.';
+                final building = '${getBuildingByClassroom(currentClassroom)} корпус';
+                final zoClassroom = '$currentClassroom Заоч.';
 
-              bool isScheduleExist = true;
-              var currentScheduleModel = buildingsScheduleMap[building]
-                  ?.firstWhereOrNull((element) => element.name == zoClassroom);
+                bool isScheduleExist = true;
+                var currentScheduleModel = buildingsScheduleMap[building]
+                    ?.firstWhereOrNull((element) => element.name == zoClassroom);
 
-              if (currentScheduleModel == null) {
-                currentScheduleModel = ScheduleModel(
-                  name: zoClassroom,
-                  type: ScheduleType.classroom,
-                  weeks: [],
+                if (currentScheduleModel == null) {
+                  currentScheduleModel = ScheduleModel(
+                    name: zoClassroom,
+                    type: ScheduleType.classroom,
+                    weeks: [],
+                  );
+                  isScheduleExist = false;
+                }
+
+                currentScheduleModel.updateWeekByDate(
+                  weekNames[dayOfWeekIndex ~/ 7],
+                  dayOfWeekIndex % 7,
+                  lessonIndex,
+                  builtLesson,
+                  dayOfWeekDate: dayOfWeekDate,
                 );
-                isScheduleExist = false;
-              }
 
-              currentScheduleModel.updateWeekByDate(
-                weekNames[dayOfWeekIndex ~/ 7],
-                dayOfWeekIndex % 7,
-                lessonIndex,
-                LessonBuilder.createZoClassroomLesson(
-                    lessonNumber: lessonIndex + 1, lesson: fullLesson),
-                dayOfWeekDate: dayOfWeekDate,
-              );
-
-              if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
-                buildingsScheduleMap[building]?.add(currentScheduleModel);
+                if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
+                  buildingsScheduleMap[building]?.add(currentScheduleModel);
+                }
               }
 
               if (++lessonIndex >= 7) break;
