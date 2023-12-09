@@ -18,6 +18,8 @@ class SettingsRepository {
           (storage.getString(SettingsTypes.hideSchedule)) ?? 'false',
       SettingsTypes.hideLesson:
           (storage.getString(SettingsTypes.hideLesson)) ?? 'false',
+      SettingsTypes.weekButtonHint:
+          (storage.getString(SettingsTypes.weekButtonHint)) ?? 'false',
     };
 
     return settingsMap;

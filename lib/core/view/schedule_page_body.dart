@@ -38,6 +38,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   /// Список дней недели для показа всех дней недели включая пустые
   late Iterable<String> daysOfWeek;
 
+  /// Дата недель для аудиторий заочного
   late List<String?> weekDates;
 
   bool get isCurrentWeek =>
@@ -55,6 +56,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   bool showEmptyLessons = true;
 
   TabController? _tabController;
+
+  int weekButtonTapCount = 0;
 
   @override
   void initState() {
@@ -176,7 +179,14 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                         _favoriteButton(),
                         const SizedBox(width: 5),
                         FilledButton(
-                          onPressed: () => _changeWeekNumber(),
+                          onPressed: () {
+                            weekButtonTapCount++;
+                            if (weekButtonTapCount > 2) {
+                              _longPressHintDialog();
+                              weekButtonTapCount = 0;
+                            }
+                            _changeWeekNumber();
+                          },
                           onLongPress: () => _changeWeekDialog(context),
                           child: Row(
                             children: [
@@ -501,7 +511,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
     );
   }
 
-  Future<void> _addToMainDialog() async {
+  void _addToMainDialog() {
     showDialog(
       context: context,
       builder: (context) {
@@ -528,7 +538,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
     );
   }
 
-  Future<void> _noUpdateDialog() async {
+  void _noUpdateDialog() {
     /// Вызов через BlocProvider, так как SettingsBloc отсутствует в модуляре
     final state = BlocProvider.of<SettingsBloc>(context).state;
     if (state is SettingsLoaded && !state.noUpdateClassroom) {
@@ -538,9 +548,12 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
           return AlertDialog(
             title: const Text('Внимание'),
             content: const Text(
-                'Расписание аудиторий не имеет возможности обновления из избранного'),
+              'Расписание аудиторий не имеет '
+              'возможности обновления из избранного',
+              style: TextStyle(fontSize: 16),
+            ),
             actions: [
-              TextButton(
+              OutlinedButton(
                   onPressed: () {
                     BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
                         settingType: SettingsTypes.noUpdateClassroom,
@@ -548,7 +561,42 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                     Navigator.of(context).pop();
                   },
                   child: const Text('Больше не показывать')),
-              TextButton(
+              FilledButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Ок')),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  void _longPressHintDialog() {
+    /// Вызов через BlocProvider, так как SettingsBloc отсутствует в модуляре
+    final state = BlocProvider.of<SettingsBloc>(context).state;
+    if (state is SettingsLoaded && !state.weekButtonHint) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Подсказка'),
+            content: const Text(
+              'Для точного выбора недели нажмите и '
+              'удерживайте кнопку смены недель',
+              style: TextStyle(fontSize: 16),
+            ),
+            actions: [
+              OutlinedButton(
+                  onPressed: () {
+                    BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
+                        settingType: SettingsTypes.weekButtonHint,
+                        value: 'true'));
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Больше не показывать')),
+              FilledButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },

@@ -8,5 +8,6 @@ class SettingsTypes {
   static String noUpdateClassroom = 'noUpdateClassroomService';
   static String hideSchedule = 'hideScheduleService';
   static String hideLesson = 'hideLessonService';
+  static String weekButtonHint = 'weekButtonHintService';
   static String legacyFavoriteDeleted = 'legacyFavoriteDeletedService';
 }

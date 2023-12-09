@@ -60,6 +60,10 @@ class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
       }
 
       favoriteListMap.removeWhere((key, value) => value.isEmpty);
+      for(var key in favoriteListMap.keys){
+        favoriteListMap[key]!.sort();
+      }
+
       emit(FavoriteListLoaded(favoriteListMap));
     } catch (e, stack) {
       emit(FavoriteListError(Logger.error(
