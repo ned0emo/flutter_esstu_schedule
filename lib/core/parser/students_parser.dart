@@ -412,24 +412,32 @@ class StudentsParser extends Parser {
                 continue;
               }
 
+              /// Приходится вытаскивать список пар по количеству аудиторий в
+              /// ячейке пары группы
               final lessonsList = LessonBuilder.createZoClassroomLessons(
                   lessonNumber: lessonIndex + 1, lesson: fullLesson);
 
-              for(var builtLesson in lessonsList){
-                final currentClassroom = builtLesson.lessonData?[0][Lesson.classrooms];
-                if(currentClassroom == null) continue;
+              for (var builtLesson in lessonsList) {
+                final currentClassroom =
+                    builtLesson.lessonData?[0][Lesson.classrooms];
+                if (currentClassroom == null) continue;
 
                 if (!currentClassroom.contains(RegExp(r"[0-9]"))) {
                   //if (++lessonIndex > 5) break;
                   continue;
                 }
 
-                final building = '${getBuildingByClassroom(currentClassroom)} корпус';
+                /// Затирать, чтоб не отображалось лишнее поле
+                builtLesson.lessonData?[0][Lesson.classrooms] = '';
+
+                final building =
+                    '${getBuildingByClassroom(currentClassroom)} корпус';
                 final zoClassroom = '$currentClassroom Заоч.';
 
                 bool isScheduleExist = true;
                 var currentScheduleModel = buildingsScheduleMap[building]
-                    ?.firstWhereOrNull((element) => element.name == zoClassroom);
+                    ?.firstWhereOrNull(
+                        (element) => element.name == zoClassroom);
 
                 if (currentScheduleModel == null) {
                   currentScheduleModel = ScheduleModel(
