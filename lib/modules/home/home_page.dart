@@ -68,62 +68,69 @@ class HomePage extends StatelessWidget {
                   },
                 ),
               ),
-              ListView(
-                reverse: true,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 30.0,
-                  horizontal: 30.0,
+              GestureDetector(
+                onHorizontalDragEnd: (details) {
+                  if ((details.primaryVelocity ?? 1) < 0) {
+                    Modular.to.pushNamed(AppRoutes.favoriteListRoute);
+                  }
+                },
+                child: ListView(
+                  reverse: true,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 30.0,
+                    horizontal: 30.0,
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Modular.to.pushNamed(AppRoutes.favoriteListRoute);
+                        },
+                        child: _homeElevatedButtonContent(
+                          'Избранное',
+                          FontAwesomeIcons.solidStar,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _classroomsDialog(context);
+                        },
+                        child: _homeElevatedButtonContent(
+                          'Аудитории',
+                          FontAwesomeIcons.bookOpen,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Modular.to.pushNamed(AppRoutes.teachersRoute);
+                        },
+                        child: _homeElevatedButtonContent(
+                          'Преподаватели',
+                          FontAwesomeIcons.graduationCap,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Modular.to.pushNamed(AppRoutes.studentsRoute);
+                        },
+                        child: _homeElevatedButtonContent(
+                          'Учебные группы',
+                          FontAwesomeIcons.userGroup,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Modular.to.pushNamed(AppRoutes.favoriteListRoute);
-                      },
-                      child: _homeElevatedButtonContent(
-                        'Избранное',
-                        FontAwesomeIcons.solidStar,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _classroomsDialog(context);
-                      },
-                      child: _homeElevatedButtonContent(
-                        'Аудитории',
-                        FontAwesomeIcons.bookOpen,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Modular.to.pushNamed(AppRoutes.teachersRoute);
-                      },
-                      child: _homeElevatedButtonContent(
-                        'Преподаватели',
-                        FontAwesomeIcons.graduationCap,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Modular.to.pushNamed(AppRoutes.studentsRoute);
-                      },
-                      child: _homeElevatedButtonContent(
-                        'Учебные группы',
-                        FontAwesomeIcons.userGroup,
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),

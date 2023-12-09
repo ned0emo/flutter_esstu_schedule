@@ -432,7 +432,7 @@ class StudentsParser extends Parser {
 
                 final building =
                     '${getBuildingByClassroom(currentClassroom)} корпус';
-                final zoClassroom = '$currentClassroom Заоч.';
+                final zoClassroom = ' $currentClassroom Заоч.';
 
                 bool isScheduleExist = true;
                 var currentScheduleModel = buildingsScheduleMap[building]

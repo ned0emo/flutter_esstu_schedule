@@ -91,12 +91,12 @@ class SettingsPage extends StatelessWidget {
                           content: const Text('Избранное и логи будут удалены.'
                               ' Настройки приложения вернутся к значениям по умолчанию.'),
                           actions: [
-                            TextButton(
+                            FilledButton(
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },
                                 child: const Text('Нет')),
-                            TextButton(
+                            OutlinedButton(
                                 onPressed: () {
                                   BlocProvider.of<SettingsBloc>(context)
                                       .add(ClearAll());
