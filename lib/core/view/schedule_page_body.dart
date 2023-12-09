@@ -560,7 +560,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                         value: 'true'));
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Больше не показывать')),
+                  child: const Text('Больше не\nпоказывать')),
               FilledButton(
                   onPressed: () {
                     Navigator.of(context).pop();
@@ -595,13 +595,14 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                         value: 'true'));
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Больше не показывать')),
+                  child: const Text('Больше не\nпоказывать')),
               FilledButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                   child: const Text('Ок')),
             ],
+
           );
         },
       );
