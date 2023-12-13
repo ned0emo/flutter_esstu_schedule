@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:schedule/core/models/schedule_model.dart';
@@ -221,7 +222,7 @@ class StudentsParser extends Parser {
     }
   }
 
-  /// Создание мэпа корпус - список аудиторий.
+  /// Создание мэпа корпус - список аудиторий для заочников.
   /// [streamController] - для отслеживания прогресса в блоке, после окончания
   /// обязательно закрывать
   Future<Map<String, List<ScheduleModel>>?> buildingsZoClassroomsMap(
@@ -246,51 +247,164 @@ class StudentsParser extends Parser {
       '15 корпус': [],
     };
 
-    int getBuildingByClassroom(String classroom) {
+    String getBuildingByClassroom(String classroom) {
       if (classroom.length > 1) {
         final start = classroom.substring(0, 2);
         switch (start) {
           case '11':
-            return 11;
+            return '11';
           case '12':
-            return 12;
+            return '12';
           case '13':
-            return 13;
+            return '13';
           case '14':
-            return 14;
+            return '14';
           case '15':
-            return 15;
+            return '15';
         }
       }
       if (classroom.isNotEmpty) {
-        final start = classroom[0];
-        switch (start) {
-          case '0':
-            return 10;
-          case '1':
-            return 1;
-          case '2':
-            return 2;
-          case '3':
-            return 3;
-          case '4':
-            return 4;
-          case '5':
-            return 5;
-          case '6':
-            return 6;
-          case '7':
-            return 7;
-          case '8':
-            return 8;
-          case '9':
-            return 9;
-        }
+        if (classroom[0] == '0') return '10';
+
+        return classroom[0];
       }
 
-      return 1;
+      return 'Не определен';
     }
 
+    final result = await _zoPagesParser(
+      buildingsScheduleMap,
+      streamController,
+      (map, lesson, dayOfWeekIndex, weekNames, lessonIndex, dayOfWeekDate) {
+        final classrooms = lesson
+            .split('а.')
+            .skip(1)
+            .map((e) => e.contains(' ') ? e.substring(0, e.indexOf(' ')) : e)
+            .toList()
+          ..removeWhere((element) => !element.contains(RegExp(r"[0-9]")));
+
+        for (var classroom in classrooms) {
+          final cleanClassroom =
+              classroom.replaceFirst(RegExp(r'[^А-Яа-я0-9]+$'), '');
+          final building = '${getBuildingByClassroom(cleanClassroom)} корпус';
+          final zoClassroom = ' $cleanClassroom Заоч.';
+
+          bool isScheduleExist = true;
+          buildingsScheduleMap[building] ??= [];
+          var currentScheduleModel = buildingsScheduleMap[building]!
+              .firstWhereOrNull((element) => element.name == zoClassroom);
+
+          if (currentScheduleModel == null) {
+            currentScheduleModel = ScheduleModel(
+              name: zoClassroom,
+              type: ScheduleType.classroom,
+              weeks: [],
+            );
+            isScheduleExist = false;
+          }
+
+          currentScheduleModel.updateWeekByDate(
+            weekNames[dayOfWeekIndex ~/ 7],
+            dayOfWeekIndex % 7,
+            lessonIndex,
+            LessonBuilder.createClassroomLesson(
+                lessonNumber: lessonIndex + 1, lesson: lesson),
+            dayOfWeekDate: dayOfWeekDate,
+          );
+
+          if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
+            buildingsScheduleMap[building]!.add(currentScheduleModel);
+          }
+        }
+      },
+    );
+
+    if (!result) return null;
+
+    for (var building in buildingsScheduleMap.keys) {
+      buildingsScheduleMap[building]!.sort((a, b) => a.name.compareTo(b.name));
+    }
+
+    return buildingsScheduleMap;
+  }
+
+  /// Создание мэпа буква - список преподов для зочников.
+  /// [streamController] - для отслеживания прогресса в блоке, после окончания
+  /// обязательно закрывать
+  Future<Map<String, List<ScheduleModel>>?> lettersZoTeachersMap(
+    StreamController<Map<String, String>> streamController,
+  ) async {
+    lastError = null;
+
+    /// Буква - список расписаний
+    final SplayTreeMap<String, List<ScheduleModel>> teachersScheduleMap =
+        SplayTreeMap();
+
+    final result = await _zoPagesParser(
+      teachersScheduleMap,
+      streamController,
+      (map, lesson, dayOfWeekIndex, weekNames, lessonIndex, dayOfWeekDate) {
+        final teachers = RegExp(LessonBuilder.teachersRegExp)
+            .allMatches(lesson)
+            .map((e) => e[0]!)
+            .toList()
+          ..removeWhere((element) => element.isEmpty);
+
+        for (var teacher in teachers) {
+          final letter = teacher[0];
+          final zoTeacher = ' $teacher Заоч.';
+
+          bool isScheduleExist = true;
+          map[letter] ??= [];
+          var currentScheduleModel = map[letter]!
+              .firstWhereOrNull((element) => element.name == zoTeacher);
+
+          if (currentScheduleModel == null) {
+            currentScheduleModel = ScheduleModel(
+              name: zoTeacher,
+              type: ScheduleType.classroom,
+              weeks: [],
+            );
+            isScheduleExist = false;
+          }
+
+          currentScheduleModel.updateWeekByDate(
+            weekNames[dayOfWeekIndex ~/ 7],
+            dayOfWeekIndex % 7,
+            lessonIndex,
+            LessonBuilder.createTeacherLesson(
+                lessonNumber: lessonIndex + 1, lesson: lesson),
+            dayOfWeekDate: dayOfWeekDate,
+          );
+
+          if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
+            map[letter]?.add(currentScheduleModel);
+          }
+        }
+      },
+    );
+
+    if (!result) return null;
+
+    for (var key in teachersScheduleMap.keys) {
+      teachersScheduleMap[key]!.sort((a, b) => a.name.compareTo(b.name));
+    }
+
+    return teachersScheduleMap;
+  }
+
+  Future<bool> _zoPagesParser(
+    Map<String, List<ScheduleModel>> scheduleMap,
+    StreamController streamController,
+    void Function(
+      Map<String, List<ScheduleModel>> map,
+      String lesson,
+      int dayOfWeekIndex,
+      List<String> weekNames,
+      int lessonIndex,
+      String dayOfWeekDate,
+    ) mapCreating,
+  ) async {
     final groupLinkMap1 = await groupLinkMap(
       defaultStudentsLinks: [
         ScheduleLinks.allZo1Groups,
@@ -312,7 +426,7 @@ class StudentsParser extends Parser {
         exception: 'Невозможно получить список заочных групп. '
             'groupLinkMap == null',
       );
-      return null;
+      return false;
     }
 
     String warnings = '';
@@ -417,51 +531,18 @@ class StudentsParser extends Parser {
               final lesson = fullLesson
                   .replaceAll('и/д', '')
                   .replaceAll('пр.', '')
-                  .replaceAll('пр', '')
+                  //.replaceAll('пр', '')
                   .replaceAll('д/кл', '')
                   .replaceAll('д/к', '');
 
-              final classrooms = lesson
-                  .split('а.')
-                  .skip(1)
-                  .map((e) =>
-                      e.contains(' ') ? e.substring(0, e.indexOf(' ')) : e)
-                  .toList()
-                ..removeWhere((element) => !element.contains(RegExp(r"[0-9]")));
-
-              for (var classroom in classrooms) {
-                final cleanClassroom =
-                    classroom.replaceFirst(RegExp(r'[^А-Яа-я0-9]+$'), '');
-                final building = '${getBuildingByClassroom(cleanClassroom)} корпус';
-                final zoClassroom = ' $cleanClassroom Заоч.';
-
-                bool isScheduleExist = true;
-                var currentScheduleModel = buildingsScheduleMap[building]
-                    ?.firstWhereOrNull(
-                        (element) => element.name == zoClassroom);
-
-                if (currentScheduleModel == null) {
-                  currentScheduleModel = ScheduleModel(
-                    name: zoClassroom,
-                    type: ScheduleType.classroom,
-                    weeks: [],
-                  );
-                  isScheduleExist = false;
-                }
-
-                currentScheduleModel.updateWeekByDate(
-                  weekNames[dayOfWeekIndex ~/ 7],
-                  dayOfWeekIndex % 7,
-                  lessonIndex,
-                  LessonBuilder.createClassroomLesson(
-                      lessonNumber: lessonIndex + 1, lesson: lesson),
-                  dayOfWeekDate: dayOfWeekDate,
-                );
-
-                if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
-                  buildingsScheduleMap[building]?.add(currentScheduleModel);
-                }
-              }
+              mapCreating(
+                scheduleMap,
+                lesson,
+                dayOfWeekIndex,
+                weekNames,
+                lessonIndex,
+                dayOfWeekDate,
+              );
 
               if (++lessonIndex >= 7) break;
             }
@@ -504,9 +585,9 @@ class StudentsParser extends Parser {
       lastError = Logger.error(
         title: Errors.zoClassroomsError,
         exception: 'Большое количество ошибок при загрузке страниц '
-            'расписания заочных групп. loadingError > 0',
+            'расписания заочных групп. loadingError == true',
       );
-      return null;
+      return false;
     }
 
     if (warnings.isNotEmpty) {
@@ -516,20 +597,16 @@ class StudentsParser extends Parser {
       );
     }
 
-    buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
-    for (var building in buildingsScheduleMap.keys) {
-      buildingsScheduleMap[building]!.sort((a, b) => a.name.compareTo(b.name));
-    }
-
-    if (buildingsScheduleMap.isEmpty) {
+    scheduleMap.removeWhere((key, value) => value.isEmpty);
+    if (scheduleMap.isEmpty) {
       lastError = Logger.error(
         title: Errors.zoClassroomsError,
         exception: 'Не найдено ни одного расписания заочных групп. '
-            'buildingsScheduleMap.isEmpty',
+            'teachersScheduleMap.isEmpty',
       );
-      return null;
+      return false;
     }
 
-    return buildingsScheduleMap;
+    return true;
   }
 }

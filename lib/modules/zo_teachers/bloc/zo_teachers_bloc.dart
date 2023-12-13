@@ -5,26 +5,27 @@ import 'package:flutter/foundation.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/students_parser.dart';
 
-part 'zo_classroom_event.dart';
-part 'zo_classroom_state.dart';
+part 'zo_teachers_event.dart';
 
-class ZoClassroomsBloc extends Bloc<ZoClassroomEvent, ZoClassroomsState> {
+part 'zo_teachers_state.dart';
+
+class ZoTeachersBloc extends Bloc<ZoTeachersEvent, ZoTeachersState> {
   final StudentsParser _parser;
 
   final _streamController = StreamController<Map<String, String>>();
 
-  ZoClassroomsBloc(StudentsParser parser)
+  ZoTeachersBloc(StudentsParser parser)
       : _parser = parser,
-        super(ZoClassroomInitial()) {
-    on<LoadZoClassroomsSchedule>(_loadZoClassroomsSchedule);
-    on<ChangeZoBuilding>(_changeZoBuilding);
-    on<ChangeZoClassroom>(_changeZoClassroom);
+        super(ZoTeachersInitial()) {
+    on<LoadZoTeachersSchedule>(_loadZoTeachersSchedule);
+    on<ChangeZoLetter>(_changeZoLetter);
+    on<ChangeZoTeacher>(_changeZoTeacher);
   }
 
-  Future<void> _changeZoBuilding(
-      ChangeZoBuilding event, Emitter<ZoClassroomsState> emit) async {
+  Future<void> _changeZoLetter(
+      ChangeZoLetter event, Emitter<ZoTeachersState> emit) async {
     final currentState = state;
-    if (currentState is ZoClassroomsLoaded) {
+    if (currentState is ZoTeachersLoaded) {
       emit(currentState.copyWith(
         currentBuildingName: event.buildingName,
         currentClassroomIndex: 0,
@@ -34,10 +35,10 @@ class ZoClassroomsBloc extends Bloc<ZoClassroomEvent, ZoClassroomsState> {
     }
   }
 
-  Future<void> _changeZoClassroom(
-      ChangeZoClassroom event, Emitter<ZoClassroomsState> emit) async {
+  Future<void> _changeZoTeacher(
+      ChangeZoTeacher event, Emitter<ZoTeachersState> emit) async {
     final currentState = state;
-    if (currentState is ZoClassroomsLoaded) {
+    if (currentState is ZoTeachersLoaded) {
       final index = currentState.scheduleMap[currentState.currentBuildingName]!
           .indexWhere((element) => element.name == event.classroom);
       emit(currentState.copyWith(
@@ -47,12 +48,12 @@ class ZoClassroomsBloc extends Bloc<ZoClassroomEvent, ZoClassroomsState> {
     }
   }
 
-  Future<void> _loadZoClassroomsSchedule(
-      LoadZoClassroomsSchedule event, Emitter<ZoClassroomsState> emit) async {
-    emit(const ZoClassroomsLoading());
+  Future<void> _loadZoTeachersSchedule(
+      LoadZoTeachersSchedule event, Emitter<ZoTeachersState> emit) async {
+    emit(const ZoTeachersLoading());
 
     _streamController.stream.listen((event) {
-      emit(ZoClassroomsLoading(
+      emit(ZoTeachersLoading(
         percents: event['percents'] ?? '0',
         message: event['message'] ?? '',
       ));
@@ -62,15 +63,15 @@ class ZoClassroomsBloc extends Bloc<ZoClassroomEvent, ZoClassroomsState> {
     /// "аудитория" - список дней недели.
     /// В элементе списка дней недели пары
     final buildingsScheduleMap =
-        await _parser.buildingsZoClassroomsMap(_streamController);
+        await _parser.lettersZoTeachersMap(_streamController);
     await _streamController.close();
 
     if (buildingsScheduleMap == null) {
-      emit(ZoClassroomsError(_parser.lastError ?? 'Ошибка'));
+      emit(ZoTeachersError(_parser.lastError ?? 'Ошибка'));
       return;
     }
 
-    emit(ZoClassroomsLoaded(
+    emit(ZoTeachersLoaded(
       appBarTitle: buildingsScheduleMap.keys.first,
       currentBuildingName: buildingsScheduleMap.keys.first,
       scheduleMap: buildingsScheduleMap,

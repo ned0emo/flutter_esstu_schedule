@@ -9,6 +9,7 @@ class AppRoutes{
   static const debugRoute = '/debug';
   static const classesRoute = '/classes';
   static const zoClassesRoute = '/zoClasses';
+  static const zoTeachersRoute = '/zoTeachers';
   static const searchRoute = '/search';
   static const searchingScheduleRoute = '/searchingSchedule';
 }

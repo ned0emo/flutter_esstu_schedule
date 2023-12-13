@@ -17,6 +17,7 @@ import 'package:schedule/modules/settings/settings_module.dart';
 import 'package:schedule/modules/students/students_module.dart';
 import 'package:schedule/modules/teachers/teachers_module.dart';
 import 'package:schedule/modules/zo_classrooms/zo_classrooms_module.dart';
+import 'package:schedule/modules/zo_teachers/zo_teachers_module.dart';
 
 class HomeModule extends Module {
   @override
@@ -55,5 +56,6 @@ class HomeModule extends Module {
     r.module(AppRoutes.favoriteListRoute, module: FavoriteModule());
     r.module(AppRoutes.searchRoute, module: SearchModule());
     r.module(AppRoutes.zoClassesRoute, module: ZoClassroomsModule());
+    r.module(AppRoutes.zoTeachersRoute, module: ZoTeachersModule());
   }
 }

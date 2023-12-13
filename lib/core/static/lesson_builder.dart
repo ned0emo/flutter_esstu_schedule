@@ -77,10 +77,9 @@ class LessonBuilder {
         {
           Lesson.title: _lessonTitle(clearLesson),
           Lesson.classrooms: RegExp(oneClassroomRegExp)
-                  .firstMatch(clearLesson)?[0]
-                  ?.replaceAll(RegExp(r'а\.\s*'), '')
-                  .trim() ??
-              '',
+              .allMatches(clearLesson)
+              .map((e) => e[0]!.replaceAll(RegExp(r'а\.\s*'), '').trim())
+              .join(', '),
           Lesson.type: _lessonType(clearLesson)
         }
       ],

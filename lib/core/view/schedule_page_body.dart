@@ -57,7 +57,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
 
   TabController? _tabController;
 
-  int weekButtonTapCount = 0;
+  int _weekButtonTapCount = 0;
 
   @override
   void initState() {
@@ -180,10 +180,10 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                         const SizedBox(width: 5),
                         FilledButton(
                           onPressed: () {
-                            weekButtonTapCount++;
-                            if (weekButtonTapCount > 2) {
+                            _weekButtonTapCount++;
+                            if (_weekButtonTapCount > 2) {
                               _longPressHintDialog();
-                              weekButtonTapCount = 0;
+                              _weekButtonTapCount = 0;
                             }
                             _changeWeekNumber();
                           },
@@ -550,7 +550,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
           return AlertDialog(
             title: const Text('Внимание'),
             content: const Text(
-              'Расписание аудиторий не имеет '
+              'Расписание данного типа не имеет '
               'возможности обновления из избранного',
               style: TextStyle(fontSize: 16),
             ),
@@ -604,7 +604,6 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                   },
                   child: const Text('Ок')),
             ],
-
           );
         },
       );

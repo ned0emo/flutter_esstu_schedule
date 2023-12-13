@@ -25,47 +25,60 @@ class FacultiesPage extends StatelessWidget {
             }
           },
           child: Center(
-            child: SingleChildScrollView(
-              child: BlocBuilder<FacultyBloc, FacultyState>(
-                builder: (context, state) {
-                  if (state is FacultiesLoadingState) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+            child: BlocBuilder<FacultyBloc, FacultyState>(
+              builder: (context, state) {
+                if (state is FacultiesLoadingState) {
+                  return const CircularProgressIndicator();
+                }
 
-                  if (state is FacultiesLoadedState ||
-                      state is CurrentFacultyState) {
-                    final map = state.facultyDepartmentLinkMap!;
+                if (state is FacultiesLoadedState ||
+                    state is CurrentFacultyState) {
+                  final map = state.facultyDepartmentLinkMap!;
 
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 15,
-                          horizontal: 0,
+                  return Center(
+                    child: ListView(
+                      children: [
+                        ...List.generate(
+                          map.keys.length,
+                          (index) => _facultyButton(map.keys.elementAt(index),
+                              map[map.keys.elementAt(index)]!, context),
                         ),
-                        child: Column(
-                          children: List.generate(
-                              map.keys.length,
-                              (index) => _facultyButton(
-                                  map.keys.elementAt(index),
-                                  map[map.keys.elementAt(index)]!,
-                                  context)),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 15.0),
+                          child: Divider(),
                         ),
-                      ),
-                    );
-                  }
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8.0,
+                            horizontal: 15.0,
+                          ),
+                          child: SizedBox(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Modular.to.pushNamed(AppRoutes.zoTeachersRoute);
+                              },
+                              child: Container(
+                                height: 50.0,
+                                alignment: AlignmentDirectional.center,
+                                child: const Text(
+                                  'Заочное отделение',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
-                  if (state is FacultiesErrorState) {
-                    return Center(
-                      child: Text(
-                        state.message,
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  }
+                if (state is FacultiesErrorState) {
+                  return Text(state.message, textAlign: TextAlign.center);
+                }
 
-                  return const Center(child: Text('Неизвестная ошибка'));
-                },
-              ),
+                return const Center(child: Text('Неизвестная ошибка'));
+              },
             ),
           ),
         ),
@@ -76,28 +89,24 @@ class FacultiesPage extends StatelessWidget {
   Widget _facultyButton(String facultyName,
       Map<String, List<String>> departmentsMap, BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                Modular.get<FacultyBloc>().add(ChooseFaculty(
-                    facultyName: facultyName, departmentsMap: departmentsMap));
-              },
-              child: Container(
-                height: 50.0,
-                alignment: AlignmentDirectional.center,
-                child: Text(
-                  facultyName,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
+      child: SizedBox(
+        child: ElevatedButton(
+          onPressed: () {
+            Modular.get<FacultyBloc>().add(ChooseFaculty(
+                facultyName: facultyName, departmentsMap: departmentsMap));
+          },
+          child: Container(
+            height: 50.0,
+            alignment: AlignmentDirectional.center,
+            child: Text(
+              facultyName,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
