@@ -362,7 +362,7 @@ class StudentsParser extends Parser {
           if (currentScheduleModel == null) {
             currentScheduleModel = ScheduleModel(
               name: zoTeacher,
-              type: ScheduleType.classroom,
+              type: ScheduleType.teacher,
               weeks: [],
             );
             isScheduleExist = false;

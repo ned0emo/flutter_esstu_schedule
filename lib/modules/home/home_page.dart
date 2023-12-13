@@ -222,28 +222,38 @@ class HomePage extends StatelessWidget {
                 height: 60,
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: ElevatedButton(
-                    onPressed: () {
-                      Modular.to.popAndPushNamed(AppRoutes.classesRoute);
-                    },
-                    child: const Text(
-                      'Очное отделение',
-                      style: TextStyle(fontSize: 20),
-                      textAlign: TextAlign.center,
-                    )),
+                  onPressed: () {
+                    Modular.to.popAndPushNamed(AppRoutes.classesRoute);
+                  },
+                  child: const Text(
+                    'Очное отделение',
+                    style: TextStyle(fontSize: 20),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
               Container(
                 width: double.infinity,
                 height: 60,
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: ElevatedButton(
-                    onPressed: () {
-                      Modular.to.popAndPushNamed(AppRoutes.zoClassesRoute);
-                    },
-                    child: const Text(
-                      'Заочное отделение (beta)',
-                      style: TextStyle(fontSize: 20),
-                      textAlign: TextAlign.center,
-                    )),
+                  onPressed: () async {
+                    Modular.to.popAndPushNamed(AppRoutes.zoClassesRoute);
+                  },
+                  child: const Text(
+                    'Заочное отделение (beta)',
+                    style: TextStyle(fontSize: 20),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Внимание. Расписание аудиторий не имеет '
+                  'возможности обновления из избранного',
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
             ],
           ),

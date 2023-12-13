@@ -151,12 +151,12 @@ class FavoriteListPage extends StatelessWidget {
                         return AlertDialog(
                           title: const Text('Очистить избранное?'),
                           actions: [
-                            TextButton(
+                            FilledButton(
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },
                                 child: const Text('Нет')),
-                            TextButton(
+                            OutlinedButton(
                                 onPressed: () {
                                   Modular.get<FavoriteListBloc>()
                                       .add(ClearAllSchedule());

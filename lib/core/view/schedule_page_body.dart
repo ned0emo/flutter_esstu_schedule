@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/static/schedule_time_data.dart';
-import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/core/view/lesson_section.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
@@ -486,11 +485,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
               Modular.get<FavoriteButtonBloc>()
                   .add(SaveSchedule(scheduleModel: widget.scheduleModel!));
 
-              if (widget.scheduleModel!.type == ScheduleType.classroom) {
-                _noUpdateDialog();
-              } else {
-                _addToMainDialog();
-              }
+              //TODO: Убрать диалог для аудиторий и заочных преподов
+              _addToMainDialog();
             }
           },
           child: state is FavoriteExist
@@ -520,12 +516,12 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
         return AlertDialog(
           title: const Text('Открывать при запуске приложения?'),
           actions: [
-            TextButton(
+            OutlinedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
                 child: const Text('Нет')),
-            TextButton(
+            FilledButton(
                 onPressed: () {
                   Modular.get<FavoriteButtonBloc>().add(AddFavoriteToMainPage(
                     scheduleType: widget.scheduleModel!.type,
@@ -538,41 +534,6 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
         );
       },
     );
-  }
-
-  void _noUpdateDialog() {
-    /// Вызов через BlocProvider, так как SettingsBloc отсутствует в модуляре
-    final state = BlocProvider.of<SettingsBloc>(context).state;
-    if (state is SettingsLoaded && !state.noUpdateClassroom) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Внимание'),
-            content: const Text(
-              'Расписание данного типа не имеет '
-              'возможности обновления из избранного',
-              style: TextStyle(fontSize: 16),
-            ),
-            actions: [
-              OutlinedButton(
-                  onPressed: () {
-                    BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
-                        settingType: SettingsTypes.noUpdateClassroom,
-                        value: 'true'));
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Больше не\nпоказывать')),
-              FilledButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Ок')),
-            ],
-          );
-        },
-      );
-    }
   }
 
   void _longPressHintDialog() {
