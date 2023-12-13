@@ -56,7 +56,7 @@ android {
         minSdkVersion 25
         targetSdkVersion flutter.targetSdkVersion
         //13.12.2023
-        versionCode 44
+        versionCode 45
         versionName "3.8.0"
     }
 
