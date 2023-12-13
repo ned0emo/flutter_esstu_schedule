@@ -122,7 +122,7 @@ class ZoTeachersPage extends StatelessWidget {
   }
 
   Widget _appBarText(ZoTeachersState state) {
-    return Text(state.appBarTitle ?? 'Аудитории', maxLines: 2);
+    return Text(state.appBarTitle ?? 'Преподаватели', maxLines: 2);
   }
 
   Widget _dropDownButton(ZoTeachersLoaded state) {
@@ -130,7 +130,7 @@ class ZoTeachersPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Row(
         children: [
-          const Text('Аудитория:   ', style: TextStyle(fontSize: 18)),
+          const Text('Преподаватель:   ', style: TextStyle(fontSize: 18)),
           Expanded(
             child: DropdownButton<String>(
               isExpanded: true,
