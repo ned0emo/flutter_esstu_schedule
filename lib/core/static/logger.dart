@@ -8,11 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// !! - Разделитель сообщений
 class Logger {
-  //static const String error = 'error';
-  //static const String warning = 'warning';
-  //static const String info = 'info';
-
   static const String _key = 'logService';
+  static const String _divider = '!!';
 
   static String _exceptionToString(dynamic e) {
     if (e is SocketException) {
@@ -78,18 +75,6 @@ class Logger {
 
   static Future<void> _addLog(String type, String title, String message) async {
     final storage = await SharedPreferences.getInstance();
-    //print(type);
-    //print(title);
-    //print(message);
-
-    //String? currentLog;
-    //try{
-    //  currentLog = await _storage.read(key: _key);
-    //}
-    //catch(e){
-    //  return;
-    //}
-
     final currentLog = storage.getString(_key);
 
     final now = DateFormat('dd.MM.yyyy\nHH:mm:ss').format(DateTime.now());
@@ -99,7 +84,7 @@ class Logger {
       return;
     }
 
-    final logList = currentLog.split('!!');
+    final logList = currentLog.split(_divider);
     if (logList.length > 50) {
       logList.removeAt(0);
 
@@ -108,7 +93,7 @@ class Logger {
         newLog += '!!$logMessage';
       }
 
-      ///!! уже введен в цикле
+      ///Разделитель уже введен в цикле
       await storage.setString(_key, '$now|$type|$title|$message$newLog');
       return;
     }
@@ -126,6 +111,6 @@ class Logger {
   static Future<List<String>> getLog() async {
     final storage = await SharedPreferences.getInstance();
     final log = storage.getString(_key);
-    return log?.split('!!').toList() ?? [];
+    return log?.split(_divider).toList() ?? [];
   }
 }

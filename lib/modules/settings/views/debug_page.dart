@@ -63,14 +63,13 @@ class _DebugPageState extends State<DebugPage> {
           context: context,
           builder: (context) {
             return Dialog(
-                child: SingleChildScrollView(
-                  child: Center(
-                      heightFactor: 1.2,
-                      child: Text(
-                        message[3],
-                        textAlign: TextAlign.center,
-                      )),
-                ));
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(message[3], textAlign: TextAlign.center),
+                ),
+              ),
+            );
           },
         );
       },

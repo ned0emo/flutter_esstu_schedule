@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/static/schedule_time_data.dart';
+import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/core/view/lesson_section.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
@@ -485,8 +486,10 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
               Modular.get<FavoriteButtonBloc>()
                   .add(SaveSchedule(scheduleModel: widget.scheduleModel!));
 
-              //TODO: Убрать диалог для аудиторий и заочных преподов
-              _addToMainDialog();
+              if (widget.scheduleModel?.type != ScheduleType.zoTeacher &&
+                  widget.scheduleModel?.type != ScheduleType.zoClassroom) {
+                _addToMainDialog();
+              }
             }
           },
           child: state is FavoriteExist

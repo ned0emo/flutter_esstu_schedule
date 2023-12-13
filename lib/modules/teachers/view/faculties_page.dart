@@ -50,9 +50,11 @@ class FacultiesPage extends StatelessWidget {
                           child: Divider(),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
-                            horizontal: 15.0,
+                          padding: const EdgeInsets.only(
+                            top: 8.0,
+                            left: 15.0,
+                            right: 15.0,
+                            bottom: 30.0,
                           ),
                           child: SizedBox(
                             child: ElevatedButton(
@@ -64,8 +66,10 @@ class FacultiesPage extends StatelessWidget {
                                 height: 50.0,
                                 alignment: AlignmentDirectional.center,
                                 child: const Text(
-                                  'Заочное отделение',
+                                  'Заочное отделение (beta)',
+                                  maxLines: 2,
                                   textAlign: TextAlign.center,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),

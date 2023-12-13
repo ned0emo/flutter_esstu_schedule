@@ -80,7 +80,7 @@ class FavoriteListPage extends StatelessWidget {
           alignment: AlignmentDirectional.center,
           padding: const EdgeInsets.only(top: 20.0),
           child: Text(
-            ScheduleType.scheduleTypeRussian(sectionName),
+            _scheduleTypeRussian(sectionName),
             style: const TextStyle(fontSize: 20),
           ),
         ),
@@ -174,5 +174,22 @@ class FavoriteListPage extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _scheduleTypeRussian(String type) {
+    switch (type) {
+      case ScheduleType.classroom:
+        return 'Аудитории';
+      case ScheduleType.zoClassroom:
+        return 'Аудитории (заочное)';
+      case ScheduleType.student:
+        return 'Учебные группы';
+      case ScheduleType.teacher:
+        return 'Преподаватели';
+      case ScheduleType.zoTeacher:
+        return 'Преподаватели (заочное)';
+      default:
+        return 'Не распознано';
+    }
   }
 }

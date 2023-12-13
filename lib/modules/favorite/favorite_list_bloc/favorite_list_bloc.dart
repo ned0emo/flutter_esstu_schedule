@@ -35,8 +35,10 @@ class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
 
       final Map<String, List<String>> favoriteListMap = {
         ScheduleType.teacher: [],
+        ScheduleType.zoTeacher: [],
         ScheduleType.student: [],
         ScheduleType.classroom: [],
+        ScheduleType.zoClassroom: [],
         '': [],
       };
 

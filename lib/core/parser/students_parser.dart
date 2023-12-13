@@ -287,17 +287,16 @@ class StudentsParser extends Parser {
           final cleanClassroom =
               classroom.replaceFirst(RegExp(r'[^А-Яа-я0-9]+$'), '');
           final building = '${getBuildingByClassroom(cleanClassroom)} корпус';
-          final zoClassroom = ' $cleanClassroom Заоч.';
 
           bool isScheduleExist = true;
           buildingsScheduleMap[building] ??= [];
           var currentScheduleModel = buildingsScheduleMap[building]!
-              .firstWhereOrNull((element) => element.name == zoClassroom);
+              .firstWhereOrNull((element) => element.name == cleanClassroom);
 
           if (currentScheduleModel == null) {
             currentScheduleModel = ScheduleModel(
-              name: zoClassroom,
-              type: ScheduleType.classroom,
+              name: cleanClassroom,
+              type: ScheduleType.zoClassroom,
               weeks: [],
             );
             isScheduleExist = false;
@@ -352,17 +351,16 @@ class StudentsParser extends Parser {
 
         for (var teacher in teachers) {
           final letter = teacher[0];
-          final zoTeacher = ' $teacher Заоч.';
 
           bool isScheduleExist = true;
           map[letter] ??= [];
           var currentScheduleModel = map[letter]!
-              .firstWhereOrNull((element) => element.name == zoTeacher);
+              .firstWhereOrNull((element) => element.name == teacher);
 
           if (currentScheduleModel == null) {
             currentScheduleModel = ScheduleModel(
-              name: zoTeacher,
-              type: ScheduleType.teacher,
+              name: teacher,
+              type: ScheduleType.zoTeacher,
               weeks: [],
             );
             isScheduleExist = false;

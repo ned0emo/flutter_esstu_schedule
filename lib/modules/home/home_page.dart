@@ -250,7 +250,7 @@ class HomePage extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
-                  'Внимание. Расписание аудиторий не имеет '
+                  'Расписание аудиторий не имеет '
                   'возможности обновления из избранного',
                   style: TextStyle(fontSize: 16),
                 ),
