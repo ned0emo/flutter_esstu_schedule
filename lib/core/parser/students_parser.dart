@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:schedule/core/models/lesson_model.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/core/static/errors.dart';
@@ -320,7 +319,7 @@ class StudentsParser extends Parser {
 
     /// Данные для парллельной загрузки
     int progress = 0;
-    int globalErrorsCount = 0;
+    bool loadingError = false;
     int completeThreads = 0;
 
     const threadsCount = 6;
@@ -337,12 +336,12 @@ class StudentsParser extends Parser {
     /// Функция загрузки и обработки заочников.
     /// [map] - "Группа" - ["Ссылка"]
     Future<void> parseSchedulePages(Map<String, List<String>> map) async {
-      int errorsCount = 0;
+      int localErrorsCount = 0;
       for (var group in map.keys) {
         progress++;
 
         ///Если один из потоков сдох, то обрубать все
-        if (globalErrorsCount > 0) break;
+        if (loadingError) break;
 
         try {
           final page = await repository.loadPage(map[group]![0]);
@@ -401,8 +400,11 @@ class StudentsParser extends Parser {
                 continue;
               }
 
-              final fullLesson =
-                  '$group ${lessonSection.substring(0, lessonSection.indexOf('</FONT>')).trim()}';
+              // ignore: prefer_interpolation_to_compose_strings
+              final fullLesson = '$group ' +
+                  lessonSection
+                      .substring(0, lessonSection.indexOf('</FONT>'))
+                      .trim();
 
               final lessonChecker =
                   fullLesson.replaceAll(RegExp(r'[^0-9а-яА-Я]'), '');
@@ -412,27 +414,26 @@ class StudentsParser extends Parser {
                 continue;
               }
 
-              /// Приходится вытаскивать список пар по количеству аудиторий в
-              /// ячейке пары группы
-              final lessonsList = LessonBuilder.createZoClassroomLessons(
-                  lessonNumber: lessonIndex + 1, lesson: fullLesson);
+              final lesson = fullLesson
+                  .replaceAll('и/д', '')
+                  .replaceAll('пр.', '')
+                  .replaceAll('пр', '')
+                  .replaceAll('д/кл', '')
+                  .replaceAll('д/к', '');
 
-              for (var builtLesson in lessonsList) {
-                final currentClassroom =
-                    builtLesson.lessonData?[0][Lesson.classrooms];
-                if (currentClassroom == null) continue;
+              final classrooms = lesson
+                  .split('а.')
+                  .skip(1)
+                  .map((e) =>
+                      e.contains(' ') ? e.substring(0, e.indexOf(' ')) : e)
+                  .toList()
+                ..removeWhere((element) => !element.contains(RegExp(r"[0-9]")));
 
-                if (!currentClassroom.contains(RegExp(r"[0-9]"))) {
-                  //if (++lessonIndex > 5) break;
-                  continue;
-                }
-
-                /// Затирать, чтоб не отображалось лишнее поле
-                builtLesson.lessonData?[0][Lesson.classrooms] = '';
-
-                final building =
-                    '${getBuildingByClassroom(currentClassroom)} корпус';
-                final zoClassroom = ' $currentClassroom Заоч.';
+              for (var classroom in classrooms) {
+                final cleanClassroom =
+                    classroom.replaceFirst(RegExp(r'[^А-Яа-я0-9]+$'), '');
+                final building = '${getBuildingByClassroom(cleanClassroom)} корпус';
+                final zoClassroom = ' $cleanClassroom Заоч.';
 
                 bool isScheduleExist = true;
                 var currentScheduleModel = buildingsScheduleMap[building]
@@ -452,7 +453,8 @@ class StudentsParser extends Parser {
                   weekNames[dayOfWeekIndex ~/ 7],
                   dayOfWeekIndex % 7,
                   lessonIndex,
-                  builtLesson,
+                  LessonBuilder.createClassroomLesson(
+                      lessonNumber: lessonIndex + 1, lesson: lesson),
                   dayOfWeekDate: dayOfWeekDate,
                 );
 
@@ -472,11 +474,11 @@ class StudentsParser extends Parser {
             exception: e,
             stack: stack,
           );
-          errorsCount++;
+          localErrorsCount++;
         }
 
-        if (errorsCount > 8) {
-          globalErrorsCount++;
+        if (localErrorsCount > 8) {
+          loadingError = true;
           break;
         }
       }
@@ -497,19 +499,19 @@ class StudentsParser extends Parser {
       await Future.delayed(const Duration(milliseconds: 500));
     }
 
-    /// Если хотя бы один поток вернул больше 8 ошибок, то обрубать
-    if (globalErrorsCount > 0) {
+    /// Если хотя бы один поток вернул ошибку
+    if (loadingError) {
       lastError = Logger.error(
         title: Errors.zoClassroomsError,
         exception: 'Большое количество ошибок при загрузке страниц '
-            'расписания заочных групп. globalErrorsCount > 1',
+            'расписания заочных групп. loadingError > 0',
       );
       return null;
     }
 
     if (warnings.isNotEmpty) {
       Logger.warning(
-        title: Errors.zoClassroomsError,
+        title: Errors.zoClassroomsWarning,
         exception: warnings,
       );
     }

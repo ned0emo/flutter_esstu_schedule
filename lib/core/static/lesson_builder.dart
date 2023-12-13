@@ -65,51 +65,6 @@ class LessonBuilder {
         .toList();*/
   }
 
-  /// Возвращает список пар, так как для учебной группы, где есть несколько
-  /// аудиторий, приходится для каждой из аудиторий создавать свою пару.
-  /// Занятие прост объединяется со всех частей
-  static List<Lesson> createZoClassroomLessons({
-    required int lessonNumber,
-    required String lesson,
-  }) {
-    final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), ' ');
-
-    final classrooms = RegExp(oneClassroomRegExp).allMatches(clearLesson);
-
-    final lessons = clearLesson.split(RegExp(classroomsRegExp));
-    if (lessons.length > 1) lessons.removeLast();
-    final mergedLesson = lessons.join('; ');
-
-    final teachers = RegExp(teachersRegExp)
-        .allMatches(mergedLesson)
-        .map((e) => e[0] ?? '')
-        .join(', ');
-    final lessonTitle = _lessonTitle(mergedLesson);
-    final lessonType = _lessonType(mergedLesson);
-
-    final lessonList = <Lesson>[];
-
-    for (var classroom in classrooms) {
-      lessonList.add(Lesson(
-        fullLesson: lesson,
-        lessonNumber: lessonNumber,
-        lessonData: [
-          {
-            Lesson.title: lessonTitle,
-            Lesson.teachers: teachers,
-            Lesson.type: lessonType,
-            Lesson.classrooms: classroom[0]!
-                .replaceAll(RegExp(r'а\.\s*'), '')
-                .trim()
-                .replaceAll(RegExp(r'-$'), ''),
-          }
-        ],
-      ));
-    }
-
-    return lessonList;
-  }
-
   static Lesson createTeacherLesson({
     required int lessonNumber,
     required String lesson,
@@ -138,14 +93,18 @@ class LessonBuilder {
     required String lesson,
   }) {
     //final clearLesson = lesson.replaceAll(RegExp(classroomsJunkRegExp), '');
-    final teacher = RegExp(teachersRegExp).firstMatch(lesson)?[0] ?? '';
+    //final teacher = RegExp(teachersRegExp).firstMatch(lesson)?[0] ?? '';
+    final teachers = RegExp(teachersRegExp)
+        .allMatches(lesson)
+        .map((e) => e[0] ?? '')
+        .join(', ');
 
     return Lesson(
       lessonNumber: lessonNumber,
       lessonData: [
         {
           Lesson.title: _lessonTitle(lesson),
-          Lesson.teachers: teacher,
+          Lesson.teachers: teachers,
           Lesson.type: _lessonType(lesson)
         }
       ],

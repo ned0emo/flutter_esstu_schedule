@@ -365,7 +365,7 @@ class TeachersParser extends Parser {
               lessonIndex,
               LessonBuilder.createClassroomLesson(
                   lessonNumber: lessonIndex + 1,
-                  lesson: '$teacherName $fullLesson}'),
+                  lesson: '$teacherName $fullLesson'),
             );
 
             if (!isScheduleExist && currentScheduleModel.isNotEmpty) {

@@ -10,4 +10,6 @@ class Errors {
 
   static const String zoClassroomsError =
       'Ошибка загрузки расписания аудиторий заочного отделения';
+  static const String zoClassroomsWarning =
+      'Проблемы загрузки расписания аудиторий заочного отделения';
 }

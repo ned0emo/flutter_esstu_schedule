@@ -438,21 +438,23 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
       builder: (context) {
         return AlertDialog(
           title: const Text('Выберите неделю'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: List.generate(
-              numOfWeeks,
-              (index) => SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: () {
-                    setState(() => _changeWeekNumber(number: index));
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(weekDates[index] ??
-                      ('${index + 1} неделя'
-                          '${index == ScheduleTimeData.getCurrentWeekIndex() && !isZo ? ' (Сейчас)' : ''}')),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(
+                numOfWeeks,
+                (index) => SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() => _changeWeekNumber(number: index));
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(weekDates[index] ??
+                        ('${index + 1} неделя'
+                            '${index == ScheduleTimeData.getCurrentWeekIndex() && !isZo ? ' (Сейчас)' : ''}')),
+                  ),
                 ),
               ),
             ),
