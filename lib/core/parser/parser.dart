@@ -14,6 +14,54 @@ class Parser {
 
   Parser(this.repository);
 
+  Future<ScheduleModel?> updateSchedule({
+    required String link1,
+    String? link2,
+    required String scheduleName,
+    required String scheduleType,
+    bool isZo = false,
+  }) async {
+    lastError = null;
+    final pagesList = <String>[];
+
+    try {
+      pagesList.add(await repository.loadPage(link1));
+      if (link2 != null) {
+        pagesList.add(await repository.loadPage(link2));
+      }
+    } catch (e, stack) {
+      lastError = Logger.error(
+        title: Errors.updateError,
+        exception: e,
+        stack: stack,
+      );
+
+      return null;
+    }
+
+    if (!pagesList[0].contains(scheduleName) &&
+        (pagesList.length < 2 || !pagesList[1].contains(scheduleName))) {
+      lastError = Logger.warning(
+          title: Errors.updateError,
+          exception:
+              'Расписание "$scheduleName" не найдено по сохраненной ссылке. '
+              '1:"$link1", 2:"$link2"');
+
+      return null;
+    }
+
+    return scheduleModel(
+      link1: link1,
+      link2: link2,
+      page1: pagesList[0],
+      page2: pagesList.length > 1 ? pagesList[1] : null,
+      scheduleName: scheduleName,
+      scheduleType: scheduleType,
+      isZo: isZo,
+      defaultErrorTitle: Errors.updateError,
+    );
+  }
+
   /// Парсинг страницы с расписанием и превращение ее в модель
   Future<ScheduleModel?> scheduleModel({
     required String link1,

@@ -34,17 +34,20 @@ class FavoriteUpdateBloc
     emit(FavoriteScheduleUpdating());
 
     try {
-      final scheduleModel = await _parser.scheduleModel(
+      final scheduleModel = await _parser.updateSchedule(
         link1: event.scheduleModel.link1!,
         link2: event.scheduleModel.link2,
         scheduleName: event.scheduleModel.name,
         scheduleType: event.scheduleModel.type,
         isZo: event.scheduleModel.isZo,
-        defaultErrorTitle: Errors.updateError,
       );
 
+      //TODO: переделать
       if (scheduleModel == null) {
-        emit(FavoriteScheduleUpdateError('Ошибка обновления расписания'));
+        emit(FavoriteScheduleUpdateError(
+            _parser.lastError?.contains('обновления') ?? false
+                ? _parser.lastError!
+                : 'Ошибка обновления расписания'));
         return;
       }
 
