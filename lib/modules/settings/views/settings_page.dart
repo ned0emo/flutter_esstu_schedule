@@ -11,6 +11,8 @@ import 'package:url_launcher/url_launcher.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
+  static const _version = '3.8.2';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,7 +117,7 @@ class SettingsPage extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 )),
                 ListTile(
-                  title: const Text('Версия 3.8.1'),
+                  title: const Text('Версия $_version'),
                   subtitle: RichText(
                     text: TextSpan(
                       children: [

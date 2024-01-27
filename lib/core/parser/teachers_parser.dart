@@ -333,7 +333,9 @@ class TeachersParser extends Parser {
                 .replaceAll('пр.', '')
                 .replaceAll('пр', '')
                 .replaceAll('д/кл', '')
-                .replaceAll('д/к', '');
+                .replaceAll('д/к', '')
+                .replaceAll(
+                    RegExp(r'си\W+|си$|св\W+|св$|мф\W+|мф$'), ' ');
 
             final classroom = lesson.contains(' ')
                 ? lesson.substring(0, lesson.indexOf(' '))

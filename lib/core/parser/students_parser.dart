@@ -285,7 +285,7 @@ class StudentsParser extends Parser {
 
         for (var classroom in classrooms) {
           final cleanClassroom =
-              classroom.replaceFirst(RegExp(r'[^А-Яа-я0-9]+$'), '');
+              classroom.replaceFirst(RegExp(r'[^А-Яа-я0-9]+$|си\W+|си$|св\W+|св$|мф\W+|мф$'), '');
           final building = '${getBuildingByClassroom(cleanClassroom)} корпус';
 
           bool isScheduleExist = true;

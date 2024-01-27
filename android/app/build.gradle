@@ -55,9 +55,9 @@ android {
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
         minSdkVersion 25
         targetSdkVersion flutter.targetSdkVersion
-        //13.12.2023
-        versionCode 46
-        versionName "3.8.1"
+        //26.01.2024
+        versionCode 47
+        versionName "3.8.2"
     }
 
     signingConfigs {
