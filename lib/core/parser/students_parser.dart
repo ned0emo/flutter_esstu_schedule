@@ -2,22 +2,21 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart';
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/parser.dart';
-import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/static/lesson_builder.dart';
-import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/static/schedule_links.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/core/static/students_type.dart';
 
 class StudentsParser extends Parser {
-  StudentsParser(super.repository);
+  StudentsParser(super.repository, super.logger);
 
   ///Мэп группа - ссылка по курсам
-  Future<Map<String, Map<String, Map<String, String>>>?>
+  Future<Map<String, Map<String, Map<String, String>>>>
       courseGroupLinkMap() async {
-    lastError = null;
     final schedulePages = <String>[];
 
     final studentsLinks = [
@@ -91,33 +90,30 @@ class StudentsParser extends Parser {
       scheduleMap.removeWhere((key, value) => scheduleMap[key]!.isEmpty);
 
       if (scheduleMap.isEmpty) {
-        lastError = Logger.error(
+        logger.error(
           title: Errors.scheduleError,
           exception: 'Не найдено ни одного расписания. scheduleMap.isEmpty',
         );
-        return null;
+
+        throw CustomException(
+            message: 'Не найдено ни одного расписания. scheduleMap.isEmpty');
       }
 
       return scheduleMap;
     } catch (e, stack) {
-      lastError = Logger.error(
-        title: Errors.scheduleError,
-        exception: e,
-        stack: stack,
-      );
-    }
+      logger.error(title: Errors.scheduleError, exception: e, stack: stack);
 
-    return null;
+      throw CustomException(message: Errors.scheduleError);
+    }
   }
 
   /// Просто мэп группа - список ссылок. Список нужен для преподов, у студентов
   /// всегда можно вызывать 0 элемент
-  Future<Map<String, List<String>>?> groupLinkMap({
+  Future<Map<String, List<String>>> groupLinkMap({
     List<String>? defaultStudentsLinks,
     List<String>? defaultScheduleLinks,
     List<String>? defaultStudentsTypes,
   }) async {
-    lastError = null;
     final schedulePages = <String>[];
 
     final studentsLinks = defaultStudentsLinks ??
@@ -138,6 +134,8 @@ class StudentsParser extends Parser {
       _parseStudentGroups(
         scheduleLinksMap,
         schedulePages,
+
+        /// функция заполнения мэпы для расписания студентов
         (map, name, link, type, i) {
           map[name] ??= [];
           map[name]!.add(link);
@@ -147,24 +145,21 @@ class StudentsParser extends Parser {
       );
 
       if (scheduleLinksMap.isEmpty) {
-        lastError = Logger.error(
+        const text =
+            'Не найдено ни одной ссылки на расписание. scheduleLinksMap.isEmpty';
+        logger.error(
           title: Errors.scheduleError,
-          exception:
-              'Не найдено ни одной ссылки на расписание. scheduleLinksMap.isEmpty',
+          exception: text,
         );
-        return null;
+        throw CustomException(message: '${Errors.scheduleError} $text');
       }
 
       return scheduleLinksMap;
     } catch (e, stack) {
-      lastError = Logger.error(
-        title: Errors.scheduleError,
-        exception: e,
-        stack: stack,
-      );
-    }
+      logger.error(title: Errors.scheduleError, exception: e, stack: stack);
 
-    return null;
+      throw CustomException(message: Errors.scheduleError);
+    }
   }
 
   /// Непосредственно парсинг страниц с учебными группами.
@@ -225,10 +220,9 @@ class StudentsParser extends Parser {
   /// Создание мэпа корпус - список аудиторий для заочников.
   /// [streamController] - для отслеживания прогресса в блоке, после окончания
   /// обязательно закрывать
-  Future<Map<String, List<ScheduleModel>>?> buildingsZoClassroomsMap(
+  Future<Map<String, List<ScheduleModel>>> buildingsZoClassroomsMap(
     StreamController<Map<String, String>> streamController,
   ) async {
-    lastError = null;
     final Map<String, List<ScheduleModel>> buildingsScheduleMap = {
       '1 корпус': [],
       '2 корпус': [],
@@ -272,53 +266,64 @@ class StudentsParser extends Parser {
       return 'Не определен';
     }
 
-    final result = await _zoPagesParser(
-      buildingsScheduleMap,
-      streamController,
-      (map, lesson, dayOfWeekIndex, weekNames, lessonIndex, dayOfWeekDate) {
-        final classrooms = lesson
-            .split('а.')
-            .skip(1)
-            .map((e) => e.contains(' ') ? e.substring(0, e.indexOf(' ')) : e)
-            .toList()
-          ..removeWhere((element) => !element.contains(RegExp(r"[0-9]")));
+    try {
+      await _zoPagesParser(
+        buildingsScheduleMap,
+        streamController,
 
-        for (var classroom in classrooms) {
-          final cleanClassroom =
-              classroom.replaceFirst(RegExp(r'[^А-Яа-я0-9]+$|си\W+|си$|св\W+|св$|мф\W+|мф$'), '');
-          final building = '${getBuildingByClassroom(cleanClassroom)} корпус';
+        /// Функция заполнения мэпы для аудиторий заочного
+        (map, lesson, dayOfWeekIndex, weekNames, lessonIndex, dayOfWeekDate) {
+          final classrooms = lesson
+              .split('а.')
+              .skip(1)
+              .map((e) => e.contains(' ') ? e.substring(0, e.indexOf(' ')) : e)
+              .toList()
+            ..removeWhere((element) => !element.contains(RegExp(r"[0-9]")));
 
-          bool isScheduleExist = true;
-          buildingsScheduleMap[building] ??= [];
-          var currentScheduleModel = buildingsScheduleMap[building]!
-              .firstWhereOrNull((element) => element.name == cleanClassroom);
+          for (var classroom in classrooms) {
+            final cleanClassroom = classroom.replaceFirst(
+                RegExp(r'[^А-Яа-я0-9]+$|си\W+|си$|св\W+|св$|мф\W+|мф$'), '');
+            final building = '${getBuildingByClassroom(cleanClassroom)} корпус';
 
-          if (currentScheduleModel == null) {
-            currentScheduleModel = ScheduleModel(
-              name: cleanClassroom,
-              type: ScheduleType.zoClassroom,
-              weeks: [],
+            bool isScheduleExist = true;
+            buildingsScheduleMap[building] ??= [];
+            var currentScheduleModel = buildingsScheduleMap[building]!
+                .firstWhereOrNull((element) => element.name == cleanClassroom);
+
+            if (currentScheduleModel == null) {
+              currentScheduleModel = ScheduleModel(
+                name: cleanClassroom,
+                type: ScheduleType.zoClassroom,
+                weeks: [],
+              );
+              isScheduleExist = false;
+            }
+
+            currentScheduleModel.updateWeekByDate(
+              weekNames[dayOfWeekIndex ~/ 7],
+              dayOfWeekIndex % 7,
+              lessonIndex,
+              LessonBuilder.createClassroomLesson(
+                  lessonNumber: lessonIndex + 1, lesson: lesson),
+              dayOfWeekDate: dayOfWeekDate,
             );
-            isScheduleExist = false;
+
+            if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
+              buildingsScheduleMap[building]!.add(currentScheduleModel);
+            }
           }
-
-          currentScheduleModel.updateWeekByDate(
-            weekNames[dayOfWeekIndex ~/ 7],
-            dayOfWeekIndex % 7,
-            lessonIndex,
-            LessonBuilder.createClassroomLesson(
-                lessonNumber: lessonIndex + 1, lesson: lesson),
-            dayOfWeekDate: dayOfWeekDate,
-          );
-
-          if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
-            buildingsScheduleMap[building]!.add(currentScheduleModel);
-          }
-        }
-      },
-    );
-
-    if (!result) return null;
+        },
+      );
+    } on CustomException {
+      rethrow;
+    } catch (e, stack) {
+      logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      );
+      throw CustomException(message: Errors.scheduleError);
+    }
 
     for (var building in buildingsScheduleMap.keys) {
       buildingsScheduleMap[building]!.sort((a, b) => a.name.compareTo(b.name));
@@ -330,59 +335,68 @@ class StudentsParser extends Parser {
   /// Создание мэпа буква - список преподов для зочников.
   /// [streamController] - для отслеживания прогресса в блоке, после окончания
   /// обязательно закрывать
-  Future<Map<String, List<ScheduleModel>>?> lettersZoTeachersMap(
+  Future<Map<String, List<ScheduleModel>>> lettersZoTeachersMap(
     StreamController<Map<String, String>> streamController,
   ) async {
-    lastError = null;
-
     /// Буква - список расписаний
     final SplayTreeMap<String, List<ScheduleModel>> teachersScheduleMap =
         SplayTreeMap();
 
-    final result = await _zoPagesParser(
-      teachersScheduleMap,
-      streamController,
-      (map, lesson, dayOfWeekIndex, weekNames, lessonIndex, dayOfWeekDate) {
-        final teachers = RegExp(LessonBuilder.teachersRegExp)
-            .allMatches(lesson)
-            .map((e) => e[0]!)
-            .toList()
-          ..removeWhere((element) => element.isEmpty);
+    try {
+      await _zoPagesParser(
+        teachersScheduleMap,
+        streamController,
 
-        for (var teacher in teachers) {
-          final letter = teacher[0];
+        /// Функция заполнения мэпы для преподов заочного
+        (map, lesson, dayOfWeekIndex, weekNames, lessonIndex, dayOfWeekDate) {
+          final teachers = RegExp(LessonBuilder.teachersRegExp)
+              .allMatches(lesson)
+              .map((e) => e[0]!)
+              .toList()
+            ..removeWhere((element) => element.isEmpty);
 
-          bool isScheduleExist = true;
-          map[letter] ??= [];
-          var currentScheduleModel = map[letter]!
-              .firstWhereOrNull((element) => element.name == teacher);
+          for (var teacher in teachers) {
+            final letter = teacher[0];
 
-          if (currentScheduleModel == null) {
-            currentScheduleModel = ScheduleModel(
-              name: teacher,
-              type: ScheduleType.zoTeacher,
-              weeks: [],
+            bool isScheduleExist = true;
+            map[letter] ??= [];
+            var currentScheduleModel = map[letter]!
+                .firstWhereOrNull((element) => element.name == teacher);
+
+            if (currentScheduleModel == null) {
+              currentScheduleModel = ScheduleModel(
+                name: teacher,
+                type: ScheduleType.zoTeacher,
+                weeks: [],
+              );
+              isScheduleExist = false;
+            }
+
+            currentScheduleModel.updateWeekByDate(
+              weekNames[dayOfWeekIndex ~/ 7],
+              dayOfWeekIndex % 7,
+              lessonIndex,
+              LessonBuilder.createTeacherLesson(
+                  lessonNumber: lessonIndex + 1, lesson: lesson),
+              dayOfWeekDate: dayOfWeekDate,
             );
-            isScheduleExist = false;
+
+            if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
+              map[letter]?.add(currentScheduleModel);
+            }
           }
-
-          currentScheduleModel.updateWeekByDate(
-            weekNames[dayOfWeekIndex ~/ 7],
-            dayOfWeekIndex % 7,
-            lessonIndex,
-            LessonBuilder.createTeacherLesson(
-                lessonNumber: lessonIndex + 1, lesson: lesson),
-            dayOfWeekDate: dayOfWeekDate,
-          );
-
-          if (!isScheduleExist && currentScheduleModel.isNotEmpty) {
-            map[letter]?.add(currentScheduleModel);
-          }
-        }
-      },
-    );
-
-    if (!result) return null;
+        },
+      );
+    } on CustomException {
+      rethrow;
+    } catch (e, stack) {
+      logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      );
+      throw CustomException(message: Errors.scheduleError);
+    }
 
     for (var key in teachersScheduleMap.keys) {
       teachersScheduleMap[key]!.sort((a, b) => a.name.compareTo(b.name));
@@ -391,7 +405,11 @@ class StudentsParser extends Parser {
     return teachersScheduleMap;
   }
 
-  Future<bool> _zoPagesParser(
+  /// парсинг страниц заочников
+  ///
+  /// В [mapCreating] передаем функцию для заполнения [map] в зависимости
+  /// от того, преподов или аудитории собираем
+  Future<void> _zoPagesParser(
     Map<String, List<ScheduleModel>> scheduleMap,
     StreamController streamController,
     void Function(
@@ -417,15 +435,6 @@ class StudentsParser extends Parser {
         StudentsType.zo1,
       ],
     );
-
-    if (groupLinkMap1 == null) {
-      lastError = Logger.error(
-        title: Errors.zoClassroomsError,
-        exception: 'Невозможно получить список заочных групп. '
-            'groupLinkMap == null',
-      );
-      return false;
-    }
 
     String warnings = '';
 
@@ -533,6 +542,7 @@ class StudentsParser extends Parser {
                   .replaceAll('д/кл', '')
                   .replaceAll('д/к', '');
 
+              /// Данная функция передается парметром в _zoPagesParser
               mapCreating(
                 scheduleMap,
                 lesson,
@@ -548,7 +558,7 @@ class StudentsParser extends Parser {
             dayOfWeekIndex++;
           }
         } catch (e, stack) {
-          Logger.error(
+          logger.error(
             title: Errors.pageLoadingError,
             exception: e,
             stack: stack,
@@ -580,31 +590,26 @@ class StudentsParser extends Parser {
 
     /// Если хотя бы один поток вернул ошибку
     if (loadingError) {
-      lastError = Logger.error(
-        title: Errors.zoClassroomsError,
+      logger.error(
+        title: Errors.scheduleError,
         exception: 'Большое количество ошибок при загрузке страниц '
             'расписания заочных групп. loadingError == true',
       );
-      return false;
+      throw CustomException(message: Errors.scheduleError);
     }
 
     if (warnings.isNotEmpty) {
-      Logger.warning(
-        title: Errors.zoClassroomsWarning,
-        exception: warnings,
-      );
+      logger.warning(title: Errors.zoClassroomsWarning, exception: warnings);
     }
 
     scheduleMap.removeWhere((key, value) => value.isEmpty);
     if (scheduleMap.isEmpty) {
-      lastError = Logger.error(
-        title: Errors.zoClassroomsError,
+      logger.error(
+        title: Errors.scheduleError,
         exception: 'Не найдено ни одного расписания заочных групп. '
             'teachersScheduleMap.isEmpty',
       );
-      return false;
+      throw CustomException(message: Errors.scheduleError);
     }
-
-    return true;
   }
 }

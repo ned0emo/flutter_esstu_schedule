@@ -1,13 +1,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:schedule/core/static/logger.dart';
-import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
 
-part 'settings_state.dart';
-
 part 'settings_event.dart';
+part 'settings_state.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final SettingsRepository _settingsRepository;
@@ -48,11 +46,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         ),
       );
     } catch (e, stack) {
-      emit(SettingsError(Logger.error(
-        title: Errors.settingsError,
-        exception: e,
-        stack: stack,
-      )));
+      emit(SettingsError('${Errors.settingsError}: ${e.runtimeType}\n$stack'));
     }
   }
 
@@ -75,11 +69,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         ),
       );
     } catch (e, stack) {
-      emit(SettingsError(Logger.error(
-        title: Errors.settingsError,
-        exception: e,
-        stack: stack,
-      )));
+      emit(SettingsError('${Errors.settingsError}: ${e.runtimeType}\n$stack'));
     }
   }
 
@@ -88,11 +78,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     try {
       await _settingsRepository.clearAll();
     } catch (e, stack) {
-      Logger.error(
-        title: Errors.settingsError,
-        exception: e,
-        stack: stack,
-      );
+      emit(SettingsError('${Errors.settingsError}: ${e.runtimeType}\n$stack'));
+      return;
     }
 
     try {
@@ -112,11 +99,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         ),
       );
     } catch (e, stack) {
-      emit(SettingsError(Logger.error(
-        title: Errors.settingsError,
-        exception: e,
-        stack: stack,
-      )));
+      emit(SettingsError('${Errors.settingsError}: ${e.runtimeType}\n$stack'));
     }
   }
 }

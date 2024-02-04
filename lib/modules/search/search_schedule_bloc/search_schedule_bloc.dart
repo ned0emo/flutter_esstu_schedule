@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/parser.dart';
-import 'package:schedule/core/static/errors.dart';
 
 part 'search_schedule_event.dart';
 part 'search_schedule_state.dart';
@@ -23,21 +23,23 @@ class SearchScheduleBloc
       LoadSearchingSchedule event, Emitter<SearchScheduleState> emit) async {
     emit(SearchScheduleLoading(appBarName: event.scheduleName));
 
-    final scheduleModel = await _parser.scheduleModel(
-      link1: event.link1,
-      link2: event.link2,
-      scheduleName: event.scheduleName,
-      scheduleType: event.scheduleType,
-      isZo: event.link1.contains('zo'),
-    );
+    try {
+      final scheduleModel = await _parser.scheduleModel(
+        link1: event.link1,
+        link2: event.link2,
+        scheduleName: event.scheduleName,
+        scheduleType: event.scheduleType,
+        isZo: event.link1.contains('zo'),
+      );
 
-    if (scheduleModel == null) {
-      emit(SearchScheduleError(_parser.lastError ?? Errors.scheduleError));
+      emit(SearchScheduleLoaded(
+        scheduleModel: scheduleModel,
+        appBarName: event.scheduleName,
+      ));
+    } on CustomException catch (e) {
+      emit(SearchScheduleError(e.message));
+    } catch (e) {
+      emit(SearchScheduleError('Ошибка: ${e.runtimeType}'));
     }
-
-    emit(SearchScheduleLoaded(
-      scheduleModel: scheduleModel!,
-      appBarName: event.scheduleName,
-    ));
   }
 }

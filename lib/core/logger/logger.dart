@@ -8,10 +8,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// !! - Разделитель сообщений
 class Logger {
-  static const String _key = 'logService';
-  static const String _divider = '!!';
+  final String _key = 'logService';
+  final String _divider = '!!';
 
-  static String _exceptionToString(dynamic e) {
+  String _exceptionToString(dynamic e) {
     if (e is SocketException) {
       return 'Ошибка подключения'
           '\nАдрес: ${e.address?.address}'
@@ -50,7 +50,7 @@ class Logger {
     return 'Неизвестная ошибка: ${e.runtimeType}';
   }
 
-  static String error(
+  String error(
       {required String title, required dynamic exception, StackTrace? stack}) {
     final message = _exceptionToString(exception);
     _addLog('error', title, '$message\n\n$stack');
@@ -58,7 +58,7 @@ class Logger {
     return '$title\n$message';
   }
 
-  static String warning(
+  String warning(
       {required String title, required dynamic exception, StackTrace? stack}) {
     final message = _exceptionToString(exception);
     _addLog('warning', title, '$message\n\n$stack');
@@ -66,14 +66,14 @@ class Logger {
     return '$title\n$message';
   }
 
-  static String info({required String title, required dynamic exception}) {
+  String info({required String title, required dynamic exception}) {
     final message = _exceptionToString(exception);
     _addLog('info', title, message);
 
     return '$title\n$message';
   }
 
-  static Future<void> _addLog(String type, String title, String message) async {
+  Future<void> _addLog(String type, String title, String message) async {
     final storage = await SharedPreferences.getInstance();
     final currentLog = storage.getString(_key);
 
@@ -103,12 +103,12 @@ class Logger {
     return;
   }
 
-  static Future<void> clearLog() async {
+  Future<void> clearLog() async {
     final storage = await SharedPreferences.getInstance();
     await storage.remove(_key);
   }
 
-  static Future<List<String>> getLog() async {
+  Future<List<String>> getLog() async {
     final storage = await SharedPreferences.getInstance();
     final log = storage.getString(_key);
     return log?.split(_divider).toList() ?? [];

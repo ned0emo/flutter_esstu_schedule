@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/main_repository.dart';
 import 'package:schedule/core/models/schedule_model.dart';
+import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/core/parser/students_parser.dart';
-import 'package:schedule/core/static/errors.dart';
-import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 
 part 'current_group_event.dart';
@@ -12,7 +12,7 @@ part 'current_group_state.dart';
 
 class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
   final MainRepository _repository;
-  final StudentsParser _parser;
+  final Parser _parser;
 
   CurrentGroupBloc(MainRepository repository, StudentsParser parser)
       : _repository = repository,
@@ -35,11 +35,6 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
         isZo: event.isZo,
       );
 
-      if(currentScheduleModel == null){
-        emit(CurrentGroupError(_parser.lastError ?? 'Неизвестная ошибка'));
-        return;
-      }
-
       String? groupNameOnPage = RegExp(r'#ff00ff">.*</P').firstMatch(page)?[0];
       if (groupNameOnPage != null) {
         groupNameOnPage = groupNameOnPage
@@ -59,12 +54,10 @@ class CurrentGroupBloc extends Bloc<CurrentGroupEvent, CurrentGroupState> {
         scheduleModel: currentScheduleModel,
         message: message,
       ));
-    } catch (e, stack) {
-      emit(CurrentGroupError(Logger.error(
-        title: Errors.scheduleError,
-        exception: e,
-        stack: stack,
-      )));
+    } on CustomException catch (e) {
+      emit(CurrentGroupError(e.message));
+    } catch (e) {
+      emit(CurrentGroupError('Ошибка: ${e.runtimeType}'));
     }
   }
 }

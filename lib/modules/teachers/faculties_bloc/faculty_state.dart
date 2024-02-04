@@ -6,34 +6,29 @@ abstract class FacultyState {
 
 class FacultyInitial extends FacultyState {}
 
-class FacultiesLoadingState extends FacultyState {}
+class FacultiesLoading extends FacultyState {}
 
-class FacultiesLoadedState extends FacultyState {
-  //final Map<String, Map<String, List<String>>> facultyDepartmentLinkMap;
-
-  FacultiesLoadedState(
-      {required Map<String, Map<String, List<String>>>
-          facultyDepartmentLinkMap}) {
+class FacultiesLoaded extends FacultyState {
+  FacultiesLoaded({
+    required Map<String, Map<String, List<String>>> facultyDepartmentLinkMap,
+  }) {
     this.facultyDepartmentLinkMap = facultyDepartmentLinkMap;
   }
 }
 
-class FacultiesErrorState extends FacultyState {
+class FacultiesError extends FacultyState {
   final String message;
 
-  FacultiesErrorState(this.message);
+  FacultiesError(this.message);
 }
 
-class CurrentFacultyState extends FacultyState {
+class CurrentFacultyLoaded extends FacultyState {
   final String facultyName;
   final Map<String, List<String>> departmentsMap;
 
-  final int weekNumber;
-
-  CurrentFacultyState({
+  CurrentFacultyLoaded({
     required this.facultyName,
     required this.departmentsMap,
-    required this.weekNumber,
     required Map<String, Map<String, List<String>>> facultyDepartmentLinkMap,
   }) {
     this.facultyDepartmentLinkMap = facultyDepartmentLinkMap;

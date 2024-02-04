@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:schedule/core/static/logger.dart';
+import 'package:schedule/core/logger/logger.dart';
 import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
@@ -11,10 +11,12 @@ import 'package:url_launcher/url_launcher.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  static const _version = '3.8.2';
+  static const _version = '3.8.3';
 
   @override
   Widget build(BuildContext context) {
+    final logger = Modular.get<Logger>();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Настройки')),
       body: BlocBuilder<SettingsBloc, SettingsState>(
@@ -140,7 +142,7 @@ class SettingsPage extends StatelessWidget {
                                 await launchUrl(Uri.parse(
                                     'https://github.com/ned0emo/flutter_esstu_schedule/issues'));
                               } catch (exception, stack) {
-                                Logger.error(
+                                logger.error(
                                   title: "Ошибка открытия ссылки на github",
                                   exception: exception,
                                   stack: stack,
@@ -165,7 +167,7 @@ class SettingsPage extends StatelessWidget {
                                 await launchUrl(Uri.parse(
                                     'https://www.flaticon.com/authors/smashicons'));
                               } catch (exception, stack) {
-                                Logger.error(
+                                logger.error(
                                   title: "Ошибка открытия ссылки на flaticon",
                                   exception: exception,
                                   stack: stack,
@@ -190,7 +192,7 @@ class SettingsPage extends StatelessWidget {
                                 await launchUrl(Uri.parse(
                                     'https://fontawesome.com/v4/icons'));
                               } catch (exception, stack) {
-                                Logger.error(
+                                logger.error(
                                   title:
                                       "Ошибка открытия ссылки на fontawesome",
                                   exception: exception,

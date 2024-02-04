@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/teachers_parser.dart';
 
@@ -38,25 +39,25 @@ class DepartmentBloc extends Bloc<DepartmentEvent, DepartmentState> {
       LoadDepartment event, Emitter<DepartmentState> emit) async {
     emit(DepartmentLoading(appBarTitle: event.departmentName));
 
-    final teachersSchedule = await _parser.teachersScheduleList(
-      link1: event.link1,
-      link2: event.link2,
-    );
+    try{
+      final teachersSchedule = await _parser.teachersScheduleList(
+        link1: event.link1,
+        link2: event.link2,
+      );
 
-    if (teachersSchedule == null) {
-      emit(DepartmentError(
-        errorMessage: _parser.lastError ?? 'Неизвестная ошибка',
+      emit(DepartmentLoaded(
+        appBarTitle: state.appBarTitle,
+        teachersScheduleData: teachersSchedule,
+        currentTeacherName: teachersSchedule[0].name,
+        currentDepartmentName: event.departmentName,
+        currentTeacherIndex: 0,
       ));
-
-      return;
     }
-
-    emit(DepartmentLoaded(
-      appBarTitle: state.appBarTitle,
-      teachersScheduleData: teachersSchedule,
-      currentTeacherName: teachersSchedule[0].name,
-      currentDepartmentName: event.departmentName,
-      currentTeacherIndex: 0,
-    ));
+    on CustomException catch(e){
+      emit(DepartmentError(errorMessage: e.message));
+    }
+    catch (e){
+      emit(DepartmentError(errorMessage: 'Ошибка: ${e.runtimeType}'));
+    }
   }
 }

@@ -1,27 +1,26 @@
 import 'dart:async';
 
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/main_repository.dart';
 import 'package:schedule/core/models/schedule_model.dart';
-import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/static/lesson_builder.dart';
-import 'package:schedule/core/static/logger.dart';
+import 'package:schedule/core/logger/logger.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 
 class Parser {
   final MainRepository repository;
+  final Logger logger;
 
-  String? lastError;
+  Parser(this.repository, this.logger);
 
-  Parser(this.repository);
-
-  Future<ScheduleModel?> updateSchedule({
+  Future<ScheduleModel> updateSchedule({
     required String link1,
     String? link2,
     required String scheduleName,
     required String scheduleType,
     bool isZo = false,
   }) async {
-    lastError = null;
     final pagesList = <String>[];
 
     try {
@@ -30,24 +29,19 @@ class Parser {
         pagesList.add(await repository.loadPage(link2));
       }
     } catch (e, stack) {
-      lastError = Logger.error(
-        title: Errors.updateError,
-        exception: e,
-        stack: stack,
-      );
+      logger.error(title: Errors.updateError, exception: e, stack: stack);
 
-      return null;
+      throw CustomException(message: Errors.updateError);
     }
 
     if (!pagesList[0].contains(scheduleName) &&
         (pagesList.length < 2 || !pagesList[1].contains(scheduleName))) {
-      lastError = Logger.warning(
-          title: Errors.updateError,
-          exception:
-              'Расписание "$scheduleName" не найдено по сохраненной ссылке. '
-              '1:"$link1", 2:"$link2"');
+      final text =
+          'Расписание "$scheduleName" не найдено по сохраненной ссылке. '
+          '1:"$link1", 2:"$link2"';
+      logger.warning(title: Errors.updateError, exception: text);
 
-      return null;
+      throw CustomException(message: text);
     }
 
     return scheduleModel(
@@ -58,12 +52,11 @@ class Parser {
       scheduleName: scheduleName,
       scheduleType: scheduleType,
       isZo: isZo,
-      defaultErrorTitle: Errors.updateError,
     );
   }
 
   /// Парсинг страницы с расписанием и превращение ее в модель
-  Future<ScheduleModel?> scheduleModel({
+  Future<ScheduleModel> scheduleModel({
     required String link1,
     String? link2,
     String? page1,
@@ -71,9 +64,7 @@ class Parser {
     required String scheduleName,
     required String scheduleType,
     bool isZo = false,
-    String? defaultErrorTitle,
   }) async {
-    lastError = null;
     final numOfLessons = isZo ? 7 : 6;
 
     final pagesList = <String>[];
@@ -85,13 +76,9 @@ class Parser {
         pagesList.add(await repository.loadPage(link2));
       }
     } catch (e, stack) {
-      lastError = Logger.error(
-        title: defaultErrorTitle ?? Errors.pageLoadingError,
-        exception: e,
-        stack: stack,
-      );
+      logger.error(title: Errors.pageLoadingError, exception: e, stack: stack);
 
-      return null;
+      throw CustomException(message: Errors.pageLoadingError);
     }
 
     final ScheduleModel scheduleModel = ScheduleModel(
@@ -175,22 +162,21 @@ class Parser {
       }
 
       if (scheduleModel.isEmpty) {
-        lastError = Logger.warning(
+        logger.warning(
           title: Errors.scheduleModelError,
           exception: 'Модель расписания пуста. scheduleModel.isEmpty',
         );
-        //return null;
       }
 
       return scheduleModel;
     } catch (e, stack) {
-      lastError = Logger.error(
+      logger.error(
         title: Errors.scheduleModelError,
         exception: e,
         stack: stack,
       );
 
-      return null;
+      throw CustomException(message: Errors.scheduleModelError);
     }
   }
 

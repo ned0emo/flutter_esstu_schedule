@@ -1,23 +1,22 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/parser.dart';
-import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/static/lesson_builder.dart';
-import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/core/static/schedule_links.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 
 class TeachersParser extends Parser {
-  TeachersParser(super.repository);
+  TeachersParser(super.repository, super.logger);
 
   /// Список расписаний преподов по страницам кафедр.
-  Future<List<ScheduleModel>?> teachersScheduleList({
+  Future<List<ScheduleModel>> teachersScheduleList({
     required String link1,
     String? link2,
   }) async {
-    lastError = null;
     final List<ScheduleModel> teachersSchedule = [];
 
     try {
@@ -93,29 +92,29 @@ class TeachersParser extends Parser {
       }
 
       if (teachersSchedule.isEmpty) {
-        lastError = Logger.warning(
-          title: 'Хмм.. Кажется, расписание для данной кафедры отсутствует',
+        logger.warning(
+          title: Errors.departmentTeachersEmpty,
           exception: 'teachersScheduleMap.isEmpty == true',
         );
 
-        return null;
+        throw CustomException(message: Errors.departmentTeachersEmpty);
       }
 
       return teachersSchedule;
     } catch (e, stack) {
-      lastError = Logger.error(
+      logger.error(
         title: Errors.scheduleError,
         exception: e,
         stack: stack,
       );
-      return null;
+      throw CustomException(message: Errors.scheduleError);
     }
   }
 
   /// Мэп факультет - кафедра - список ссылок
-  Future<Map<String, Map<String, List<String>>>?>
+  /// Для страницы факультетов
+  Future<Map<String, Map<String, List<String>>>>
       facultyDepartmentLinksMap() async {
-    lastError = null;
     try {
       String bakSiteText =
           await repository.loadPage(ScheduleLinks.allBakFaculties);
@@ -144,13 +143,13 @@ class TeachersParser extends Parser {
       }
 
       if (facultyWordExistingCheck > 1) {
-        lastError = Logger.error(
+        logger.error(
           title: Errors.pageParsingError,
           exception:
               'Возможно, проблемы с доступом к сайту\nfacultyWordExistingCheck = 2',
         );
 
-        return null;
+        throw CustomException(message: Errors.pageParsingError);
       }
 
       final Map<String, Map<String, List<String>>> facultyMap = {};
@@ -166,7 +165,7 @@ class TeachersParser extends Parser {
                     facultySection.indexOf('</h2>'))
                 : 'Прочее';
           } catch (e, stack) {
-            Logger.warning(
+            logger.warning(
               title: Errors.pageParsingError,
               exception: e,
               stack: stack,
@@ -190,7 +189,7 @@ class TeachersParser extends Parser {
                   departmentSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
                   departmentSection.indexOf('<'));
             } catch (e, stack) {
-              Logger.warning(
+              logger.warning(
                 title: Errors.pageParsingError,
                 exception: e,
                 stack: stack,
@@ -212,21 +211,20 @@ class TeachersParser extends Parser {
 
       return facultyMap;
     } catch (e, stack) {
-      lastError = Logger.error(
+      logger.error(
         title: Errors.scheduleError,
         exception: e,
         stack: stack,
       );
-      return null;
+      throw CustomException(message: Errors.facultiesTeachersEmpty);
     }
   }
 
   /// Создание мэпа корпус - список аудиторий.
   /// [streamController] - для отслеживания прогресса в блоке, после окончания
   /// обязательно закрывать
-  Future<Map<String, List<ScheduleModel>>?> buildingsClassroomsMap(
+  Future<Map<String, List<ScheduleModel>>> buildingsClassroomsMap(
       StreamController<Map<String, String>> streamController) async {
-    lastError = null;
     final Map<String, List<ScheduleModel>> buildingsScheduleMap = {
       '1 корпус': [],
       '2 корпус': [],
@@ -334,8 +332,7 @@ class TeachersParser extends Parser {
                 .replaceAll('пр', '')
                 .replaceAll('д/кл', '')
                 .replaceAll('д/к', '')
-                .replaceAll(
-                    RegExp(r'си\W+|си$|св\W+|св$|мф\W+|мф$'), ' ');
+                .replaceAll(RegExp(r'си\W+|си$|св\W+|св$|мф\W+|мф$'), ' ');
 
             final classroom = lesson.contains(' ')
                 ? lesson.substring(0, lesson.indexOf(' '))
@@ -382,38 +379,46 @@ class TeachersParser extends Parser {
       }
     }
 
-    if (await _parseDepartments(
-      buildingsScheduleMap,
-      streamController,
-      mapCreating,
-    )) {
-      buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
-      for (var building in buildingsScheduleMap.keys) {
-        buildingsScheduleMap[building]!
-            .sort((a, b) => a.name.compareTo(b.name));
-      }
-
-      if (buildingsScheduleMap.isEmpty) {
-        lastError = Logger.error(
-          title: Errors.scheduleError,
-          exception:
-              'Не найдено ни одного расписания кафедры. buildingsScheduleMap.isEmpty',
-        );
-        return null;
-      }
-
-      return buildingsScheduleMap;
+    try {
+      await _parseDepartments(
+        buildingsScheduleMap,
+        streamController,
+        mapCreating,
+      );
+    } on CustomException {
+      rethrow;
+    } catch (e, stack) {
+      logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      );
+      throw CustomException(message: Errors.scheduleError);
     }
 
-    return null;
+    buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
+    for (var building in buildingsScheduleMap.keys) {
+      buildingsScheduleMap[building]!.sort((a, b) => a.name.compareTo(b.name));
+    }
+
+    if (buildingsScheduleMap.isEmpty) {
+      logger.error(
+        title: Errors.scheduleError,
+        exception:
+            'Не найдено ни одного расписания кафедры. buildingsScheduleMap.isEmpty',
+      );
+      throw CustomException(message: Errors.scheduleError);
+    }
+
+    return buildingsScheduleMap;
   }
 
   /// Получения мэпа препод - список ссылок для поиска
-  Future<Map<String, List<String>>?> teachersLinksMap(
+  Future<Map<String, List<String>>> teachersLinksMap(
       StreamController<Map<String, String>> streamController) async {
-    lastError = null;
     final Map<String, List<String>> scheduleLinksMap = {};
 
+    /// Функция заплнения scheduleLinksMap
     void mapCreating(
       Map<String, List<String>> map,
       Iterable<String> splittedPage, {
@@ -428,23 +433,32 @@ class TeachersParser extends Parser {
       }
     }
 
-    if (await _parseDepartments(
-      scheduleLinksMap,
-      streamController,
-      mapCreating,
-    )) {
-      if (scheduleLinksMap.isEmpty) {
-        lastError = Logger.error(
-          title: Errors.scheduleError,
-          exception:
-              'Не найдено ни одной ссылки на кафедру. scheduleLinksMap.isEmpty',
-        );
-        return null;
-      }
-      return scheduleLinksMap;
+    try {
+      await _parseDepartments(
+        scheduleLinksMap,
+        streamController,
+        mapCreating,
+      );
+    } on CustomException {
+      rethrow;
+    } catch (e, stack) {
+      logger.error(
+        title: Errors.scheduleError,
+        exception: e,
+        stack: stack,
+      );
+      throw CustomException(message: Errors.scheduleError);
     }
 
-    return null;
+    if (scheduleLinksMap.isEmpty) {
+      logger.error(
+        title: Errors.scheduleError,
+        exception:
+            'Не найдено ни одной ссылки на кафедру. scheduleLinksMap.isEmpty',
+      );
+      throw CustomException(message: Errors.scheduleError);
+    }
+    return scheduleLinksMap;
   }
 
   /// Парсинг всех страниц кафедр.
@@ -452,7 +466,7 @@ class TeachersParser extends Parser {
   /// [streamController] - для отслеживания процентов в блоке.
   /// [mapCreating] - функция заполнения мэпа данными.
   /// Возвращает true, если все прошло успешно, иначе - false
-  Future<bool> _parseDepartments<T extends Map>(
+  Future<void> _parseDepartments<T extends Map>(
     T map,
     StreamController streamController,
     void Function(T map, Iterable<String> splittedPage, {String? link})
@@ -476,13 +490,9 @@ class TeachersParser extends Parser {
         facultiesPages.add(await repository.loadPage(link));
       }
     } catch (e, stack) {
-      lastError = Logger.error(
-        title: Errors.scheduleError,
-        exception: e,
-        stack: stack,
-      );
+      logger.error(title: Errors.pageLoadingError, exception: e, stack: stack);
 
-      return false;
+      throw CustomException(message: Errors.pageLoadingError);
     }
 
     int progress = 0;
@@ -505,7 +515,7 @@ class TeachersParser extends Parser {
 
           progress++;
         } catch (e, stack) {
-          Logger.warning(
+          logger.warning(
               title: Errors.pageLoadingError, exception: e, stack: stack);
 
           localErrorCount++;
@@ -552,11 +562,11 @@ class TeachersParser extends Parser {
       }
 
       if (linksCount == 0) {
-        lastError = Logger.error(
+        logger.error(
           title: Errors.pageParsingError,
           exception: 'Не получено ни одной ссылки на кафедры. linksCount == 0',
         );
-        return false;
+        throw CustomException(message: Errors.pageParsingError);
       }
 
       /// Собственно [threadCount] асинхронных потоков по загрузке страниц. Далее
@@ -593,21 +603,19 @@ class TeachersParser extends Parser {
       } while (completedThreads < threadCount);
 
       if (errorCount > 8) {
-        lastError = Logger.error(
+        logger.error(
           title: Errors.scheduleError,
           exception: 'Большое количество ошибок при загрузке. errorsCount > 8',
         );
-        return false;
+        throw CustomException(message: Errors.scheduleError);
       }
-
-      return true;
     } catch (e, stack) {
-      lastError = Logger.error(
+      logger.error(
         title: Errors.scheduleError,
         exception: e,
         stack: stack,
       );
-      return false;
+      throw CustomException(message: Errors.scheduleError);
     }
   }
 }

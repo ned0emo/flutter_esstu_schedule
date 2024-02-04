@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/students_parser.dart';
 
@@ -59,31 +60,40 @@ class ZoTeachersBloc extends Bloc<ZoTeachersEvent, ZoTeachersState> {
       ));
     });
 
-    /// Карта "корпус" - сортированная карта аудиторий:
-    /// "аудитория" - список дней недели.
-    /// В элементе списка дней недели пары
-    final buildingsScheduleMap =
-        await _parser.lettersZoTeachersMap(_streamController);
-    await _streamController.close();
+    try {
+      /// Карта "корпус" - сортированная карта аудиторий:
+      /// "аудитория" - список дней недели.
+      /// В элементе списка дней недели пары
+      final buildingsScheduleMap =
+          await _parser.lettersZoTeachersMap(_streamController);
+      await _streamController.close();
 
-    if (buildingsScheduleMap == null) {
-      emit(ZoTeachersError(_parser.lastError ?? 'Ошибка'));
-      return;
+      emit(ZoTeachersLoaded(
+        appBarTitle: buildingsScheduleMap.keys.first,
+        currentBuildingName: buildingsScheduleMap.keys.first,
+        scheduleMap: buildingsScheduleMap,
+        currentClassroomIndex: 0,
+        currentClassroomName:
+            buildingsScheduleMap[buildingsScheduleMap.keys.first]![0].name,
+      ));
+    } on CustomException catch (e) {
+      if (_streamController.hasListener) {
+        await _streamController.close();
+      }
+      emit(ZoTeachersError(e.message));
+    } catch (e) {
+      if (_streamController.hasListener) {
+        await _streamController.close();
+      }
+      emit(ZoTeachersError('Ошибка: ${e.runtimeType}'));
     }
-
-    emit(ZoTeachersLoaded(
-      appBarTitle: buildingsScheduleMap.keys.first,
-      currentBuildingName: buildingsScheduleMap.keys.first,
-      scheduleMap: buildingsScheduleMap,
-      currentClassroomIndex: 0,
-      currentClassroomName:
-          buildingsScheduleMap[buildingsScheduleMap.keys.first]![0].name,
-    ));
   }
 
   @override
   Future<void> close() async {
-    await _streamController.close();
+    if (_streamController.hasListener) {
+      await _streamController.close();
+    }
     return super.close();
   }
 }

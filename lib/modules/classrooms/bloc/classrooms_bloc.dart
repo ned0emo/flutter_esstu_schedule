@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/main_repository.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/teachers_parser.dart';
 
 part 'classrooms_event.dart';
+
 part 'classrooms_state.dart';
 
 class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
@@ -59,31 +61,40 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
       ));
     });
 
-    /// Карта "корпус" - сортированная карта аудиторий:
-    /// "аудитория" - список дней недели.
-    /// В элементе списка дней недели пары
-    final buildingsScheduleMap =
-        await _parser.buildingsClassroomsMap(_streamController);
-    await _streamController.close();
+    try {
+      /// Карта "корпус" - сортированная карта аудиторий:
+      /// "аудитория" - список дней недели.
+      /// В элементе списка дней недели пары
+      final buildingsScheduleMap =
+          await _parser.buildingsClassroomsMap(_streamController);
+      await _streamController.close();
 
-    if (buildingsScheduleMap == null) {
-      emit(ClassroomsError(_parser.lastError ?? 'Ошибка'));
-      return;
+      emit(ClassroomsLoaded(
+        appBarTitle: buildingsScheduleMap.keys.first,
+        currentBuildingName: buildingsScheduleMap.keys.first,
+        scheduleMap: buildingsScheduleMap,
+        currentClassroomIndex: 0,
+        currentClassroomName:
+            buildingsScheduleMap[buildingsScheduleMap.keys.first]![0].name,
+      ));
+    } on CustomException catch (e) {
+      if(_streamController.hasListener) {
+        await _streamController.close();
+      }
+      emit(ClassroomsError(e.message));
+    } catch (e) {
+      if(_streamController.hasListener) {
+        await _streamController.close();
+      }
+      emit(ClassroomsError('Ошибка: ${e.runtimeType}'));
     }
-
-    emit(ClassroomsLoaded(
-      appBarTitle: buildingsScheduleMap.keys.first,
-      currentBuildingName: buildingsScheduleMap.keys.first,
-      scheduleMap: buildingsScheduleMap,
-      currentClassroomIndex: 0,
-      currentClassroomName:
-      buildingsScheduleMap[buildingsScheduleMap.keys.first]![0].name,
-    ));
   }
 
   @override
   Future<void> close() async {
-    await _streamController.close();
+    if(_streamController.hasListener) {
+      await _streamController.close();
+    }
     return super.close();
   }
 }

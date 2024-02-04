@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:schedule/core/static/logger.dart';
-import 'package:schedule/core/static/errors.dart';
+import 'package:schedule/core/logger/logger.dart';
+import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
@@ -13,9 +13,10 @@ part 'favorite_list_state.dart';
 
 class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
   final FavoriteRepository _favoriteRepository;
+  final Logger _logger;
 
-  FavoriteListBloc(FavoriteRepository repository)
-      : _favoriteRepository = repository,
+  FavoriteListBloc(FavoriteRepository repository, Logger logger)
+      : _favoriteRepository = repository, _logger = logger,
         super(FavoriteListInitial()) {
     on<LoadFavoriteList>(_loadFavoriteList);
     on<ClearAllSchedule>(_clearAllSchedule);
@@ -51,7 +52,7 @@ class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
                     scheduleName.substring(0, scheduleName.indexOf('|'))]!
                 .add(scheduleName.substring(scheduleName.indexOf('|') + 1));
           } catch (e, stack) {
-            Logger.warning(
+            _logger.warning(
               title: 'Ошибка определения типа расписания',
               exception: e,
               stack: stack,
@@ -62,13 +63,13 @@ class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
       }
 
       favoriteListMap.removeWhere((key, value) => value.isEmpty);
-      for(var key in favoriteListMap.keys){
+      for (var key in favoriteListMap.keys) {
         favoriteListMap[key]!.sort();
       }
 
       emit(FavoriteListLoaded(favoriteListMap));
     } catch (e, stack) {
-      emit(FavoriteListError(Logger.error(
+      emit(FavoriteListError(_logger.error(
         title: Errors.scheduleError,
         exception: e,
         stack: stack,

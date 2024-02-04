@@ -20,7 +20,7 @@ class FacultiesPage extends StatelessWidget {
         ],
         child: BlocListener<FacultyBloc, FacultyState>(
           listener: (context, state) {
-            if (state is CurrentFacultyState) {
+            if (state is CurrentFacultyLoaded) {
               Modular.to.pushNamed(
                   AppRoutes.teachersRoute + AppRoutes.departmentsRoute,
                   arguments: state);
@@ -29,12 +29,12 @@ class FacultiesPage extends StatelessWidget {
           child: Center(
             child: BlocBuilder<FacultyBloc, FacultyState>(
               builder: (context, state) {
-                if (state is FacultiesLoadingState) {
+                if (state is FacultiesLoading) {
                   return const CircularProgressIndicator();
                 }
 
-                if (state is FacultiesLoadedState ||
-                    state is CurrentFacultyState) {
+                if (state is FacultiesLoaded ||
+                    state is CurrentFacultyLoaded) {
                   final map = state.facultyDepartmentLinkMap!;
 
                   return Center(
@@ -80,7 +80,7 @@ class FacultiesPage extends StatelessWidget {
                   );
                 }
 
-                if (state is FacultiesErrorState) {
+                if (state is FacultiesError) {
                   return Text(state.message, textAlign: TextAlign.center);
                 }
 

@@ -3,7 +3,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/core/parser/students_parser.dart';
 import 'package:schedule/core/parser/teachers_parser.dart';
-import 'package:schedule/core/static/logger.dart';
+import 'package:schedule/core/logger/logger.dart';
 import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/modules/classrooms/classrooms_module.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';

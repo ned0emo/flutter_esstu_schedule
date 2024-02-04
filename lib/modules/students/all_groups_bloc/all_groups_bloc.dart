@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/main_repository.dart';
 import 'package:schedule/core/parser/students_parser.dart';
-import 'package:schedule/core/static/errors.dart';
-import 'package:schedule/core/static/logger.dart';
+import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/static/students_type.dart';
 
 part 'all_groups_event.dart';
@@ -28,23 +28,16 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
       LoadAllGroups event, Emitter<AllGroupsState> emit) async {
     emit(const AllGroupsLoading());
 
-    final scheduleMap = await _parser.courseGroupLinkMap();
-
-    if (scheduleMap == null) {
-      emit(AllGroupsError(_parser.lastError ?? 'Ошибка'));
-      return;
-    }
-
     try {
+      final scheduleMap = await _parser.courseGroupLinkMap();
+
       final typeKey = scheduleMap.keys.firstOrNull;
       final courseKey = scheduleMap[typeKey]?.keys.firstOrNull;
       final groupKey = scheduleMap[typeKey]?[courseKey]?.keys.firstOrNull;
 
       if (groupKey == null || courseKey == null) {
-        emit(AllGroupsError(Logger.error(
-          title: Errors.studentsNotFoundError,
-          exception: 'studKey == null',
-        )));
+        emit(const AllGroupsError(
+            '${Errors.studentsNotFoundError} studKey == null'));
         return;
       }
 
@@ -56,9 +49,10 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
             currentGroup: groupKey,
             appBarTitle: '${_groupTypeRus(typeKey)}. $courseKey'),
       );
-    } catch (e, stack) {
-      emit(AllGroupsError(Logger.error(
-          title: Errors.scheduleError, exception: e, stack: stack)));
+    } on CustomException catch (e) {
+      emit(AllGroupsError(e.message));
+    } catch (e) {
+      emit(AllGroupsError('Ошибка: ${e.runtimeType}'));
     }
   }
 
@@ -71,12 +65,8 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
 
       final courseMap =
           currentState.courseMap(event.courseName, event.studType);
+      /// Такт удаляются все пустые записи, но пусть будет
       if (courseMap.isEmpty) {
-        Logger.info(
-          title: Errors.studentsNotFoundError,
-          exception: 'AllGroupsLoaded().courseMap is empty',
-        );
-
         emit(currentState.copyWith(
             currentCourse: event.courseName,
             warningMessage:

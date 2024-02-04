@@ -2,14 +2,12 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/parser.dart';
-import 'package:schedule/core/static/errors.dart';
-import 'package:schedule/core/static/logger.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
 part 'favorite_update_event.dart';
-
 part 'favorite_update_state.dart';
 
 class FavoriteUpdateBloc
@@ -42,15 +40,6 @@ class FavoriteUpdateBloc
         isZo: event.scheduleModel.isZo,
       );
 
-      //TODO: переделать
-      if (scheduleModel == null) {
-        emit(FavoriteScheduleUpdateError(
-            _parser.lastError?.contains('обновления') ?? false
-                ? _parser.lastError!
-                : 'Ошибка обновления расписания'));
-        return;
-      }
-
       final oldModelStr = event.scheduleModel.toString();
       final newModelStr = scheduleModel.toString();
 
@@ -69,12 +58,10 @@ class FavoriteUpdateBloc
       } else {
         emit(FavoriteUpdateInitial(message: 'Расписание обновлено'));
       }
-    } catch (e, stack) {
-      emit(FavoriteScheduleUpdateError(Logger.warning(
-        title: Errors.updateError,
-        exception: e,
-        stack: stack,
-      )));
+    } on CustomException catch (e) {
+      emit(FavoriteScheduleUpdateError(e.message));
+    } catch (e) {
+      emit(FavoriteScheduleUpdateError('Ошибка: ${e.runtimeType}'));
     }
   }
 }

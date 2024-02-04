@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/parser/teachers_parser.dart';
-import 'package:schedule/core/static/schedule_time_data.dart';
 
 part 'faculty_event.dart';
 part 'faculty_state.dart';
@@ -20,24 +20,25 @@ class FacultyBloc extends Bloc<FacultyEvent, FacultyState> {
 
   Future<void> _loadFaculties(
       LoadFaculties event, Emitter<FacultyState> emit) async {
-    emit(FacultiesLoadingState());
-    final facultyDepartmentLinkMap = await _parser.facultyDepartmentLinksMap();
+    emit(FacultiesLoading());
+    try {
+      final facultyDepartmentLinkMap =
+          await _parser.facultyDepartmentLinksMap();
 
-    if (facultyDepartmentLinkMap == null) {
-      emit(FacultiesErrorState(_parser.lastError ?? 'Неизвестная ошибка'));
-      return;
+      emit(FacultiesLoaded(
+          facultyDepartmentLinkMap: facultyDepartmentLinkMap));
+    } on CustomException catch (e) {
+      emit(FacultiesError(e.message));
+    } catch (e) {
+      emit(FacultiesError('Ошибка: ${e.runtimeType}'));
     }
-
-    emit(FacultiesLoadedState(
-        facultyDepartmentLinkMap: facultyDepartmentLinkMap));
   }
 
   Future<void> _chooseFaculty(
       ChooseFaculty event, Emitter<FacultyState> emit) async {
-    emit(CurrentFacultyState(
+    emit(CurrentFacultyLoaded(
       facultyName: event.facultyName,
       departmentsMap: event.departmentsMap,
-      weekNumber: ScheduleTimeData.getCurrentWeekIndex(),
       facultyDepartmentLinkMap: state.facultyDepartmentLinkMap ?? {},
     ));
   }

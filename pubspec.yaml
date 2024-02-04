@@ -77,7 +77,6 @@ flutter:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   assets:
-    - assets/newlogo.png
     - assets/newlogo_dark.png
     - assets/newlogo_warm.png
     - assets/hmmm.png

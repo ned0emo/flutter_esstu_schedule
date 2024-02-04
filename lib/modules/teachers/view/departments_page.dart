@@ -8,7 +8,7 @@ import 'package:schedule/modules/teachers/departments_bloc/department_bloc.dart'
 import 'package:schedule/modules/teachers/faculties_bloc/faculty_bloc.dart';
 
 class DepartmentsPage extends StatelessWidget {
-  final CurrentFacultyState facultyState;
+  final CurrentFacultyLoaded facultyState;
 
   const DepartmentsPage({super.key, required this.facultyState});
 

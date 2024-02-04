@@ -85,10 +85,8 @@ class SearchListPage extends StatelessWidget {
 
         if (state is SearchingError) {
           return Center(
-              child: Text(
-            'Ошибка загрзуки:\n${state.message}',
-            textAlign: TextAlign.center,
-          ));
+            child: Text(state.message, textAlign: TextAlign.center),
+          );
         }
 
         return const Center(child: Text('Неизвестная ошибка'));

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:schedule/core/static/logger.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:schedule/core/logger/logger.dart';
 
 class DebugPage extends StatefulWidget {
   const DebugPage({super.key});
@@ -10,10 +11,12 @@ class DebugPage extends StatefulWidget {
 
 class _DebugPageState extends State<DebugPage> {
   List<String> _logList = [];
+  late final Logger _logger;
 
   @override
   void initState() {
-    _loadLogger();
+    _logger = Modular.get<Logger>();
+    _loadLog();
     super.initState();
   }
 
@@ -33,8 +36,8 @@ class _DebugPageState extends State<DebugPage> {
             ),
       floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            await Logger.clearLog();
-            _loadLogger();
+            await _logger.clearLog();
+            _loadLog();
           },
           child: const Icon(Icons.delete)),
     );
@@ -76,8 +79,8 @@ class _DebugPageState extends State<DebugPage> {
     );
   }
 
-  Future<void> _loadLogger() async {
-    final list = await Logger.getLog();
+  Future<void> _loadLog() async {
+    final list = await _logger.getLog();
     setState(() {
       _logList = list;
     });

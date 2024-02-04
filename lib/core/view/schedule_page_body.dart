@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/static/schedule_time_data.dart';
 import 'package:schedule/core/static/schedule_type.dart';
@@ -41,8 +42,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   /// Дата недель для аудиторий заочного
   late List<String?> weekDates;
 
-  bool get isCurrentWeek =>
-      selectedWeekIndex == ScheduleTimeData.getCurrentWeekIndex();
+  bool get isCurrentWeek => selectedWeekIndex == _getCurrentWeekIndex;
 
   int numOfWeeks = 0;
   int initialTabIndex = 0;
@@ -63,9 +63,9 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
   void initState() {
     super.initState();
 
-    selectedWeekIndex = ScheduleTimeData.getCurrentWeekIndex();
-    currentDayOfWeekIndex = ScheduleTimeData.getCurrentDayOfWeekIndex();
-    currentLessonIndex = ScheduleTimeData.getCurrentLessonIndex();
+    selectedWeekIndex = _getCurrentWeekIndex;
+    currentDayOfWeekIndex = _getCurrentDayOfWeekIndex;
+    currentLessonIndex = _getCurrentLessonIndex;
 
     final settingsState = BlocProvider.of<SettingsBloc>(context).state;
     if (settingsState is SettingsLoaded) {
@@ -98,8 +98,8 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
       listener: (context, state) async {
         isNeedToSelectTab = true;
         setState(() {
-          selectedWeekIndex = ScheduleTimeData.getCurrentWeekIndex();
-          currentDayOfWeekIndex = ScheduleTimeData.getCurrentDayOfWeekIndex();
+          selectedWeekIndex = _getCurrentWeekIndex;
+          currentDayOfWeekIndex = _getCurrentDayOfWeekIndex;
         });
       },
       child: Builder(
@@ -117,7 +117,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
 
           if (!isZo) {
             initialTabIndex = showEmptyDays
-                ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
+                ? _getCurrentDayOfWeekIndex % 6
                 : widget.scheduleModel!.dayOfWeekByAbsoluteIndex(
                     selectedWeekIndex, currentDayOfWeekIndex);
           }
@@ -146,7 +146,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
         _tabController = DefaultTabController.of(context);
         if (isNeedToSelectTab && !isZo) {
           _tabController?.animateTo(showEmptyDays
-              ? ScheduleTimeData.getCurrentDayOfWeekIndex() % 6
+              ? _getCurrentDayOfWeekIndex % 6
               : widget.scheduleModel!.dayOfWeekByAbsoluteIndex(
                   selectedWeekIndex, currentDayOfWeekIndex));
         }
@@ -453,7 +453,7 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
                     },
                     child: Text(weekDates[index] ??
                         ('${index + 1} неделя'
-                            '${index == ScheduleTimeData.getCurrentWeekIndex() && !isZo ? ' (Сейчас)' : ''}')),
+                            '${index == _getCurrentWeekIndex && !isZo ? ' (Сейчас)' : ''}')),
                   ),
                 ),
               ),
@@ -573,6 +573,31 @@ class SchedulePageBodyState<T1 extends Bloc> extends State<SchedulePageBody>
       );
     }
   }
+
+  int get _getCurrentLessonIndex {
+    int currentLesson = -1;
+    final currentTime =
+        Jiffy.now().dateTime.minute + Jiffy.now().dateTime.hour * 60;
+    if (currentTime >= 540 && currentTime <= 635) {
+      currentLesson = 0;
+    } else if (currentTime >= 645 && currentTime <= 740) {
+      currentLesson = 1;
+    } else if (currentTime >= 780 && currentTime <= 875) {
+      currentLesson = 2;
+    } else if (currentTime >= 885 && currentTime <= 980) {
+      currentLesson = 3;
+    } else if (currentTime >= 985 && currentTime <= 1080) {
+      currentLesson = 4;
+    } else if (currentTime >= 1085 && currentTime <= 1180) {
+      currentLesson = 5;
+    }
+
+    return currentLesson;
+  }
+
+  int get _getCurrentWeekIndex => (Jiffy.now().weekOfYear + 1) % 2;
+
+  int get _getCurrentDayOfWeekIndex => Jiffy.now().dateTime.weekday - 1;
 
   @override
   bool get wantKeepAlive => true;
