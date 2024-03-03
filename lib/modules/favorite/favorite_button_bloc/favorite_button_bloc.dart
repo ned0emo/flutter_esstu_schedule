@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 

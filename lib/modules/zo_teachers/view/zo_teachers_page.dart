@@ -53,7 +53,7 @@ class ZoTeachersPage extends StatelessWidget {
         children: [
           _dropDownButton(state),
           Expanded(
-              child: SchedulePageBody<ZoTeachersBloc>(
+              child: SchedulePageBody(
             scheduleModel: state.scheduleModel,
           )),
         ],

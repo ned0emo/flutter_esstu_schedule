@@ -20,6 +20,8 @@ class SettingsRepository {
           (storage.getString(SettingsTypes.hideLesson)) ?? 'false',
       SettingsTypes.weekButtonHint:
           (storage.getString(SettingsTypes.weekButtonHint)) ?? 'false',
+      SettingsTypes.showTabDate:
+          (storage.getString(SettingsTypes.showTabDate)) ?? 'true',
     };
 
     return settingsMap;

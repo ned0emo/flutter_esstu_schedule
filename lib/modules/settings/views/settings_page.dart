@@ -11,7 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  static const _version = '3.8.3';
+  static const _version = '3.8.4';
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +43,7 @@ class SettingsPage extends StatelessWidget {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text('Автоматическое обновление'),
-                  subtitle: Text(state.autoUpdateDescription),
+                  title: const Text('Автоматическое обновление расписания в избранном'),
                   value: state.autoUpdate,
                   onChanged: (value) {
                     BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
@@ -54,7 +53,6 @@ class SettingsPage extends StatelessWidget {
                 ),
                 SwitchListTile(
                   title: const Text('Скрывать пустые дни недели'),
-                  subtitle: Text(state.hideScheduleDescription),
                   value: state.hideSchedule,
                   onChanged: (value) {
                     BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
@@ -64,11 +62,19 @@ class SettingsPage extends StatelessWidget {
                 ),
                 SwitchListTile(
                   title: const Text('Скрывать пустые занятия'),
-                  subtitle: Text(state.hideLessonDescription),
                   value: state.hideLesson,
                   onChanged: (value) {
                     BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
                         settingType: SettingsTypes.hideLesson,
+                        value: value.toString()));
+                  },
+                ),
+                SwitchListTile(
+                  title: const Text('Показывать даты дней недели'),
+                  value: state.showTabDate,
+                  onChanged: (value) {
+                    BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
+                        settingType: SettingsTypes.showTabDate,
                         value: value.toString()));
                   },
                 ),

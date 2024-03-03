@@ -8,8 +8,7 @@ abstract class AllGroupsState {
 }
 
 class AllGroupsLoading extends AllGroupsState {
-  const AllGroupsLoading({String? appBarTitle})
-      : super(appBarTitle: appBarTitle);
+  const AllGroupsLoading({super.appBarTitle});
 }
 
 class AllGroupsLoaded extends AllGroupsState {
@@ -27,8 +26,8 @@ class AllGroupsLoaded extends AllGroupsState {
     required this.studType,
     required this.currentGroup,
     this.warningMessage,
-    String? appBarTitle,
-  }) : super(appBarTitle: appBarTitle);
+    super.appBarTitle,
+  });
 
   AllGroupsLoaded copyWith({
     Map<String, Map<String, Map<String, String>>>? scheduleLinksMap,
@@ -64,8 +63,8 @@ class CourseSelected extends AllGroupsState {
     required this.linkGroupMap,
     required this.courseName,
     required this.currentGroup,
-    String? appBarTitle,
-  }) : super(appBarTitle: appBarTitle);
+    super.appBarTitle,
+  });
 }
 
 class AllGroupsError extends AllGroupsState {

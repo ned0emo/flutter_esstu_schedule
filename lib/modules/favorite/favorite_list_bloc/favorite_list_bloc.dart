@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:schedule/core/logger/logger.dart';
 import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/static/schedule_type.dart';

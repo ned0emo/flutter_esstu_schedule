@@ -1,10 +1,11 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:meta/meta.dart';
 import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
 
 part 'settings_event.dart';
+
 part 'settings_state.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
@@ -43,6 +44,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           hideLesson: stringSettingsValues[SettingsTypes.hideLesson] == 'true',
           weekButtonHint:
               stringSettingsValues[SettingsTypes.weekButtonHint] == 'true',
+          showTabDate:
+              stringSettingsValues[SettingsTypes.showTabDate] == 'true',
         ),
       );
     } catch (e, stack) {
@@ -66,6 +69,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           hideLesson: stringSettingsValues[SettingsTypes.hideLesson] == 'true',
           weekButtonHint:
               stringSettingsValues[SettingsTypes.weekButtonHint] == 'true',
+          showTabDate:
+              stringSettingsValues[SettingsTypes.showTabDate] == 'true',
         ),
       );
     } catch (e, stack) {
@@ -96,6 +101,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           hideLesson: stringSettingsValues[SettingsTypes.hideLesson] == 'true',
           weekButtonHint:
               stringSettingsValues[SettingsTypes.weekButtonHint] == 'true',
+          showTabDate:
+              stringSettingsValues[SettingsTypes.showTabDate] == 'true',
         ),
       );
     } catch (e, stack) {

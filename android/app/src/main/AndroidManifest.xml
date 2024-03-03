@@ -6,7 +6,8 @@
         android:label="Расписание ВСГУТУ"
         android:name="${applicationName}"
         android:icon="@mipmap/iconesstuv7"
-        android:roundIcon="@mipmap/roundiconesstuv7">
+        android:roundIcon="@mipmap/roundiconesstuv7"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait"

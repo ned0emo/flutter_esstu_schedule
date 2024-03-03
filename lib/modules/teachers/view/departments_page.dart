@@ -54,7 +54,7 @@ class DepartmentsPage extends StatelessWidget {
             children: [
               _dropDownButton(state),
               Expanded(
-                  child: SchedulePageBody<DepartmentBloc>(
+                  child: SchedulePageBody(
                 scheduleModel: state.scheduleModel,
               )),
             ],

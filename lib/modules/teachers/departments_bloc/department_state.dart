@@ -10,8 +10,7 @@ abstract class DepartmentState {
 class DepartmentInitial extends DepartmentState {}
 
 class DepartmentLoading extends DepartmentState {
-  const DepartmentLoading({String? appBarTitle})
-      : super(appBarTitle: appBarTitle);
+  const DepartmentLoading({super.appBarTitle});
 }
 
 class DepartmentLoaded extends DepartmentState {
@@ -22,12 +21,12 @@ class DepartmentLoaded extends DepartmentState {
   final List<ScheduleModel> teachersScheduleData;
 
   const DepartmentLoaded({
-    String? appBarTitle,
+    super.appBarTitle,
     required this.currentTeacherName,
     required this.currentDepartmentName,
     required this.currentTeacherIndex,
     required this.teachersScheduleData,
-  }) : super(appBarTitle: appBarTitle);
+  });
 
   DepartmentLoaded copyWith({
     String? appBarTitle,

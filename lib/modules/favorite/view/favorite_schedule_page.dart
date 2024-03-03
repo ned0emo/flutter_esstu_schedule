@@ -136,7 +136,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
         }
 
         if (state is FavoriteScheduleLoaded) {
-          return SchedulePageBody<FavoriteScheduleBloc>(
+          return SchedulePageBody(
             scheduleModel: state.scheduleModel,
           );
         }
@@ -174,7 +174,9 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
     return BlocBuilder<FavoriteScheduleBloc, FavoriteScheduleState>(
       builder: (context, state) {
         if (state is FavoriteScheduleLoaded &&
-            widget.scheduleType != ScheduleType.classroom) {
+            widget.scheduleType != ScheduleType.classroom &&
+            widget.scheduleType != ScheduleType.zoClassroom &&
+            widget.scheduleType != ScheduleType.zoTeacher) {
           return IconButton(
             onPressed: () {
               Modular.get<FavoriteUpdateBloc>().add(UpdateSchedule(

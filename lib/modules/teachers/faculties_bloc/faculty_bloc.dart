@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/parser/teachers_parser.dart';
 

@@ -20,10 +20,10 @@ class ClassroomsLoading extends ClassroomsState {
   final String message;
 
   const ClassroomsLoading({
-    String? appBarTitle,
+    super.appBarTitle,
     this.percents = '0',
     this.message = '',
-  }) : super(appBarTitle: appBarTitle);
+  });
 }
 
 class ClassroomsLoaded extends ClassroomsState {
@@ -33,12 +33,12 @@ class ClassroomsLoaded extends ClassroomsState {
   final String currentClassroomName;
 
   const ClassroomsLoaded({
-    String? appBarTitle,
+    super.appBarTitle,
     required this.currentBuildingName,
     required this.scheduleMap,
     required this.currentClassroomIndex,
     required this.currentClassroomName,
-  }) : super(appBarTitle: appBarTitle);
+  });
 
   ClassroomsLoaded copyWith({
     String? currentBuildingName,

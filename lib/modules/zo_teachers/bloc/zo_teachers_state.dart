@@ -20,10 +20,10 @@ class ZoTeachersLoading extends ZoTeachersState {
   final String message;
 
   const ZoTeachersLoading({
-    String? appBarTitle,
+    super.appBarTitle,
     this.percents = '0',
     this.message = '',
-  }) : super(appBarTitle: appBarTitle);
+  });
 }
 
 class ZoTeachersLoaded extends ZoTeachersState {
@@ -33,12 +33,12 @@ class ZoTeachersLoaded extends ZoTeachersState {
   final String currentClassroomName;
 
   const ZoTeachersLoaded({
-    String? appBarTitle,
+    super.appBarTitle,
     required this.currentBuildingName,
     required this.scheduleMap,
     required this.currentClassroomIndex,
     required this.currentClassroomName,
-  }) : super(appBarTitle: appBarTitle);
+  });
 
   ZoTeachersLoaded copyWith({
     String? currentBuildingName,
