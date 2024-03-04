@@ -396,9 +396,9 @@ class SchedulePageBodyState extends State<SchedulePageBody>
               Modular.get<FavoriteButtonBloc>()
                   .add(SaveSchedule(scheduleModel: widget.scheduleModel!));
 
-              if (widget.scheduleModel!.type != ScheduleType.zoTeacher &&
-                  widget.scheduleModel!.type != ScheduleType.zoClassroom &&
-                  widget.scheduleModel!.type != ScheduleType.classroom) {
+              if (widget.scheduleModel?.type != ScheduleType.zoTeacher &&
+                  widget.scheduleModel?.type != ScheduleType.zoClassroom &&
+                  widget.scheduleModel?.type != ScheduleType.classroom) {
                 _addToMainDialog();
               }
             }

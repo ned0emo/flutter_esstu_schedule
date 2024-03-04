@@ -1,15 +1,15 @@
 /// !!!
 /// Типы должны оканчиваться на Service
 /// !!!
-class SettingsTypes {
-  static String darkTheme = 'darkThemeService';
-  static String autoUpdate = 'autoUpdateService';
-  static String noUpdateClassroom = 'noUpdateClassroomService';
-  static String hideSchedule = 'hideScheduleService';
-  static String hideLesson = 'hideLessonService';
-  static String weekButtonHint = 'weekButtonHintService';
-  static String showTabDate = 'showTabDateService';
+abstract class SettingsTypes {
+  static const String darkTheme = 'darkThemeService';
+  static const String autoUpdate = 'autoUpdateService';
+  static const String noUpdateClassroom = 'noUpdateClassroomService';
+  static const String hideSchedule = 'hideScheduleService';
+  static const String hideLesson = 'hideLessonService';
+  static const String weekButtonHint = 'weekButtonHintService';
+  static const String showTabDate = 'showTabDateService';
 
   //legacy
-  static String legacyFavoriteDeleted = 'legacyFavoriteDeletedService';
+  static const String legacyFavoriteDeleted = 'legacyFavoriteDeletedService';
 }

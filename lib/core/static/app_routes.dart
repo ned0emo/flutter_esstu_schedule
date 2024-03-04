@@ -1,4 +1,4 @@
-class AppRoutes{
+abstract class AppRoutes{
   static const home = '/home';
   static const studentsRoute = '/students';
   static const teachersRoute = '/teachers';

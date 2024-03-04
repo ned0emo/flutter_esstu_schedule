@@ -1,13 +1,13 @@
-class ScheduleLinks {
-  static String main = 'portal.esstu.ru';
-  static String allBakGroups = '/bakalavriat/raspisan.htm';
-  static String allMagGroups = '/spezialitet/raspisan.htm';
-  static String allZo1Groups = '/zo1/raspisan.htm';
-  static String allZo2Groups = '/zo2/raspisan.htm';
-  static String allBakFaculties = '/bakalavriat/craspisanEdt.htm';
-  static String allMagFaculties = '/spezialitet/craspisanEdt.htm';
-  static String bakPrefix = '/bakalavriat/';
-  static String magPrefix = '/spezialitet/';
-  static String zo1Prefix = '/zo1/';
-  static String zo2Prefix = '/zo2/';
+abstract class ScheduleLinks {
+  static const String main = 'portal.esstu.ru';
+  static const String allBakGroups = '/bakalavriat/raspisan.htm';
+  static const String allMagGroups = '/spezialitet/raspisan.htm';
+  static const String allZo1Groups = '/zo1/raspisan.htm';
+  static const String allZo2Groups = '/zo2/raspisan.htm';
+  static const String allBakFaculties = '/bakalavriat/craspisanEdt.htm';
+  static const String allMagFaculties = '/spezialitet/craspisanEdt.htm';
+  static const String bakPrefix = '/bakalavriat/';
+  static const String magPrefix = '/spezialitet/';
+  static const String zo1Prefix = '/zo1/';
+  static const String zo2Prefix = '/zo2/';
 }

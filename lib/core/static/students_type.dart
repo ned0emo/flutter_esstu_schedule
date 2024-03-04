@@ -1,4 +1,4 @@
-class StudentsType {
+abstract class StudentsType {
   static const String bak = 'bak';
   static const String mag = 'mag';
   static const String col = 'col';

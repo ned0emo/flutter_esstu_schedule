@@ -1,6 +1,6 @@
 import 'package:schedule/core/models/lesson_model.dart';
 
-class LessonBuilder {
+abstract class LessonBuilder {
   static const teachersRegExp =
       r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.';
   static const classroomsJunkRegExp =
