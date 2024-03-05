@@ -57,7 +57,7 @@ class WeekModel {
 
     daysOfWeek.add(DayOfWeekModel(
       dayOfWeekNumber: dayOfWeekIndex + 1,
-      dayOfWeekName: ScheduleTimeData.daysOfWeekSmall[dayOfWeekIndex],
+      dayOfWeekName: ScheduleTimeData.daysOfWeekShort[dayOfWeekIndex],
       lessons: [],
       dayOfWeekDate: dayOfWeekDate,
     )..updateLesson(lesson));

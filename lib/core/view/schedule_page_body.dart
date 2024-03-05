@@ -23,10 +23,9 @@ class SchedulePageBody extends StatefulWidget {
   State<StatefulWidget> createState() => SchedulePageBodyState();
 }
 
+/// Добавлять сюда еще setState очень осторожно
 class SchedulePageBodyState extends State<SchedulePageBody>
     with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
-  late int selectedWeekIndex;
-
   /// Индекс с учетом отсутствия некоторых дней недели
   /// Вычисляется в ScheduleModel, либо, если все дни недели показаны,
   /// равен индексу дня недели в STD
@@ -39,6 +38,8 @@ class SchedulePageBodyState extends State<SchedulePageBody>
   /// или от настройки "скрывать пустые дни недели"
   late int tabCount;
 
+  late int numOfWeeks;
+
   /// Список дней недели для показа всех дней недели включая пустые
   late Iterable<String> daysOfWeek;
 
@@ -47,12 +48,15 @@ class SchedulePageBodyState extends State<SchedulePageBody>
 
   bool get isCurrentWeek => selectedWeekIndex == _getCurrentWeekIndex;
 
-  int numOfWeeks = 0;
-
+  int numOfLessons = 6;
   int lastTabIndex = 0;
+  int selectedWeekIndex = 0;
 
-  /// Для отмены выбора сегодняшнего дня во время смены недели
-  bool isNeedToSelectTab = false;
+  /// Для отмены выбора сегодняшнего дня во время смены недели.
+  /// Сначала всегда держать true.
+  /// Вообще супер важная переменная, перед сменой номера недели выключать,
+  /// после операций с вкладками в build() обратно включать
+  bool isScheduleChanged = true;
 
   bool isZo = false;
 
@@ -69,7 +73,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
   void initState() {
     super.initState();
 
-    selectedWeekIndex = _getCurrentWeekIndex;
+    numOfWeeks = widget.scheduleModel!.numOfWeeks;
     currentDayOfWeekIndex = _getCurrentDayOfWeekIndex;
     currentLessonIndex = _getCurrentLessonIndex;
 
@@ -85,7 +89,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
   /// нажатие кнопки. Иначе плюсует до тех пор, пока не станет больше равно, чем
   /// [numOfWeeks]. Тогда возвращает к нулю
   void _changeWeekNumber({int? number}) {
-    isNeedToSelectTab = false;
+    isScheduleChanged = false;
     setState(() {
       selectedWeekIndex = number ??
           (selectedWeekIndex + 1 >= numOfWeeks ? 0 : selectedWeekIndex + 1);
@@ -101,39 +105,50 @@ class SchedulePageBodyState extends State<SchedulePageBody>
     }
 
     isZo = widget.scheduleModel!.isZo;
+    if (isZo) numOfLessons = 7;
 
-    numOfWeeks = widget.scheduleModel!.numOfWeeks;
-    if (selectedWeekIndex >= numOfWeeks) {
-      selectedWeekIndex = 0;
+    if (isScheduleChanged) {
+      selectedWeekIndex = _getCurrentWeekIndex;
+
+      if (selectedWeekIndex >= numOfWeeks) {
+        selectedWeekIndex = 0;
+      }
     }
 
     daysOfWeek = showEmptyDays && !isZo
-        ? ScheduleTimeData.daysOfWeekSmall.take(6)
+        ? ScheduleTimeData.daysOfWeekShort.take(6)
         : widget.scheduleModel!.weeks[selectedWeekIndex].daysOfWeek
-        .where((element) => element.lessons.isNotEmpty)
-        .map((e) => e.dayOfWeekName);
+            .where((element) => element.lessons.isNotEmpty)
+            .map((e) => e.dayOfWeekName);
 
     tabCount = daysOfWeek.length;
-    _tabController?.dispose();
 
+    //выбор инишл вкладки только при первом открытии расписания
+    //и не у заочников
+    if (isScheduleChanged && !isZo) {
+      if (showEmptyDays) {
+        lastTabIndex = _getCurrentDayOfWeekIndex % 6;
+      } else {
+        lastTabIndex = widget.scheduleModel!
+            .dayOfWeekByAbsoluteIndex(selectedWeekIndex, currentDayOfWeekIndex);
+      }
+    } else {
+      lastTabIndex = min(max(tabCount - 1, 0), lastTabIndex);
+    }
+    //включать после смены номера недели
+    isScheduleChanged = true;
+
+    _tabController?.dispose();
     _tabController = TabController(
       length: tabCount,
       vsync: this,
       animationDuration: const Duration(milliseconds: 100),
-      initialIndex: min(max(tabCount - 1, 0), lastTabIndex),
+      initialIndex: lastTabIndex,
     );
 
     _tabController!.addListener(() {
       lastTabIndex = _tabController!.index;
     });
-
-    if (isNeedToSelectTab && !isZo) {
-      _tabController?.animateTo(showEmptyDays
-          ? _getCurrentDayOfWeekIndex % 6
-          : widget.scheduleModel!.dayOfWeekByAbsoluteIndex(
-          selectedWeekIndex, currentDayOfWeekIndex));
-    }
-    isNeedToSelectTab = true;
 
     ///даты для точного выбора недели у заочников
     weekDates = widget.scheduleModel!.weekDates;
@@ -205,8 +220,8 @@ class SchedulePageBodyState extends State<SchedulePageBody>
       controller: _tabController,
       children: daysOfWeek.map(
         (e) {
-          final currentDaySchedule =
-          widget.scheduleModel!.getDayOfWeekByShortName(e, selectedWeekIndex);
+          final currentDaySchedule = widget.scheduleModel!
+              .getDayOfWeekByShortName(e, selectedWeekIndex);
 
           if (currentDaySchedule == null) {
             return const Center(
@@ -217,24 +232,22 @@ class SchedulePageBodyState extends State<SchedulePageBody>
           return ListView(
             padding: const EdgeInsets.only(bottom: 50),
             children: showEmptyLessons
-                ? [
-                    ...List.generate(
-                      6,
-                      (index) {
-                        return LessonSection(
-                          lesson: currentDaySchedule.lessons.firstWhereOrNull(
-                              (element) => element.lessonNumber == index + 1),
-                          isCurrentLesson: isCurrentWeek &&
-                              currentDayOfWeekIndex ==
-                                  currentDaySchedule.dayOfWeekIndex &&
-                              currentLessonIndex == index,
-                          lessonNumber: index + 1,
-                        );
-                      },
-                    ),
-                  ]
+                ? List.generate(
+                    numOfLessons,
+                    (index) {
+                      return LessonSection(
+                        lesson: currentDaySchedule.lessons.firstWhereOrNull(
+                            (element) => element.lessonNumber == index + 1),
+                        isCurrentLesson: isCurrentWeek &&
+                            currentDayOfWeekIndex ==
+                                currentDaySchedule.dayOfWeekIndex &&
+                            currentLessonIndex == index,
+                        lessonNumber: index + 1,
+                      );
+                    },
+                  )
                 : currentDaySchedule.lessons
-                    .map<Widget>(
+                    .map(
                       (lesson) => LessonSection(
                         lesson: lesson,
                         isCurrentLesson: isCurrentWeek &&
@@ -286,7 +299,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
       controller: _tabController,
       tabs: daysOfWeek.map((e) {
         final currentDaySchedule =
-        widget.scheduleModel!.getDayOfWeekByShortName(e, selectedWeekIndex);
+            widget.scheduleModel!.getDayOfWeekByShortName(e, selectedWeekIndex);
 
         if (currentDaySchedule == null) {
           return Tab(
@@ -294,7 +307,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
             child: FittedBox(
               fit: BoxFit.none,
               child: Text(
-                ScheduleTimeData.daysOfWeekSmall.indexOf(e) ==
+                ScheduleTimeData.daysOfWeekShort.indexOf(e) ==
                             currentDayOfWeekIndex &&
                         isCurrentWeek
                     ? '[$e]${dates[e]}'
@@ -359,7 +372,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
                   width: double.infinity,
                   child: TextButton(
                     onPressed: () {
-                      setState(() => _changeWeekNumber(number: index));
+                      _changeWeekNumber(number: index);
                       Navigator.of(context).pop();
                     },
                     child: Text(weekDates[index] ??
@@ -388,7 +401,8 @@ class SchedulePageBodyState extends State<SchedulePageBody>
           onPressed: () {
             if (state is FavoriteExist) {
               Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
-                  name: widget.scheduleModel!.name, scheduleType: widget.scheduleModel!.type));
+                  name: widget.scheduleModel!.name,
+                  scheduleType: widget.scheduleModel!.type));
               return;
             }
 

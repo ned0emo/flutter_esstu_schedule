@@ -9,7 +9,7 @@ abstract class ScheduleTimeData {
     '19:45 - 21:20',
   ];
 
-  static final daysOfWeekSmall = [
+  static final daysOfWeekShort = [
     'ПН',
     'ВТ',
     'СР',
