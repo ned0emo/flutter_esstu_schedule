@@ -4,7 +4,7 @@ abstract class LessonBuilder {
   static const teachersRegExp =
       r'[А-Я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.\s*[А-Я]\.|[А-Я]+\s+[А-Я]\.|[А-Я][а-я]+\s+[А-Я]\.';
   static const classroomsJunkRegExp =
-      r'и/д-*|д/кл-*|д/к-*|н/х-*|\s+мф\s+|\s+и/п\s+|\s+св\s+|\s+си\s+|смук-*';
+      r'и/д-*|д/кл-*|д/к-*|н/х-*|\s+мф\s+|\s+и/п\s+|\s+св\s+|\s+си\s+|смук-*|\.{2,}';
   static const classroomsRegExp = r'(?:\s*а\.\s*\S+\s*)+';
   static const oneClassroomRegExp = r'а\.\s*\S+';
 
@@ -46,6 +46,10 @@ abstract class LessonBuilder {
         type = lessonData[0][Lesson.type] ?? type;
       }
 
+      if (i < classrooms.length && classrooms[i].contains('дист')) {
+        classrooms[i] = 'дистанционно';
+      }
+
       lessonData.add({
         Lesson.title: title,
         Lesson.teachers: teachers.join(', '),
@@ -78,7 +82,9 @@ abstract class LessonBuilder {
           Lesson.title: _lessonTitle(clearLesson),
           Lesson.classrooms: RegExp(oneClassroomRegExp)
               .allMatches(clearLesson)
-              .map((e) => e[0]!.replaceAll(RegExp(r'а\.\s*'), '').trim())
+              .map((e) => e[0]!.contains('дист')
+                  ? 'дистанционно'
+                  : e[0]!.replaceAll(RegExp(r'а\.\s*'), '').trim())
               .join(', '),
           Lesson.type: _lessonType(clearLesson)
         }
@@ -122,7 +128,7 @@ abstract class LessonBuilder {
         //аудитории
         .replaceAll(RegExp(r'а\.\s*\S+'), '')
         //Лишние символы в конце (также пустое занятие)
-        .replaceAll(RegExp(r'[^а-яА-Я0-9a-zA-Z)]+$'), '')
+        .replaceAll(RegExp(r'[^а-яА-Я0-9a-zA-Z)+]+$'), '')
         //много точек
         .replaceAll(RegExp(r'\.{2,}'), '.')
         //длинные пробелы

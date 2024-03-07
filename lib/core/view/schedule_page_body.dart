@@ -267,7 +267,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
     Map<String, String> dates;
     double fontSize;
 
-    if (showTabDate) {
+    if (showTabDate && !isZo) {
       fontSize = 12;
       final formatter = DateFormat("\ndd.MM");
       final mondayDate = DateTime.now().subtract(
@@ -276,15 +276,18 @@ class SchedulePageBodyState extends State<SchedulePageBody>
         ),
       );
 
-      dates = Map.fromEntries(
-        List.generate(
-          daysOfWeek.length,
-          (index) => MapEntry(
-            daysOfWeek.elementAt(index),
-            formatter.format(mondayDate.add(Duration(days: index))),
+      dates = Map.fromEntries(daysOfWeek.map(
+        (day) => MapEntry(
+          day,
+          formatter.format(
+            mondayDate.add(
+              Duration(
+                days: ScheduleTimeData.daysOfWeekShort.indexOf(day),
+              ),
+            ),
           ),
         ),
-      );
+      ));
     } else {
       fontSize = 14;
       dates = Map.fromEntries(
