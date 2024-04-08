@@ -11,7 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  static const _version = '3.8.6';
+  static const _version = '3.8.7';
 
   @override
   Widget build(BuildContext context) {

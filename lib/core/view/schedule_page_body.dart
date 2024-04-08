@@ -109,6 +109,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
 
     if (isScheduleChanged) {
       selectedWeekIndex = _getCurrentWeekIndex;
+      numOfWeeks = widget.scheduleModel!.numOfWeeks;
 
       if (selectedWeekIndex >= numOfWeeks) {
         selectedWeekIndex = 0;
