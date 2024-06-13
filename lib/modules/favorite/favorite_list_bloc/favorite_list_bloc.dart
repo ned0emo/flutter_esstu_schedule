@@ -13,11 +13,8 @@ part 'favorite_list_state.dart';
 
 class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
   final FavoriteRepository _favoriteRepository;
-  final Logger _logger;
 
-  FavoriteListBloc(FavoriteRepository repository, Logger logger)
-      : _favoriteRepository = repository, _logger = logger,
-        super(FavoriteListInitial()) {
+  FavoriteListBloc(this._favoriteRepository) : super(FavoriteListInitial()) {
     on<LoadFavoriteList>(_loadFavoriteList);
     on<ClearAllSchedule>(_clearAllSchedule);
     on<DeleteScheduleFromList>(_deleteSchedule);
@@ -52,7 +49,7 @@ class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
                     scheduleName.substring(0, scheduleName.indexOf('|'))]!
                 .add(scheduleName.substring(scheduleName.indexOf('|') + 1));
           } catch (e, stack) {
-            _logger.warning(
+            Logger.warning(
               title: 'Ошибка определения типа расписания',
               exception: e,
               stack: stack,
@@ -69,8 +66,8 @@ class FavoriteListBloc extends Bloc<FavoriteListEvent, FavoriteListState> {
 
       emit(FavoriteListLoaded(favoriteListMap));
     } catch (e, stack) {
-      emit(FavoriteListError(_logger.error(
-        title: Errors.scheduleError,
+      emit(FavoriteListError(Logger.error(
+        title: Errors.favoriteList,
         exception: e,
         stack: stack,
       )));

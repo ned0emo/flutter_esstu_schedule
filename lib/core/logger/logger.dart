@@ -7,11 +7,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// | - Разделитель данных сообщения
 ///
 /// !! - Разделитель сообщений
-class Logger {
-  final String _key = 'logService';
-  final String _divider = '!!';
+abstract class Logger {
+  static const String _key = 'logService';
+  static const String _divider = '!!';
 
-  String _exceptionToString(dynamic e) {
+  static String _exceptionToString(dynamic e) {
     if (e is SocketException) {
       return 'Ошибка подключения'
           '\nАдрес: ${e.address?.address}'
@@ -47,10 +47,11 @@ class Logger {
       return 'null';
     }
 
-    return 'Неизвестная ошибка: ${e.runtimeType}';
+    return 'Тип: ${e.runtimeType}\n'
+        'Значение: $e';
   }
 
-  String error(
+  static String error(
       {required String title, required dynamic exception, StackTrace? stack}) {
     final message = _exceptionToString(exception);
     _addLog('error', title, '$message\n\n$stack');
@@ -58,7 +59,7 @@ class Logger {
     return '$title\n$message';
   }
 
-  String warning(
+  static String warning(
       {required String title, required dynamic exception, StackTrace? stack}) {
     final message = _exceptionToString(exception);
     _addLog('warning', title, '$message\n\n$stack');
@@ -66,14 +67,14 @@ class Logger {
     return '$title\n$message';
   }
 
-  String info({required String title, required dynamic exception}) {
+  static String info({required String title, required dynamic exception}) {
     final message = _exceptionToString(exception);
     _addLog('info', title, message);
 
     return '$title\n$message';
   }
 
-  Future<void> _addLog(String type, String title, String message) async {
+  static Future<void> _addLog(String type, String title, String message) async {
     final storage = await SharedPreferences.getInstance();
     final currentLog = storage.getString(_key);
 
@@ -86,11 +87,11 @@ class Logger {
 
     final logList = currentLog.split(_divider);
     if (logList.length > 50) {
-      logList.removeAt(0);
+      logList.removeLast();
 
       String newLog = '';
       for (String logMessage in logList) {
-        newLog += '!!$logMessage';
+        newLog += '$_divider$logMessage';
       }
 
       ///Разделитель уже введен в цикле
@@ -103,12 +104,12 @@ class Logger {
     return;
   }
 
-  Future<void> clearLog() async {
+  static Future<void> clearLog() async {
     final storage = await SharedPreferences.getInstance();
     await storage.remove(_key);
   }
 
-  Future<List<String>> getLog() async {
+  static Future<List<String>> getLog() async {
     final storage = await SharedPreferences.getInstance();
     final log = storage.getString(_key);
     return log?.split(_divider).toList() ?? [];

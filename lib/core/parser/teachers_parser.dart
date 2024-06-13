@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:schedule/core/logger/custom_exception.dart';
+import 'package:schedule/core/logger/logger.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/core/logger/errors.dart';
@@ -10,7 +11,7 @@ import 'package:schedule/core/static/schedule_links.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 
 class TeachersParser extends Parser {
-  TeachersParser(super.repository, super.logger);
+  TeachersParser(super.repository);
 
   /// Список расписаний преподов по страницам кафедр.
   Future<List<ScheduleModel>> teachersScheduleList({
@@ -92,22 +93,22 @@ class TeachersParser extends Parser {
       }
 
       if (teachersSchedule.isEmpty) {
-        logger.warning(
-          title: Errors.departmentTeachersEmpty,
+        Logger.warning(
+          title: Errors.departmentTeachers,
           exception: 'teachersScheduleMap.isEmpty == true',
         );
 
-        throw CustomException(message: Errors.departmentTeachersEmpty);
+        throw CustomException(message: Errors.departmentTeachers);
       }
 
       return teachersSchedule;
     } catch (e, stack) {
-      logger.error(
-        title: Errors.scheduleError,
+      Logger.error(
+        title: Errors.schedule,
         exception: e,
         stack: stack,
       );
-      throw CustomException(message: Errors.scheduleError);
+      throw CustomException(message: Errors.schedule);
     }
   }
 
@@ -143,13 +144,13 @@ class TeachersParser extends Parser {
       }
 
       if (facultyWordExistingCheck > 1) {
-        logger.error(
-          title: Errors.pageParsingError,
+        Logger.error(
+          title: Errors.pageParsing,
           exception:
               'Возможно, проблемы с доступом к сайту\nfacultyWordExistingCheck = 2',
         );
 
-        throw CustomException(message: Errors.pageParsingError);
+        throw CustomException(message: Errors.pageParsing);
       }
 
       final Map<String, Map<String, List<String>>> facultyMap = {};
@@ -165,8 +166,8 @@ class TeachersParser extends Parser {
                     facultySection.indexOf('</h2>'))
                 : 'Прочее';
           } catch (e, stack) {
-            logger.warning(
-              title: Errors.pageParsingError,
+            Logger.warning(
+              title: Errors.pageParsing,
               exception: e,
               stack: stack,
             );
@@ -189,8 +190,8 @@ class TeachersParser extends Parser {
                   departmentSection.indexOf(RegExp(r"[а-я]|[А-Я]")),
                   departmentSection.indexOf('<'));
             } catch (e, stack) {
-              logger.warning(
-                title: Errors.pageParsingError,
+              Logger.warning(
+                title: Errors.pageParsing,
                 exception: e,
                 stack: stack,
               );
@@ -211,12 +212,12 @@ class TeachersParser extends Parser {
 
       return facultyMap;
     } catch (e, stack) {
-      logger.error(
-        title: Errors.scheduleError,
+      Logger.error(
+        title: Errors.schedule,
         exception: e,
         stack: stack,
       );
-      throw CustomException(message: Errors.facultiesTeachersEmpty);
+      throw CustomException(message: Errors.facultiesTeachers);
     }
   }
 
@@ -388,12 +389,12 @@ class TeachersParser extends Parser {
     } on CustomException {
       rethrow;
     } catch (e, stack) {
-      logger.error(
-        title: Errors.scheduleError,
+      Logger.error(
+        title: Errors.schedule,
         exception: e,
         stack: stack,
       );
-      throw CustomException(message: Errors.scheduleError);
+      throw CustomException(message: Errors.schedule);
     }
 
     buildingsScheduleMap.removeWhere((key, value) => value.isEmpty);
@@ -402,12 +403,12 @@ class TeachersParser extends Parser {
     }
 
     if (buildingsScheduleMap.isEmpty) {
-      logger.error(
-        title: Errors.scheduleError,
+      Logger.error(
+        title: Errors.schedule,
         exception:
             'Не найдено ни одного расписания кафедры. buildingsScheduleMap.isEmpty',
       );
-      throw CustomException(message: Errors.scheduleError);
+      throw CustomException(message: Errors.schedule);
     }
 
     return buildingsScheduleMap;
@@ -442,21 +443,21 @@ class TeachersParser extends Parser {
     } on CustomException {
       rethrow;
     } catch (e, stack) {
-      logger.error(
-        title: Errors.scheduleError,
+      Logger.error(
+        title: Errors.schedule,
         exception: e,
         stack: stack,
       );
-      throw CustomException(message: Errors.scheduleError);
+      throw CustomException(message: Errors.schedule);
     }
 
     if (scheduleLinksMap.isEmpty) {
-      logger.error(
-        title: Errors.scheduleError,
+      Logger.error(
+        title: Errors.schedule,
         exception:
             'Не найдено ни одной ссылки на кафедру. scheduleLinksMap.isEmpty',
       );
-      throw CustomException(message: Errors.scheduleError);
+      throw CustomException(message: Errors.schedule);
     }
     return scheduleLinksMap;
   }
@@ -490,9 +491,9 @@ class TeachersParser extends Parser {
         facultiesPages.add(await repository.loadPage(link));
       }
     } catch (e, stack) {
-      logger.error(title: Errors.pageLoadingError, exception: e, stack: stack);
+      Logger.error(title: Errors.pageLoading, exception: e, stack: stack);
 
-      throw CustomException(message: Errors.pageLoadingError);
+      throw CustomException(message: Errors.pageLoading);
     }
 
     int progress = 0;
@@ -515,8 +516,8 @@ class TeachersParser extends Parser {
 
           progress++;
         } catch (e, stack) {
-          logger.warning(
-              title: Errors.pageLoadingError, exception: e, stack: stack);
+          Logger.warning(
+              title: Errors.pageLoading, exception: e, stack: stack);
 
           localErrorCount++;
         }
@@ -562,11 +563,11 @@ class TeachersParser extends Parser {
       }
 
       if (linksCount == 0) {
-        logger.error(
-          title: Errors.pageParsingError,
+        Logger.error(
+          title: Errors.pageParsing,
           exception: 'Не получено ни одной ссылки на кафедры. linksCount == 0',
         );
-        throw CustomException(message: Errors.pageParsingError);
+        throw CustomException(message: Errors.pageParsing);
       }
 
       /// Собственно [threadCount] асинхронных потоков по загрузке страниц. Далее
@@ -603,19 +604,19 @@ class TeachersParser extends Parser {
       } while (completedThreads < threadCount);
 
       if (errorCount > 8) {
-        logger.error(
-          title: Errors.scheduleError,
+        Logger.error(
+          title: Errors.schedule,
           exception: 'Большое количество ошибок при загрузке. errorsCount > 8',
         );
-        throw CustomException(message: Errors.scheduleError);
+        throw CustomException(message: Errors.schedule);
       }
     } catch (e, stack) {
-      logger.error(
-        title: Errors.scheduleError,
+      Logger.error(
+        title: Errors.schedule,
         exception: e,
         stack: stack,
       );
-      throw CustomException(message: Errors.scheduleError);
+      throw CustomException(message: Errors.schedule);
     }
   }
 }

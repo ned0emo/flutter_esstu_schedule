@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:schedule/core/logger/custom_exception.dart';
+import 'package:schedule/core/logger/errors.dart';
+import 'package:schedule/core/logger/logger.dart';
 import 'package:schedule/core/main_repository.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/teachers_parser.dart';
@@ -78,21 +80,22 @@ class ClassroomsBloc extends Bloc<ClassroomsEvent, ClassroomsState> {
             buildingsScheduleMap[buildingsScheduleMap.keys.first]![0].name,
       ));
     } on CustomException catch (e) {
-      if(_streamController.hasListener) {
+      if (_streamController.hasListener) {
         await _streamController.close();
       }
       emit(ClassroomsError(e.message));
-    } catch (e) {
-      if(_streamController.hasListener) {
+    } catch (e, stack) {
+      if (_streamController.hasListener) {
         await _streamController.close();
       }
+      Logger.error(title: Errors.classroomsSchedule, exception: e, stack: stack);
       emit(ClassroomsError('Ошибка: ${e.runtimeType}'));
     }
   }
 
   @override
   Future<void> close() async {
-    if(_streamController.hasListener) {
+    if (_streamController.hasListener) {
       await _streamController.close();
     }
     return super.close();

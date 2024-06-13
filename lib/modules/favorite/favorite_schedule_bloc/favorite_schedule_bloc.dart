@@ -14,12 +14,9 @@ part 'favorite_schedule_state.dart';
 class FavoriteScheduleBloc
     extends Bloc<FavoriteScheduleEvent, FavoriteScheduleState> {
   final FavoriteRepository _favoriteRepository;
-  final Logger _logger;
 
-  FavoriteScheduleBloc(FavoriteRepository repository, Logger logger)
-      : _favoriteRepository = repository,
-        _logger = logger,
-        super(FavoriteScheduleInitial()) {
+  FavoriteScheduleBloc(this._favoriteRepository)
+      : super(FavoriteScheduleInitial()) {
     on<ResetSchedule>((event, emit) => emit(FavoriteScheduleInitial()));
     on<LoadFavoriteSchedule>(_loadFavoriteSchedule);
     on<OpenMainFavSchedule>(_openMainFavSchedule);
@@ -33,8 +30,8 @@ class FavoriteScheduleBloc
       final scheduleModel =
           await _favoriteRepository.getScheduleModel(event.scheduleFileName);
       if (scheduleModel == null) {
-        emit(FavoriteScheduleError(_logger.error(
-          title: Errors.scheduleError,
+        emit(FavoriteScheduleError(Logger.error(
+          title: Errors.schedule,
           exception: 'scheduleModel == null',
         )));
         return;
@@ -46,8 +43,8 @@ class FavoriteScheduleBloc
         isFromMainPage: event.isFromMainPage,
       ));
     } catch (e, stack) {
-      emit(FavoriteScheduleError(_logger.error(
-        title: Errors.scheduleError,
+      emit(FavoriteScheduleError(Logger.error(
+        title: Errors.schedule,
         exception: e,
         stack: stack,
       )));

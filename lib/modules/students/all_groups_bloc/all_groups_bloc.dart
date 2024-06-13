@@ -1,12 +1,14 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:schedule/core/logger/custom_exception.dart';
+import 'package:schedule/core/logger/logger.dart';
 import 'package:schedule/core/main_repository.dart';
 import 'package:schedule/core/parser/students_parser.dart';
 import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/static/students_type.dart';
 
 part 'all_groups_event.dart';
+
 part 'all_groups_state.dart';
 
 class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
@@ -37,7 +39,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
 
       if (groupKey == null || courseKey == null) {
         emit(const AllGroupsError(
-            '${Errors.studentsNotFoundError} studKey == null'));
+            '${Errors.studentsNotFound} studKey == null'));
         return;
       }
 
@@ -51,7 +53,8 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
       );
     } on CustomException catch (e) {
       emit(AllGroupsError(e.message));
-    } catch (e) {
+    } catch (e, stack) {
+      Logger.error(title: Errors.studentsSchedule, exception: e, stack: stack);
       emit(AllGroupsError('Ошибка: ${e.runtimeType}'));
     }
   }
@@ -65,6 +68,7 @@ class AllGroupsBloc extends Bloc<AllGroupsEvent, AllGroupsState> {
 
       final courseMap =
           currentState.courseMap(event.courseName, event.studType);
+
       /// Такт удаляются все пустые записи, но пусть будет
       if (courseMap.isEmpty) {
         emit(currentState.copyWith(

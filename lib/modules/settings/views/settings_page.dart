@@ -11,12 +11,10 @@ import 'package:url_launcher/url_launcher.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  static const _version = '3.8.7';
+  static const _version = '3.9.0';
 
   @override
   Widget build(BuildContext context) {
-    final logger = Modular.get<Logger>();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Настройки')),
       body: BlocBuilder<SettingsBloc, SettingsState>(
@@ -148,7 +146,7 @@ class SettingsPage extends StatelessWidget {
                                 await launchUrl(Uri.parse(
                                     'https://github.com/ned0emo/flutter_esstu_schedule/issues'));
                               } catch (exception, stack) {
-                                logger.error(
+                                Logger.error(
                                   title: "Ошибка открытия ссылки на github",
                                   exception: exception,
                                   stack: stack,
@@ -173,7 +171,7 @@ class SettingsPage extends StatelessWidget {
                                 await launchUrl(Uri.parse(
                                     'https://www.flaticon.com/authors/smashicons'));
                               } catch (exception, stack) {
-                                logger.error(
+                                Logger.error(
                                   title: "Ошибка открытия ссылки на flaticon",
                                   exception: exception,
                                   stack: stack,
@@ -198,7 +196,7 @@ class SettingsPage extends StatelessWidget {
                                 await launchUrl(Uri.parse(
                                     'https://fontawesome.com/v4/icons'));
                               } catch (exception, stack) {
-                                logger.error(
+                                Logger.error(
                                   title:
                                       "Ошибка открытия ссылки на fontawesome",
                                   exception: exception,

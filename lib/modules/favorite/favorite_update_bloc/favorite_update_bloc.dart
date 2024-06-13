@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:schedule/core/logger/custom_exception.dart';
+import 'package:schedule/core/logger/errors.dart';
+import 'package:schedule/core/logger/logger.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/modules/favorite/repository/favorite_repository.dart';
 
 part 'favorite_update_event.dart';
+
 part 'favorite_update_state.dart';
 
 class FavoriteUpdateBloc
@@ -60,7 +63,8 @@ class FavoriteUpdateBloc
       }
     } on CustomException catch (e) {
       emit(FavoriteScheduleUpdateError(e.message));
-    } catch (e) {
+    } catch (e, stack) {
+      Logger.error(title: Errors.update, exception: e, stack: stack);
       emit(FavoriteScheduleUpdateError('Ошибка: ${e.runtimeType}'));
     }
   }
