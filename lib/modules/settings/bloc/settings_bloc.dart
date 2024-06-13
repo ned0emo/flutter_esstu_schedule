@@ -25,14 +25,6 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     try {
       final stringSettingsValues = await _settingsRepository.loadSettings();
 
-      /// Разовая чистка легаси избранного
-      /// TODO: В следующих обновлениях убрать?
-      if (stringSettingsValues[SettingsTypes.legacyFavoriteDeleted] != 'true') {
-        await _settingsRepository.clearFavorite();
-        await _settingsRepository.saveSettings(
-            SettingsTypes.legacyFavoriteDeleted, 'true');
-      }
-
       emit(
         SettingsLoaded(
           darkTheme: stringSettingsValues[SettingsTypes.darkTheme] == 'true',

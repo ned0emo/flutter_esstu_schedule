@@ -86,11 +86,11 @@ class Logger {
 
     final logList = currentLog.split(_divider);
     if (logList.length > 50) {
-      logList.removeAt(0);
+      logList.removeLast();
 
       String newLog = '';
       for (String logMessage in logList) {
-        newLog += '!!$logMessage';
+        newLog += '$_divider$logMessage';
       }
 
       ///Разделитель уже введен в цикле

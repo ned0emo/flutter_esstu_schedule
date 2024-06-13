@@ -9,7 +9,4 @@ abstract class SettingsTypes {
   static const String hideLesson = 'hideLessonService';
   static const String weekButtonHint = 'weekButtonHintService';
   static const String showTabDate = 'showTabDateService';
-
-  //legacy
-  static const String legacyFavoriteDeleted = 'legacyFavoriteDeletedService';
 }
