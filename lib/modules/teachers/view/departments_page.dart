@@ -133,7 +133,7 @@ class DepartmentsPage extends StatelessWidget {
                     return OutlinedButton(
                       style: const ButtonStyle(
                         alignment: AlignmentDirectional.centerStart,
-                        side: MaterialStatePropertyAll(
+                        side: WidgetStatePropertyAll(
                           BorderSide(color: Colors.transparent),
                         ),
                       ),
