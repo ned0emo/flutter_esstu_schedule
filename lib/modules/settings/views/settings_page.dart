@@ -29,10 +29,9 @@ class SettingsPage extends StatelessWidget {
             return ListView(
               children: [
                 const ListTile(
-                    title: Text(
-                  'Основные',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                )),
+                  title: Text('Внешний вид',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
                 SwitchListTile(
                   title: const Text('Темная тема'),
                   value: state.darkTheme,
@@ -43,12 +42,11 @@ class SettingsPage extends StatelessWidget {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text(
-                      'Автоматическое обновление расписания в избранном'),
-                  value: state.autoUpdate,
+                  title: const Text('Показывать даты дней недели'),
+                  value: state.showTabDate,
                   onChanged: (value) {
                     BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
-                        settingType: SettingsTypes.autoUpdate,
+                        settingType: SettingsTypes.showTabDate,
                         value: value.toString()));
                   },
                 ),
@@ -70,14 +68,9 @@ class SettingsPage extends StatelessWidget {
                         value: value.toString()));
                   },
                 ),
-                SwitchListTile(
-                  title: const Text('Показывать даты дней недели'),
-                  value: state.showTabDate,
-                  onChanged: (value) {
-                    BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
-                        settingType: SettingsTypes.showTabDate,
-                        value: value.toString()));
-                  },
+                const ListTile(
+                  title: Text('Номер недели',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
                 SwitchListTile(
                   title: const Text('Определение номера недели с сайта'),
@@ -111,10 +104,19 @@ class SettingsPage extends StatelessWidget {
                         },
                 ),
                 const ListTile(
-                    title: Text(
-                  'Отладка',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                )),
+                  title: Text('Прочее',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                SwitchListTile(
+                  title: const Text(
+                      'Автоматическое обновление расписания в избранном'),
+                  value: state.autoUpdate,
+                  onChanged: (value) {
+                    BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
+                        settingType: SettingsTypes.autoUpdate,
+                        value: value.toString()));
+                  },
+                ),
                 ListTile(
                   title: const Text('Логи'),
                   onTap: () {
@@ -142,6 +144,8 @@ class SettingsPage extends StatelessWidget {
                                 onPressed: () {
                                   BlocProvider.of<SettingsBloc>(context)
                                       .add(ClearAll());
+                                  Modular.get<WeekNumberBloc>()
+                                      .add(CheckWeekNumber());
                                   Navigator.of(context).pop();
                                 },
                                 child: const Text('Да'))

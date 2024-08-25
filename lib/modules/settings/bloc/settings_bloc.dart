@@ -51,7 +51,6 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   Future<void> _clearAll(ClearAll event, Emitter<SettingsState> emit) async {
-    emit(SettingsLoading());
     try {
       await _settingsRepository.clearAll();
     } catch (e, stack) {
