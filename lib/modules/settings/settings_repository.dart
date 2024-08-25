@@ -22,7 +22,9 @@ class SettingsRepository {
       SettingsTypes.showTabDate:
           (storage.getString(SettingsTypes.showTabDate)) ?? 'true',
       SettingsTypes.weekIndexShifting:
-          (storage.getString(SettingsTypes.weekIndexShifting)) ?? 'false'
+          (storage.getString(SettingsTypes.weekIndexShifting)) ?? 'false',
+      SettingsTypes.autoWeekIndexSet:
+          (storage.getString(SettingsTypes.autoWeekIndexSet)) ?? 'true',
     };
 
     return settingsMap;

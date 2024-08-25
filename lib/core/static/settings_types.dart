@@ -10,4 +10,5 @@ abstract class SettingsTypes {
   static const String weekButtonHint = 'weekButtonHintService';
   static const String showTabDate = 'showTabDateService';
   static const String weekIndexShifting = 'weekIndexShiftingService';
+  static const String autoWeekIndexSet = 'autoWeekIndexSetService';
 }

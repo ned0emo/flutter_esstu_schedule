@@ -23,12 +23,15 @@ final class HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _weekNumber =
-        CurrentTime.weekNumber;
+    _weekNumber = CurrentTime.weekNumber;
     Modular.to.addListener(_navigateListener);
 
     Modular.get<FavoriteScheduleBloc>().add(OpenMainFavSchedule());
-    Modular.get<WeekNumberBloc>().add(CheckWeekNumber());
+
+    var settingsState = BlocProvider.of<SettingsBloc>(context).state;
+    if (settingsState is SettingsLoaded && settingsState.autoWeekIndexSet) {
+      Modular.get<WeekNumberBloc>().add(CheckWeekNumber());
+    }
 
     super.initState();
   }
@@ -52,9 +55,7 @@ final class HomePageState extends State<HomePage> {
     return MultiBlocProvider(
       /// события, добавленные здесь, будут активироваться каждый setState!
       providers: [
-        BlocProvider.value(
-          value: Modular.get<FavoriteScheduleBloc>(),
-        ),
+        BlocProvider.value(value: Modular.get<FavoriteScheduleBloc>()),
         BlocProvider.value(value: Modular.get<WeekNumberBloc>()),
       ],
       child: MultiBlocListener(
@@ -78,6 +79,7 @@ final class HomePageState extends State<HomePage> {
           BlocListener<WeekNumberBloc, WeekNumberState>(
             listener: (context, state) {
               if (state is WeekNumberLoaded) {
+                BlocProvider.of<SettingsBloc>(context).add(LoadSettings());
                 setState(() {
                   _weekNumber = CurrentTime.weekNumber;
                 });

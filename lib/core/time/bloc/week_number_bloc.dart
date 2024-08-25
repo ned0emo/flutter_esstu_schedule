@@ -9,7 +9,7 @@ part 'week_number_state.dart';
 class WeekNumberBloc extends Bloc<WeekNumberEvent, WeekNumberState> {
   final WeekNumberRepository _repository;
 
-  WeekNumberBloc(this._repository) : super(WeekNumberLoading()) {
+  WeekNumberBloc(this._repository) : super(WeekNumberInitial()) {
     on<CheckWeekNumber>((event, emit) async {
       emit(WeekNumberLoading());
       try {

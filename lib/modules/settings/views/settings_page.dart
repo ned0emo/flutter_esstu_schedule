@@ -5,13 +5,15 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/logger/logger.dart';
 import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/core/static/settings_types.dart';
+import 'package:schedule/core/time/bloc/week_number_bloc.dart';
+import 'package:schedule/core/time/current_time.dart';
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  static const _version = '3.9.0';
+  static const _version = '3.9.1';
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +43,8 @@ class SettingsPage extends StatelessWidget {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text('Автоматическое обновление расписания в избранном'),
+                  title: const Text(
+                      'Автоматическое обновление расписания в избранном'),
                   value: state.autoUpdate,
                   onChanged: (value) {
                     BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
@@ -75,6 +78,37 @@ class SettingsPage extends StatelessWidget {
                         settingType: SettingsTypes.showTabDate,
                         value: value.toString()));
                   },
+                ),
+                SwitchListTile(
+                  title: const Text('Определение номера недели с сайта'),
+                  value: state.autoWeekIndexSet,
+                  onChanged: (value) {
+                    if (value) {
+                      Modular.get<WeekNumberBloc>().add(CheckWeekNumber());
+                    }
+
+                    BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
+                        settingType: SettingsTypes.autoWeekIndexSet,
+                        value: value.toString()));
+                  },
+                ),
+                SwitchListTile(
+                  title: const Text('Инвертировать номер недели'),
+                  value: state.weekIndexShifting,
+                  onChanged: state.autoWeekIndexSet
+                      ? null
+                      : (value) {
+                          if (value) {
+                            CurrentTime.weekShifting = 1;
+                          } else {
+                            CurrentTime.weekShifting = 0;
+                          }
+
+                          BlocProvider.of<SettingsBloc>(context).add(
+                              ChangeSetting(
+                                  settingType: SettingsTypes.weekIndexShifting,
+                                  value: value.toString()));
+                        },
                 ),
                 const ListTile(
                     title: Text(

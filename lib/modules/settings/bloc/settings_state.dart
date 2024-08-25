@@ -12,6 +12,8 @@ class SettingsLoaded extends SettingsState {
   final bool hideSchedule;
   final bool hideLesson;
   final bool showTabDate;
+  final bool weekIndexShifting;
+  final bool autoWeekIndexSet;
 
   final bool noUpdateClassroom;
   final bool weekButtonHint;
@@ -24,7 +26,23 @@ class SettingsLoaded extends SettingsState {
     required this.showTabDate,
     required this.hideLesson,
     required this.weekButtonHint,
+    required this.autoWeekIndexSet,
+    required this.weekIndexShifting,
   });
+
+  static SettingsLoaded fromMap(Map<String, String> settingsMap) => SettingsLoaded(
+        darkTheme: settingsMap[SettingsTypes.darkTheme] == 'true',
+        autoUpdate: settingsMap[SettingsTypes.autoUpdate] == 'true',
+        noUpdateClassroom:
+            settingsMap[SettingsTypes.noUpdateClassroom] == 'true',
+        hideSchedule: settingsMap[SettingsTypes.hideSchedule] == 'true',
+        hideLesson: settingsMap[SettingsTypes.hideLesson] == 'true',
+        weekButtonHint: settingsMap[SettingsTypes.weekButtonHint] == 'true',
+        showTabDate: settingsMap[SettingsTypes.showTabDate] == 'true',
+        autoWeekIndexSet: settingsMap[SettingsTypes.autoWeekIndexSet] == 'true',
+        weekIndexShifting:
+            settingsMap[SettingsTypes.weekIndexShifting] == 'true',
+      );
 }
 
 class SettingsError extends SettingsState {

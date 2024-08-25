@@ -33,21 +33,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         CurrentTime.weekShifting = 1;
       }
 
-      emit(
-        SettingsLoaded(
-          darkTheme: stringSettingsValues[SettingsTypes.darkTheme] == 'true',
-          autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
-          noUpdateClassroom:
-              stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
-          hideSchedule:
-              stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
-          hideLesson: stringSettingsValues[SettingsTypes.hideLesson] == 'true',
-          weekButtonHint:
-              stringSettingsValues[SettingsTypes.weekButtonHint] == 'true',
-          showTabDate:
-              stringSettingsValues[SettingsTypes.showTabDate] == 'true',
-        ),
-      );
+      emit(SettingsLoaded.fromMap(stringSettingsValues));
     } catch (e, stack) {
       emit(SettingsError('${Errors.settings}: ${e.runtimeType}\n$stack'));
     }
@@ -56,23 +42,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   Future<void> _changeSetting(
       ChangeSetting event, Emitter<SettingsState> emit) async {
     try {
-      final stringSettingsValues = await _settingsRepository.saveSettings(
-          event.settingType, event.value);
-      emit(
-        SettingsLoaded(
-          darkTheme: stringSettingsValues[SettingsTypes.darkTheme] == 'true',
-          autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
-          noUpdateClassroom:
-              stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
-          hideSchedule:
-              stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
-          hideLesson: stringSettingsValues[SettingsTypes.hideLesson] == 'true',
-          weekButtonHint:
-              stringSettingsValues[SettingsTypes.weekButtonHint] == 'true',
-          showTabDate:
-              stringSettingsValues[SettingsTypes.showTabDate] == 'true',
-        ),
-      );
+      emit(SettingsLoaded.fromMap(
+        await _settingsRepository.saveSettings(event.settingType, event.value),
+      ));
     } catch (e, stack) {
       emit(SettingsError('${Errors.settings}: ${e.runtimeType}\n$stack'));
     }
@@ -88,23 +60,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
 
     try {
-      final stringSettingsValues = await _settingsRepository.loadSettings();
-
-      emit(
-        SettingsLoaded(
-          darkTheme: stringSettingsValues[SettingsTypes.darkTheme] == 'true',
-          autoUpdate: stringSettingsValues[SettingsTypes.autoUpdate] == 'true',
-          noUpdateClassroom:
-              stringSettingsValues[SettingsTypes.noUpdateClassroom] == 'true',
-          hideSchedule:
-              stringSettingsValues[SettingsTypes.hideSchedule] == 'true',
-          hideLesson: stringSettingsValues[SettingsTypes.hideLesson] == 'true',
-          weekButtonHint:
-              stringSettingsValues[SettingsTypes.weekButtonHint] == 'true',
-          showTabDate:
-              stringSettingsValues[SettingsTypes.showTabDate] == 'true',
-        ),
-      );
+      emit(SettingsLoaded.fromMap(await _settingsRepository.loadSettings()));
     } catch (e, stack) {
       emit(SettingsError('${Errors.settings}: ${e.runtimeType}\n$stack'));
     }
