@@ -1,4 +1,5 @@
 import 'package:schedule/core/static/settings_types.dart';
+import 'package:schedule/core/time/current_time.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsRepository {
@@ -20,6 +21,8 @@ class SettingsRepository {
           (storage.getString(SettingsTypes.weekButtonHint)) ?? 'false',
       SettingsTypes.showTabDate:
           (storage.getString(SettingsTypes.showTabDate)) ?? 'true',
+      SettingsTypes.weekIndexShifting:
+          (storage.getString(SettingsTypes.weekIndexShifting)) ?? 'false'
     };
 
     return settingsMap;
@@ -35,6 +38,7 @@ class SettingsRepository {
   Future<void> clearAll() async {
     final storage = await SharedPreferences.getInstance();
     await storage.clear();
+    CurrentTime.weekShifting = 0;
   }
 
   Future<void> clearFavorite() async {

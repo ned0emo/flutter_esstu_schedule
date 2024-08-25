@@ -5,6 +5,8 @@ import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/core/parser/students_parser.dart';
 import 'package:schedule/core/parser/teachers_parser.dart';
 import 'package:schedule/core/static/app_routes.dart';
+import 'package:schedule/core/time/bloc/week_number_bloc.dart';
+import 'package:schedule/core/time/week_number_repository.dart';
 import 'package:schedule/modules/classrooms/classrooms_module.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/favorite/favorite_module.dart';
@@ -21,6 +23,8 @@ import 'package:schedule/modules/zo_teachers/zo_teachers_module.dart';
 class HomeModule extends Module {
   @override
   void binds(i) {
+    i.addSingleton(WeekNumberRepository.new);
+    i.addSingleton(WeekNumberBloc.new);
     i.addSingleton(FavoriteButtonBloc.new);
     i.addSingleton(FavoriteScheduleBloc.new);
     i.addSingleton(FavoriteRepository.new);

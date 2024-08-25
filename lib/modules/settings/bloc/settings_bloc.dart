@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:schedule/core/time/current_time.dart';
 import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
@@ -24,6 +25,13 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     emit(SettingsLoading());
     try {
       final stringSettingsValues = await _settingsRepository.loadSettings();
+
+      ///
+      /// загрузка сдвига номера недели
+      ///
+      if (stringSettingsValues[SettingsTypes.weekIndexShifting] == 'true') {
+        CurrentTime.weekShifting = 1;
+      }
 
       emit(
         SettingsLoaded(

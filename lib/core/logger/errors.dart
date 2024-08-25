@@ -8,6 +8,7 @@ abstract class Errors {
   static const zoClassroomsSchedule = 'Ошибка загрузки расписания аудиторий (заоч.)';
   static const search = 'Ошибка поиска';
   static const update = 'Ошибка обновления расписания';
+  static const weekIndex = 'Ошибка определения номера недели';
 
   static const pageLoading = 'Ошибка загрузки страницы';
   static const schedule = 'Ошибка загрузки расписания';

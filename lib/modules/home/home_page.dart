@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:jiffy/jiffy.dart';
+import 'package:schedule/core/time/bloc/week_number_bloc.dart';
+import 'package:schedule/core/time/current_time.dart';
 import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/core/static/settings_types.dart';
@@ -10,20 +11,25 @@ import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedu
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
 
-class HomePage extends StatefulWidget {
+final class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
   State<StatefulWidget> createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
+final class HomePageState extends State<HomePage> {
   int _weekNumber = 1;
 
   @override
   void initState() {
-    _weekNumber = (Jiffy.now().weekOfYear + 1) % 2 + 1;
+    _weekNumber =
+        CurrentTime.weekNumber;
     Modular.to.addListener(_navigateListener);
+
+    Modular.get<FavoriteScheduleBloc>().add(OpenMainFavSchedule());
+    Modular.get<WeekNumberBloc>().add(CheckWeekNumber());
+
     super.initState();
   }
 
@@ -36,7 +42,7 @@ class HomePageState extends State<HomePage> {
   void _navigateListener() {
     if (Modular.to.navigateHistory.length == 1) {
       setState(() {
-        _weekNumber = (Jiffy.now().weekOfYear + 1) % 2 + 1;
+        _weekNumber = CurrentTime.weekNumber;
       });
     }
   }
@@ -44,27 +50,41 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
+      /// события, добавленные здесь, будут активироваться каждый setState!
       providers: [
         BlocProvider.value(
-          value: Modular.get<FavoriteScheduleBloc>()
-            ..add(OpenMainFavSchedule()),
+          value: Modular.get<FavoriteScheduleBloc>(),
         ),
+        BlocProvider.value(value: Modular.get<WeekNumberBloc>()),
       ],
-      child: BlocListener<FavoriteScheduleBloc, FavoriteScheduleState>(
-        listener: (context, state) async {
-          if (state is FavoriteScheduleLoaded && state.isFromMainPage) {
-            Modular.to.pushNamed(
-              AppRoutes.favoriteListRoute + AppRoutes.favoriteScheduleRoute,
-              arguments: [
-                state.scheduleModel.name,
-                state.scheduleModel.type,
-                (await RepositoryProvider.of<SettingsRepository>(context)
-                        .loadSettings())[SettingsTypes.autoUpdate] ==
-                    'true',
-              ],
-            );
-          }
-        },
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<FavoriteScheduleBloc, FavoriteScheduleState>(
+            listener: (context, state) async {
+              if (state is FavoriteScheduleLoaded && state.isFromMainPage) {
+                Modular.to.pushNamed(
+                  AppRoutes.favoriteListRoute + AppRoutes.favoriteScheduleRoute,
+                  arguments: [
+                    state.scheduleModel.name,
+                    state.scheduleModel.type,
+                    (await RepositoryProvider.of<SettingsRepository>(context)
+                            .loadSettings())[SettingsTypes.autoUpdate] ==
+                        'true',
+                  ],
+                );
+              }
+            },
+          ),
+          BlocListener<WeekNumberBloc, WeekNumberState>(
+            listener: (context, state) {
+              if (state is WeekNumberLoaded) {
+                setState(() {
+                  _weekNumber = CurrentTime.weekNumber;
+                });
+              }
+            },
+          ),
+        ],
         child: Scaffold(
           appBar: _appBar(),
           body: _body(context),
@@ -79,10 +99,7 @@ class HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Расписание ВСГУТУ'),
-          Text(
-            '$_weekNumber неделя',
-            style: const TextStyle(fontSize: 16),
-          )
+          _appBarBottom(),
         ],
       ),
       actions: [
@@ -117,6 +134,47 @@ class HomePageState extends State<HomePage> {
           },
           icon: const Icon(Icons.settings),
         ),
+      ],
+    );
+  }
+
+  Widget _appBarBottom() {
+    return Row(
+      children: [
+        BlocBuilder<WeekNumberBloc, WeekNumberState>(
+          builder: (context, state) {
+            if (state is WeekNumberLoading) {
+              return Container(
+                margin: const EdgeInsets.only(right: 8.0),
+                height: 14,
+                width: 14,
+                child: const CircularProgressIndicator(
+                  color: Colors.grey,
+                  strokeWidth: 2,
+                ),
+              );
+            }
+
+            if (state is WeekNumberError) {
+              return const Padding(
+                padding: EdgeInsets.only(right: 8.0),
+                child: Icon(
+                  Icons.warning_amber,
+                  color: Colors.grey,
+                  size: 16,
+                ),
+              );
+            }
+
+            return const SizedBox();
+          },
+        ),
+        Expanded(
+          child: Text(
+            '$_weekNumber неделя',
+            style: const TextStyle(fontSize: 16),
+          ),
+        )
       ],
     );
   }
