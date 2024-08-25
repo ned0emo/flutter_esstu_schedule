@@ -11,6 +11,9 @@ class WeekNumberBloc extends Bloc<WeekNumberEvent, WeekNumberState> {
 
   WeekNumberBloc(this._repository) : super(WeekNumberInitial()) {
     on<CheckWeekNumber>((event, emit) async {
+      /// блокировка повторных запросов
+      if (state is WeekNumberLoading) return;
+
       emit(WeekNumberLoading());
       try {
         await _repository.setWeekShifting();
