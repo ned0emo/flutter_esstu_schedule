@@ -198,12 +198,19 @@ class StudentsParser extends Parser {
       int emptinessCounter = 0;
       int j = 0;
       for (String groupSection in splittedPage) {
-        if (emptinessCounter > 11) break;
+        if (emptinessCounter > 11) {
+          break;
+        }
 
-        final name = groupSection.substring(
-            groupSection.indexOf('n">') + 3, groupSection.indexOf('</FONT'));
+        final name = groupSection
+            .substring(
+                groupSection.indexOf('n">') + 3, groupSection.indexOf('</FONT'))
+            .trim();
         if (!name.contains(RegExp(r'[0-9]|[А-Я]'))) {
-          emptinessCounter++;
+          if (name.isEmpty) {
+            emptinessCounter++;
+          }
+
           j++;
           continue;
         }
