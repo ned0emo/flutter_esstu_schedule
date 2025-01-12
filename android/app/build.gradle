@@ -30,17 +30,17 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 34
+    compileSdkVersion 35
     ndkVersion flutter.ndkVersion
     namespace "com.KafSi.schedule"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility 21//JavaVersion.VERSION_1_8
+        targetCompatibility 21//JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = '19'
+        jvmTarget = '21'
     }
 
     sourceSets {

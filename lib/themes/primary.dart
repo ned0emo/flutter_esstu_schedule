@@ -15,6 +15,7 @@ class PrimaryTheme extends ThemeTemplate {
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFFFCF0EE),
         foregroundColor: Colors.grey[850],
+        iconColor: Colors.grey[850],
         textStyle: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
@@ -25,6 +26,7 @@ class PrimaryTheme extends ThemeTemplate {
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: Colors.black87,
+        iconColor: Colors.black87,
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
