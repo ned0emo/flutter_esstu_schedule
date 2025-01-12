@@ -15,7 +15,7 @@ class AppWidget extends StatelessWidget {
       create: (context) => SettingsRepository(),
       child: BlocProvider<SettingsBloc>(
         create: (context) =>
-            SettingsBloc(RepositoryProvider.of(context))..add(LoadSettings()),
+            SettingsBloc(RepositoryProvider.of(context))..add(InitialLoadSettings()),
         child: BlocBuilder<SettingsBloc, SettingsState>(
           builder: (context, state) {
             if (state is SettingsLoaded) {

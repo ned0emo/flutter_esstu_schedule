@@ -7,6 +7,12 @@ final class WeekNumberInitial extends WeekNumberState {}
 
 final class WeekNumberLoading extends WeekNumberState {}
 
-final class WeekNumberLoaded extends WeekNumberState {}
+final class WeekNumberLoaded extends WeekNumberState {
+  final bool weekShifting;
+
+  WeekNumberLoaded({
+    required this.weekShifting,
+  });
+}
 
 final class WeekNumberError extends WeekNumberState {}

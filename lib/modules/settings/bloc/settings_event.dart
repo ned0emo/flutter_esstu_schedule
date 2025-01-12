@@ -3,7 +3,10 @@ part of 'settings_bloc.dart';
 @immutable
 abstract class SettingsEvent {}
 
-class LoadSettings extends SettingsEvent {}
+/// Не использовать после первой инициализации в AppWidget
+///
+/// Ломается маршрутизация
+class InitialLoadSettings extends SettingsEvent {}
 
 class ChangeSetting extends SettingsEvent {
   final String settingType;
@@ -12,4 +15,4 @@ class ChangeSetting extends SettingsEvent {
   ChangeSetting({required this.settingType, required this.value});
 }
 
-class ClearAll extends SettingsEvent{}
+class ClearAll extends SettingsEvent {}

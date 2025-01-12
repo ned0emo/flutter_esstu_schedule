@@ -64,6 +64,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
   bool showEmptyDays = true;
   bool showEmptyLessons = true;
   bool showTabDate = true;
+  double sdk35Padding = 0;
 
   TabController? _tabController;
 
@@ -82,6 +83,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
       showEmptyDays = !settingsState.hideSchedule;
       showEmptyLessons = !settingsState.hideLesson;
       showTabDate = settingsState.showTabDate;
+      sdk35Padding = settingsState.sdkVersion >= 35 ? 12.0 : 0.0;
     }
   }
 
@@ -306,54 +308,60 @@ class SchedulePageBodyState extends State<SchedulePageBody>
             widget.scheduleModel!.getDayOfWeekByShortName(e, selectedWeekIndex);
 
         if (currentDaySchedule == null) {
-          return Tab(
-            iconMargin: EdgeInsets.zero,
-            child: FittedBox(
-              fit: BoxFit.none,
-              child: Text(
-                ScheduleTimeData.daysOfWeekShort.indexOf(e) ==
-                            currentDayOfWeekIndex &&
-                        isCurrentWeek
-                    ? '[$e]${dates[e]}'
-                    : (e + dates[e].toString()),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: fontSize,
-                  color: Colors.grey,
+          return Padding(
+            padding: EdgeInsets.only(bottom: sdk35Padding),
+            child: Tab(
+              iconMargin: EdgeInsets.zero,
+              child: FittedBox(
+                fit: BoxFit.none,
+                child: Text(
+                  ScheduleTimeData.daysOfWeekShort.indexOf(e) ==
+                              currentDayOfWeekIndex &&
+                          isCurrentWeek
+                      ? '[$e]${dates[e]}'
+                      : (e + dates[e].toString()),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: fontSize,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
             ),
           );
         }
 
-        return Tab(
-          iconMargin: EdgeInsets.zero,
-          child: FittedBox(
-            fit: BoxFit.none,
-            child: currentDaySchedule.dayOfWeekDate != null
-                ? Text(
-                    '${currentDaySchedule.dayOfWeekName}\n'
-                    '${currentDaySchedule.dayOfWeekDate}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12,
+        return Padding(
+          padding: EdgeInsets.only(bottom: sdk35Padding),
+          child: Tab(
+            iconMargin: EdgeInsets.zero,
+            child: FittedBox(
+              fit: BoxFit.none,
+              child: currentDaySchedule.dayOfWeekDate != null
+                  ? Text(
+                      '${currentDaySchedule.dayOfWeekName}\n'
+                      '${currentDaySchedule.dayOfWeekDate}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                    )
+                  : Text(
+                      currentDaySchedule.dayOfWeekIndex ==
+                                  currentDayOfWeekIndex &&
+                              isCurrentWeek
+                          ? '[${currentDaySchedule.dayOfWeekName}]${dates[e]}'
+                          : currentDaySchedule.dayOfWeekName +
+                              dates[e].toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: fontSize,
+                      ),
                     ),
-                  )
-                : Text(
-                    currentDaySchedule.dayOfWeekIndex ==
-                                currentDayOfWeekIndex &&
-                            isCurrentWeek
-                        ? '[${currentDaySchedule.dayOfWeekName}]${dates[e]}'
-                        : currentDaySchedule.dayOfWeekName +
-                            dates[e].toString(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: fontSize,
-                    ),
-                  ),
+            ),
           ),
         );
       }).toList(),

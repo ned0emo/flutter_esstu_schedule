@@ -1,3 +1,4 @@
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:schedule/core/static/settings_types.dart';
 import 'package:schedule/core/time/current_time.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,5 +53,11 @@ class SettingsRepository {
     for (var key in list) {
       storage.remove(key);
     }
+  }
+
+  Future<int> getSdkVersion() async {
+    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final androidInfo = await deviceInfo.androidInfo;
+    return androidInfo.version.sdkInt;
   }
 }

@@ -79,7 +79,10 @@ final class HomePageState extends State<HomePage> {
           BlocListener<WeekNumberBloc, WeekNumberState>(
             listener: (context, state) {
               if (state is WeekNumberLoaded) {
-                BlocProvider.of<SettingsBloc>(context).add(LoadSettings());
+                BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
+                  settingType: SettingsTypes.weekIndexShifting,
+                  value: state.weekShifting.toString(),
+                ));
                 setState(() {
                   _weekNumber = CurrentTime.weekNumber;
                 });

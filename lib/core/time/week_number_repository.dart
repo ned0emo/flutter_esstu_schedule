@@ -6,7 +6,10 @@ import 'package:schedule/core/time/current_time.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WeekNumberRepository {
-  Future<void> setWeekShifting() async {
+  ///
+  /// return true - сдвиг есть, false - сдвига нет
+  ///
+  Future<bool> setWeekShifting() async {
     try {
       //await Future.delayed(Duration(milliseconds: 2000));
       final result = await http.read(Uri.https('esstu.ru', 'index.htm'));
@@ -21,18 +24,21 @@ class WeekNumberRepository {
         throw Exception();
       }
 
+      final currentShifting = await _loadShifting();
       final weekIndex = weekTag.contains('II') ? 1 : 0;
       if (weekIndex != CurrentTime.weekIndex) {
-        final currentShifting = await _loadShifting();
-
         if (currentShifting) {
           CurrentTime.weekShifting = 0;
           await _saveShifting(false);
+          return false;
         } else {
           CurrentTime.weekShifting = 1;
           await _saveShifting(true);
+          return true;
         }
       }
+
+      return currentShifting;
     } catch (e) {
       Logger.error(title: Errors.weekIndex, exception: e);
       rethrow;

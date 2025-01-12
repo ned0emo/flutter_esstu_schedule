@@ -18,6 +18,8 @@ class SettingsLoaded extends SettingsState {
   final bool noUpdateClassroom;
   final bool weekButtonHint;
 
+  final int sdkVersion;
+
   SettingsLoaded({
     required this.darkTheme,
     required this.autoUpdate,
@@ -28,9 +30,11 @@ class SettingsLoaded extends SettingsState {
     required this.weekButtonHint,
     required this.autoWeekIndexSet,
     required this.weekIndexShifting,
+    required this.sdkVersion,
   });
 
-  static SettingsLoaded fromMap(Map<String, String> settingsMap) => SettingsLoaded(
+  static SettingsLoaded fromMap(Map<String, String> settingsMap, int sdkVersion) =>
+      SettingsLoaded(
         darkTheme: settingsMap[SettingsTypes.darkTheme] == 'true',
         autoUpdate: settingsMap[SettingsTypes.autoUpdate] == 'true',
         noUpdateClassroom:
@@ -42,6 +46,7 @@ class SettingsLoaded extends SettingsState {
         autoWeekIndexSet: settingsMap[SettingsTypes.autoWeekIndexSet] == 'true',
         weekIndexShifting:
             settingsMap[SettingsTypes.weekIndexShifting] == 'true',
+        sdkVersion: sdkVersion,
       );
 }
 

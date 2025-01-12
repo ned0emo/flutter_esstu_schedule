@@ -16,8 +16,8 @@ class WeekNumberBloc extends Bloc<WeekNumberEvent, WeekNumberState> {
 
       emit(WeekNumberLoading());
       try {
-        await _repository.setWeekShifting();
-        emit(WeekNumberLoaded());
+        emit(WeekNumberLoaded(
+            weekShifting: await _repository.setWeekShifting()));
       } catch (e) {
         emit(WeekNumberError());
       }

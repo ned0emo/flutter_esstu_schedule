@@ -15,13 +15,13 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   SettingsBloc(SettingsRepository repository)
       : _settingsRepository = repository,
         super(SettingsState()) {
-    on<LoadSettings>(_loadSettings);
+    on<InitialLoadSettings>(_loadSettings);
     on<ChangeSetting>(_changeSetting);
     on<ClearAll>(_clearAll);
   }
 
   Future<void> _loadSettings(
-      LoadSettings event, Emitter<SettingsState> emit) async {
+      InitialLoadSettings event, Emitter<SettingsState> emit) async {
     emit(SettingsLoading());
     try {
       final stringSettingsValues = await _settingsRepository.loadSettings();
@@ -33,7 +33,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         CurrentTime.weekShifting = 1;
       }
 
-      emit(SettingsLoaded.fromMap(stringSettingsValues));
+      emit(SettingsLoaded.fromMap(
+        stringSettingsValues,
+        await _settingsRepository.getSdkVersion(),
+      ));
     } catch (e, stack) {
       emit(SettingsError('${Errors.settings}: ${e.runtimeType}\n$stack'));
     }
@@ -44,6 +47,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     try {
       emit(SettingsLoaded.fromMap(
         await _settingsRepository.saveSettings(event.settingType, event.value),
+        await _settingsRepository.getSdkVersion(),
       ));
     } catch (e, stack) {
       emit(SettingsError('${Errors.settings}: ${e.runtimeType}\n$stack'));
@@ -59,7 +63,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
 
     try {
-      emit(SettingsLoaded.fromMap(await _settingsRepository.loadSettings()));
+      emit(SettingsLoaded.fromMap(
+        await _settingsRepository.loadSettings(),
+        await _settingsRepository.getSdkVersion(),
+      ));
     } catch (e, stack) {
       emit(SettingsError('${Errors.settings}: ${e.runtimeType}\n$stack'));
     }
