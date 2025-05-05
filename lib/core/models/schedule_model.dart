@@ -6,8 +6,8 @@ import 'package:schedule/core/models/lesson_model.dart';
 import 'package:schedule/core/models/week_model.dart';
 
 class ScheduleModel {
-  final String name;
-  final String type;
+  String name = '';
+  String type = '';
   final String? link1;
   final String? link2;
 
@@ -20,6 +20,8 @@ class ScheduleModel {
     this.link1,
     this.link2,
   });
+
+  ScheduleModel.custom(): weeks = [], link1 = null, link2 = null;
 
   @override
   toString() => jsonEncode(toJson());

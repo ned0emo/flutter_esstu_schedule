@@ -74,7 +74,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
   void initState() {
     super.initState();
 
-    numOfWeeks = widget.scheduleModel!.numOfWeeks;
+    numOfWeeks = widget.scheduleModel?.numOfWeeks ?? 0;
     currentDayOfWeekIndex = CurrentTime.dayOfWeekIndex;
     currentLessonIndex = _getCurrentLessonIndex;
 
