@@ -30,7 +30,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 35
+    compileSdkVersion 36
     ndkVersion flutter.ndkVersion
     namespace "com.KafSi.schedule"
 
@@ -55,8 +55,8 @@ android {
         minSdkVersion 25
         targetSdkVersion flutter.targetSdkVersion
         //12.01.2025
-        versionCode 56
-        versionName "3.9.3"
+        versionCode 57
+        versionName "3.9.4"
     }
 
     signingConfigs {

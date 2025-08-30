@@ -18,13 +18,14 @@ final class HomePage extends StatefulWidget {
   State<StatefulWidget> createState() => HomePageState();
 }
 
-final class HomePageState extends State<HomePage> {
+final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   int _weekNumber = 1;
 
   @override
   void initState() {
     _weekNumber = CurrentTime.weekNumber;
     Modular.to.addListener(_navigateListener);
+    WidgetsBinding.instance.addObserver(this);
 
     Modular.get<FavoriteScheduleBloc>().add(OpenMainFavSchedule());
 
@@ -37,8 +38,29 @@ final class HomePageState extends State<HomePage> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed) {
+      var settingsState = BlocProvider.of<SettingsBloc>(context).state;
+      if (settingsState is SettingsLoaded && settingsState.autoWeekIndexSet) {
+        Modular.get<WeekNumberBloc>().add(CheckWeekNumber());
+      }
+    }
+  }
+
+  @override
+  Future<bool> didPopRoute() {
+    setState(() {
+      _weekNumber = CurrentTime.weekNumber;
+    });
+    return super.didPopRoute();
+  }
+
+  @override
   void dispose() {
     Modular.to.removeListener(_navigateListener);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
