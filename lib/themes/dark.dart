@@ -5,7 +5,7 @@ class DarkTheme extends ThemeTemplate {
   @override
   ThemeData get data => ThemeData(
         colorScheme: const ColorScheme.dark(primary: Color(0xffa92c00)),
-        cardTheme: CardTheme(surfaceTintColor: Colors.grey[700]),
+        cardTheme: CardThemeData(surfaceTintColor: Colors.grey[700]),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.grey[300],
@@ -33,7 +33,7 @@ class DarkTheme extends ThemeTemplate {
             iconColor: Colors.white,
           ),
         ),
-        tabBarTheme: const TabBarTheme(
+        tabBarTheme: const TabBarThemeData(
             labelColor: Colors.white, dividerColor: Colors.black),
         filledButtonTheme: FilledButtonThemeData(
             style: FilledButton.styleFrom(

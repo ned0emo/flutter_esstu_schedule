@@ -22,7 +22,7 @@ class PrimaryTheme extends ThemeTemplate {
         ),
       ),
     ),
-    cardTheme: const CardTheme(surfaceTintColor: Colors.white, color: Colors.white),
+    cardTheme: const CardThemeData(surfaceTintColor: Colors.white, color: Colors.white),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: Colors.black87,
@@ -34,7 +34,7 @@ class PrimaryTheme extends ThemeTemplate {
         foregroundColor: Colors.black,
       ),
     ),
-    tabBarTheme: const TabBarTheme(labelColor: Colors.black87),
+    tabBarTheme: const TabBarThemeData(labelColor: Colors.black87),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: Colors.grey[800],
     ),
