@@ -1,19 +1,13 @@
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:schedule/modules/home/home_module.dart';
 import 'package:schedule/modules/zo_teachers/bloc/zo_teachers_bloc.dart';
 import 'package:schedule/modules/zo_teachers/view/zo_teachers_page.dart';
 
-class ZoTeachersModule extends Module {
-  @override
-  void binds(i) {
-    i.addSingleton(ZoTeachersBloc.new);
-  }
+import '../../core/static/app_routes.dart';
 
-  @override
-  void routes(RouteManager r) {
-    r.child('/', child: (context) => const ZoTeachersPage());
-  }
+final zoTeachersModule = createModule(
+    path: AppRoutes.zoTeachersRoute,
+    register: (c) {
+      c.addSingleton(ZoTeachersBloc.new);
 
-  @override
-  List<Module> get imports => [HomeModule()];
-}
+      c.route('/', child: (context, rs) => const ZoTeachersPage());
+    });

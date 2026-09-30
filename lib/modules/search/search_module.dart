@@ -1,31 +1,27 @@
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/static/app_routes.dart';
-import 'package:schedule/modules/home/home_module.dart';
 import 'package:schedule/modules/search/search_list_bloc/search_list_bloc.dart';
 import 'package:schedule/modules/search/search_schedule_bloc/search_schedule_bloc.dart';
 import 'package:schedule/modules/search/view/search_list_page.dart';
 import 'package:schedule/modules/search/view/search_schedule_page.dart';
 
-class SearchModule extends Module {
-  @override
-  void binds(i) {
-    i.addSingleton(SearchListBloc.new);
-    i.addSingleton(SearchScheduleBloc.new);
-  }
+final searchModule = createModule(
+    path: AppRoutes.searchRoute,
+    register: (c) {
+      c.addSingleton(SearchListBloc.new);
+      c.addSingleton(SearchScheduleBloc.new);
 
-  @override
-  void routes(RouteManager r) {
-    r.child('/',
-        child: (context) => SearchListPage(scheduleType: r.args.data[0]));
-    r.child(AppRoutes.searchingScheduleRoute,
-        child: (context) => SearchSchedulePage(
-              scheduleName: r.args.data[0],
-              scheduleType: r.args.data[1],
-              scheduleLink1: r.args.data[2],
-              scheduleLink2: r.args.data[3],
-            ));
-  }
+      c.route('/',
+          child: (context, rs) =>
+              SearchListPage(scheduleType: (rs.arguments! as List<String>)[0]));
+      c.route(AppRoutes.searchingScheduleRoute, child: (context, rs) {
+        final args = rs.arguments! as List<String?>;
 
-  @override
-  List<Module> get imports => [HomeModule()];
-}
+        return SearchSchedulePage(
+          scheduleName: args[0]!,
+          scheduleType: args[1]!,
+          scheduleLink1: args[2]!,
+          scheduleLink2: args[3],
+        );
+      });
+    });

@@ -14,9 +14,8 @@ class ZoTeachersPage extends StatelessWidget {
     return MultiBlocProvider(
         providers: [
           BlocProvider.value(
-              value: Modular.get<ZoTeachersBloc>()
-                ..add(LoadZoTeachersSchedule())),
-          BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
+              value: inject<ZoTeachersBloc>()..add(LoadZoTeachersSchedule())),
+          BlocProvider.value(value: inject<FavoriteButtonBloc>()),
         ],
         child: BlocBuilder<ZoTeachersBloc, ZoTeachersState>(
           builder: (context, state) {
@@ -106,7 +105,7 @@ class ZoTeachersPage extends StatelessWidget {
                           ),
                           child: Text(handlingLetter),
                           onPressed: () {
-                            Modular.get<ZoTeachersBloc>()
+                            inject<ZoTeachersBloc>()
                                 .add(ChangeZoLetter(handlingLetter));
                             Navigator.pop(context);
                           },
@@ -145,7 +144,7 @@ class ZoTeachersPage extends StatelessWidget {
               onChanged: (value) {
                 if (value == null) return;
 
-                Modular.get<ZoTeachersBloc>().add(ChangeZoTeacher(
+                inject<ZoTeachersBloc>().add(ChangeZoTeacher(
                   classroom: value,
                 ));
               },

@@ -13,7 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  static const _version = '3.9.4';
+  static const _version = '3.9.5';
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +77,7 @@ class SettingsPage extends StatelessWidget {
                   value: state.autoWeekIndexSet,
                   onChanged: (value) {
                     if (value) {
-                      Modular.get<WeekNumberBloc>().add(CheckWeekNumber());
+                      inject<WeekNumberBloc>().add(CheckWeekNumber());
                     }
 
                     BlocProvider.of<SettingsBloc>(context).add(ChangeSetting(
@@ -120,7 +120,7 @@ class SettingsPage extends StatelessWidget {
                 ListTile(
                   title: const Text('Логи'),
                   onTap: () {
-                    Modular.to.pushNamed(
+                    context.pushNamed(
                         AppRoutes.settingsRoute + AppRoutes.debugRoute);
                   },
                 ),
@@ -144,7 +144,7 @@ class SettingsPage extends StatelessWidget {
                                 onPressed: () {
                                   BlocProvider.of<SettingsBloc>(context)
                                       .add(ClearAll());
-                                  Modular.get<WeekNumberBloc>()
+                                  inject<WeekNumberBloc>()
                                       .add(CheckWeekNumber());
                                   Navigator.of(context).pop();
                                 },
@@ -265,7 +265,7 @@ class SettingsPage extends StatelessWidget {
                   ListTile(
                     title: const Text('Логи'),
                     onTap: () {
-                      Modular.to.pushNamed(
+                      context.pushNamed(
                           AppRoutes.settingsRoute + AppRoutes.debugRoute);
                     },
                   ),

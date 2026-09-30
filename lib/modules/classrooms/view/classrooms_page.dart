@@ -14,9 +14,8 @@ class ClassroomsPage extends StatelessWidget {
     return MultiBlocProvider(
         providers: [
           BlocProvider.value(
-              value: Modular.get<ClassroomsBloc>()
-                ..add(LoadClassroomsSchedule())),
-          BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
+              value: inject<ClassroomsBloc>()..add(LoadClassroomsSchedule())),
+          BlocProvider.value(value: inject<FavoriteButtonBloc>()),
         ],
         child: BlocBuilder<ClassroomsBloc, ClassroomsState>(
           builder: (context, state) {
@@ -106,7 +105,7 @@ class ClassroomsPage extends StatelessWidget {
                           ),
                           child: Text(handlingBuildingName),
                           onPressed: () {
-                            Modular.get<ClassroomsBloc>()
+                            inject<ClassroomsBloc>()
                                 .add(ChangeBuilding(handlingBuildingName));
                             Navigator.pop(context);
                           },
@@ -145,7 +144,7 @@ class ClassroomsPage extends StatelessWidget {
               onChanged: (value) {
                 if (value == null) return;
 
-                Modular.get<ClassroomsBloc>().add(ChangeClassroom(
+                inject<ClassroomsBloc>().add(ChangeClassroom(
                   classroom: value,
                 ));
               },

@@ -17,8 +17,8 @@ class FavoriteListPage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(
-            value: Modular.get<FavoriteListBloc>()..add(LoadFavoriteList())),
-        BlocProvider.value(value: Modular.get<FavoriteButtonBloc>())
+            value: inject<FavoriteListBloc>()..add(LoadFavoriteList())),
+        BlocProvider.value(value: inject<FavoriteButtonBloc>())
       ],
       child: Scaffold(
         appBar: AppBar(
@@ -28,7 +28,7 @@ class FavoriteListPage extends StatelessWidget {
         body: GestureDetector(
           onHorizontalDragEnd: (details) {
             if ((details.primaryVelocity ?? -1) > 0) {
-              Modular.to.pop();
+              context.pop();
             }
           },
           child: BlocBuilder<FavoriteListBloc, FavoriteListState>(
@@ -102,15 +102,14 @@ class FavoriteListPage extends StatelessWidget {
           Expanded(
             child: ElevatedButton(
               onPressed: () async {
-                Modular.get<FavoriteScheduleBloc>().add(ResetSchedule());
-                Modular.to.pushNamed(
+                inject<FavoriteScheduleBloc>().add(ResetSchedule());
+                context.pushNamed(
                   AppRoutes.favoriteListRoute + AppRoutes.favoriteScheduleRoute,
                   arguments: [
                     scheduleName,
                     scheduleType,
                     (await RepositoryProvider.of<SettingsRepository>(context)
-                            .loadSettings())[SettingsTypes.autoUpdate] ==
-                        'true'
+                        .loadSettings())[SettingsTypes.autoUpdate]
                   ],
                 );
               },
@@ -128,7 +127,7 @@ class FavoriteListPage extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              Modular.get<FavoriteListBloc>()
+              inject<FavoriteListBloc>()
                   .add(DeleteScheduleFromList(scheduleName, scheduleType));
             },
             icon: const Icon(Icons.delete),
@@ -158,7 +157,7 @@ class FavoriteListPage extends StatelessWidget {
                                 child: const Text('Нет')),
                             OutlinedButton(
                                 onPressed: () {
-                                  Modular.get<FavoriteListBloc>()
+                                  inject<FavoriteListBloc>()
                                       .add(ClearAllSchedule());
                                   Navigator.of(context).pop();
                                 },

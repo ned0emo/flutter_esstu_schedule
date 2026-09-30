@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:schedule/core/logger/custom_exception.dart';
 import 'package:schedule/core/logger/errors.dart';
 import 'package:schedule/core/logger/logger.dart';
 import 'package:schedule/core/static/settings_types.dart';
@@ -14,18 +15,24 @@ class WeekNumberRepository {
       //await Future.delayed(Duration(milliseconds: 2000));
       final result = await http.read(Uri.https('esstu.ru', 'index.htm'));
 
-      final weekTag =
-          RegExp(r'<span class="header-date">.*</span>').firstMatch(result)?[0];
+      final weekNumberStr =
+          RegExp(r'(?<=data-week-num=")\d(?=")').firstMatch(result)?[0];
 
-      if (weekTag == null) {
-        Logger.error(
-            title: Errors.weekIndex,
-            exception: 'Номер недели не найден на странице расписания');
-        throw Exception();
+      if (weekNumberStr == null) {
+        throw CustomException(
+            message: 'Номер недели не найден на странице расписания');
       }
 
       final currentShifting = await _loadShifting();
-      final weekIndex = weekTag.contains('II') ? 1 : 0;
+      int weekIndex = 0;
+      try {
+        weekIndex = int.parse(weekNumberStr) - 1;
+      } catch (e) {
+        throw CustomException(
+            message:
+                'Номер недели не найден на странице расписания: $weekNumberStr');
+      }
+
       if (weekIndex != CurrentTime.weekIndex) {
         if (currentShifting) {
           CurrentTime.weekShifting = 0;

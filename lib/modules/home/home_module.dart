@@ -1,10 +1,8 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:schedule/core/main_repository.dart';
 import 'package:schedule/core/parser/parser.dart';
 import 'package:schedule/core/parser/students_parser.dart';
 import 'package:schedule/core/parser/teachers_parser.dart';
-import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/core/time/bloc/week_number_bloc.dart';
 import 'package:schedule/core/time/week_number_repository.dart';
 import 'package:schedule/modules/classrooms/classrooms_module.dart';
@@ -20,44 +18,27 @@ import 'package:schedule/modules/teachers/teachers_module.dart';
 import 'package:schedule/modules/zo_classrooms/zo_classrooms_module.dart';
 import 'package:schedule/modules/zo_teachers/zo_teachers_module.dart';
 
-class HomeModule extends Module {
-  @override
-  void binds(i) {
-    i.addSingleton(WeekNumberRepository.new);
-    i.addSingleton(WeekNumberBloc.new);
-    i.addSingleton(FavoriteButtonBloc.new);
-    i.addSingleton(FavoriteScheduleBloc.new);
-    i.addSingleton(FavoriteRepository.new);
-    i.addSingleton(MainRepository.new);
-    i.addSingleton(TeachersParser.new);
-    i.addSingleton(StudentsParser.new);
-    i.addSingleton(Parser.new);
-  }
+final homeModule = createModule(
+    path: '/',
+    register: (c) {
+      c.addSingleton(WeekNumberRepository.new);
+      c.addSingleton(WeekNumberBloc.new);
+      c.addSingleton(FavoriteButtonBloc.new);
+      c.addSingleton(FavoriteScheduleBloc.new);
+      c.addSingleton(FavoriteRepository.new);
+      c.addSingleton(MainRepository.new);
+      c.addSingleton(TeachersParser.new);
+      c.addSingleton(StudentsParser.new);
+      c.addSingleton(Parser.new);
 
-  @override
-  void exportedBinds(i) {
-    //i.addSingleton(MainRepository.new);
-    //i.addSingleton(FavoriteRepository.new);
-  }
+      c.route('/', child: (context, rs) => const HomePage());
 
-  BindConfig<T> blocConfig<T extends Bloc>() {
-    return BindConfig(
-      notifier: (bloc) => bloc.stream,
-      onDispose: (bloc) => bloc.close(),
-    );
-  }
-
-  @override
-  void routes(r) {
-    r.child('/', child: (context) => const HomePage());
-
-    r.module(AppRoutes.studentsRoute, module: StudentsModule());
-    r.module(AppRoutes.settingsRoute, module: SettingsModule());
-    r.module(AppRoutes.teachersRoute, module: TeachersModule());
-    r.module(AppRoutes.classesRoute, module: ClassroomsModule());
-    r.module(AppRoutes.favoriteListRoute, module: FavoriteModule());
-    r.module(AppRoutes.searchRoute, module: SearchModule());
-    r.module(AppRoutes.zoClassesRoute, module: ZoClassroomsModule());
-    r.module(AppRoutes.zoTeachersRoute, module: ZoTeachersModule());
-  }
-}
+      c.module(studentsModule);
+      c.module(settingsModule);
+      c.module(teachersModule);
+      c.module(classroomsModule);
+      c.module(favoriteModule);
+      c.module(searchModule);
+      c.module(zoClassroomsModule);
+      c.module(zoTeachersModule);
+    });

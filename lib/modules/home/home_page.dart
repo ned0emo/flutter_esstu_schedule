@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:schedule/core/time/bloc/week_number_bloc.dart';
-import 'package:schedule/core/time/current_time.dart';
 import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/core/static/settings_types.dart';
+import 'package:schedule/core/time/bloc/week_number_bloc.dart';
+import 'package:schedule/core/time/current_time.dart';
+import 'package:schedule/main.dart';
 import 'package:schedule/modules/favorite/favorite_schedule_bloc/favorite_schedule_bloc.dart';
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
 import 'package:schedule/modules/settings/settings_repository.dart';
@@ -18,23 +19,29 @@ final class HomePage extends StatefulWidget {
   State<StatefulWidget> createState() => HomePageState();
 }
 
-final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
+final class HomePageState extends State<HomePage> with WidgetsBindingObserver, RouteAware {
   int _weekNumber = 1;
 
   @override
   void initState() {
     _weekNumber = CurrentTime.weekNumber;
-    Modular.to.addListener(_navigateListener);
+    // context.addListener(_navigateListener);
     WidgetsBinding.instance.addObserver(this);
 
-    Modular.get<FavoriteScheduleBloc>().add(OpenMainFavSchedule());
+    inject<FavoriteScheduleBloc>().add(OpenMainFavSchedule());
 
     var settingsState = BlocProvider.of<SettingsBloc>(context).state;
     if (settingsState is SettingsLoaded && settingsState.autoWeekIndexSet) {
-      Modular.get<WeekNumberBloc>().add(CheckWeekNumber());
+      inject<WeekNumberBloc>().add(CheckWeekNumber());
     }
 
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
   @override
@@ -44,7 +51,7 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       var settingsState = BlocProvider.of<SettingsBloc>(context).state;
       if (settingsState is SettingsLoaded && settingsState.autoWeekIndexSet) {
-        Modular.get<WeekNumberBloc>().add(CheckWeekNumber());
+        inject<WeekNumberBloc>().add(CheckWeekNumber());
       }
     }
   }
@@ -59,17 +66,28 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    Modular.to.removeListener(_navigateListener);
+    // context.removeListener(_navigateListener);
+    routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+  @override
+  void didPop() {
+    super.didPop();
+    _navigateListener();
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    _navigateListener();
+  }
+
   void _navigateListener() {
-    if (Modular.to.navigateHistory.length == 1) {
       setState(() {
         _weekNumber = CurrentTime.weekNumber;
       });
-    }
   }
 
   @override
@@ -77,22 +95,21 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return MultiBlocProvider(
       /// события, добавленные здесь, будут активироваться каждый setState!
       providers: [
-        BlocProvider.value(value: Modular.get<FavoriteScheduleBloc>()),
-        BlocProvider.value(value: Modular.get<WeekNumberBloc>()),
+        BlocProvider.value(value: inject<FavoriteScheduleBloc>()),
+        BlocProvider.value(value: inject<WeekNumberBloc>()),
       ],
       child: MultiBlocListener(
         listeners: [
           BlocListener<FavoriteScheduleBloc, FavoriteScheduleState>(
             listener: (context, state) async {
               if (state is FavoriteScheduleLoaded && state.isFromMainPage) {
-                Modular.to.pushNamed(
+                context.pushNamed(
                   AppRoutes.favoriteListRoute + AppRoutes.favoriteScheduleRoute,
                   arguments: [
                     state.scheduleModel.name,
                     state.scheduleModel.type,
                     (await RepositoryProvider.of<SettingsRepository>(context)
-                            .loadSettings())[SettingsTypes.autoUpdate] ==
-                        'true',
+                        .loadSettings())[SettingsTypes.autoUpdate],
                   ],
                 );
               }
@@ -137,7 +154,7 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               PopupMenuItem(
                 child: const Text('Учебная группа'),
                 onTap: () {
-                  Modular.to.pushNamed(
+                  context.pushNamed(
                     AppRoutes.searchRoute,
                     arguments: [ScheduleType.student],
                   );
@@ -146,7 +163,7 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               PopupMenuItem(
                 child: const Text('Преподаватель'),
                 onTap: () {
-                  Modular.to.pushNamed(
+                  context.pushNamed(
                     AppRoutes.searchRoute,
                     arguments: [ScheduleType.teacher],
                   );
@@ -157,7 +174,7 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
         ),
         IconButton(
           onPressed: () {
-            Modular.to.pushNamed(AppRoutes.settingsRoute);
+            context.pushNamed(AppRoutes.settingsRoute);
           },
           icon: const Icon(Icons.settings),
         ),
@@ -225,7 +242,7 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
         GestureDetector(
           onHorizontalDragEnd: (details) {
             if ((details.primaryVelocity ?? 1) < 0) {
-              Modular.to.pushNamed(AppRoutes.favoriteListRoute);
+              context.pushNamed(AppRoutes.favoriteListRoute);
             }
           },
           child: ListView(
@@ -239,7 +256,7 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    Modular.to.pushNamed(AppRoutes.favoriteListRoute);
+                    context.pushNamed(AppRoutes.favoriteListRoute);
                   },
                   child: _homeElevatedButtonContent(
                     'Избранное',
@@ -253,9 +270,8 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   onPressed: () {
                     _bottomSheet(
                       context,
-                      () => Modular.to.popAndPushNamed(AppRoutes.classesRoute),
-                      () =>
-                          Modular.to.popAndPushNamed(AppRoutes.zoClassesRoute),
+                      () => context.pushNamed(AppRoutes.classesRoute),
+                      () => context.pushNamed(AppRoutes.zoClassesRoute),
                       bottomText: 'Расписание аудиторий не имеет '
                           'возможности обновления из избранного',
                     );
@@ -272,14 +288,13 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   onPressed: () {
                     _bottomSheet(
                       context,
-                      () => Modular.to.popAndPushNamed(AppRoutes.teachersRoute),
-                      () =>
-                          Modular.to.popAndPushNamed(AppRoutes.zoTeachersRoute),
+                      () => context.pushNamed(AppRoutes.teachersRoute),
+                      () => context.pushNamed(AppRoutes.zoTeachersRoute),
                       bottomText:
                           'Расписание преподавателей заочного отделения не имеет '
                           'возможности обновления из избранного',
                     );
-                    //Modular.to.pushNamed(AppRoutes.teachersRoute);
+                    //context.pushNamed(AppRoutes.teachersRoute);
                   },
                   child: _homeElevatedButtonContent(
                     'Преподаватели',
@@ -291,7 +306,7 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    Modular.to.pushNamed(AppRoutes.studentsRoute);
+                    context.pushNamed(AppRoutes.studentsRoute);
                   },
                   child: _homeElevatedButtonContent(
                     'Учебные группы',
@@ -306,7 +321,7 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _homeElevatedButtonContent(String text, IconData icon) {
+  Widget _homeElevatedButtonContent(String text, FaIconData icon) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -333,7 +348,7 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }) {
     showModalBottomSheet(
       context: context,
-      builder: (context) {
+      builder: (sheetContext) {
         return Container(
           padding: const EdgeInsets.symmetric(
             horizontal: 16.0,
@@ -346,7 +361,10 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextButton(
-                onPressed: dayPress,
+                onPressed: () {
+                  Navigator.pop(sheetContext);
+                  dayPress();
+                },
                 child: const Row(
                   children: [
                     Icon(Icons.sunny),
@@ -356,7 +374,10 @@ final class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 ),
               ),
               TextButton(
-                onPressed: nightPress,
+                onPressed: () {
+                  Navigator.pop(sheetContext);
+                  nightPress();
+                },
                 child: const Row(
                   children: [
                     Icon(Icons.nightlight),

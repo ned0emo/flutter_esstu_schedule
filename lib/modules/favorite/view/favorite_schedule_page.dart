@@ -50,11 +50,11 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(
-            value: Modular.get<FavoriteScheduleBloc>()
+            value: inject<FavoriteScheduleBloc>()
               ..add(LoadFavoriteSchedule(widget.fileName,
                   isNeedUpdate: widget.isAutoUpdateEnabled))),
-        BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
-        BlocProvider.value(value: Modular.get<FavoriteUpdateBloc>()),
+        BlocProvider.value(value: inject<FavoriteButtonBloc>()),
+        BlocProvider.value(value: inject<FavoriteUpdateBloc>()),
       ],
       child: MultiBlocListener(
         listeners: [
@@ -77,7 +77,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
               }
 
               if (state is FavoriteScheduleUpdated) {
-                Modular.get<FavoriteScheduleBloc>()
+                inject<FavoriteScheduleBloc>()
                     .add(LoadFavoriteSchedule(state.fileName));
 
                 _controller.reset();
@@ -100,7 +100,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
             listener: (context, state) {
               if (state is FavoriteScheduleLoaded) {
                 if (state.isNeedUpdate) {
-                  Modular.get<FavoriteUpdateBloc>().add(UpdateSchedule(
+                  inject<FavoriteUpdateBloc>().add(UpdateSchedule(
                     scheduleModel: state.scheduleModel,
                     isAutoUpdate: true,
                   ));
@@ -110,9 +110,9 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
           ),
           BlocListener<FavoriteButtonBloc, FavoriteButtonState>(
             listener: (context, state) {
-              Modular.get<FavoriteListBloc>().add(LoadFavoriteList());
+              inject<FavoriteListBloc>().add(LoadFavoriteList());
               //if(state is FavoriteDoesNotExist){
-              //  Modular.get<FavoriteListBloc>().add(LoadFavoriteList());
+              //  inject<FavoriteListBloc>().add(LoadFavoriteList());
               //}
             },
           )
@@ -179,7 +179,7 @@ class _FavoriteScheduleState extends State<FavoriteSchedulePage>
             widget.scheduleType != ScheduleType.zoTeacher) {
           return IconButton(
             onPressed: () {
-              Modular.get<FavoriteUpdateBloc>().add(UpdateSchedule(
+              inject<FavoriteUpdateBloc>().add(UpdateSchedule(
                 scheduleModel: state.scheduleModel,
                 isAutoUpdate: false,
               ));

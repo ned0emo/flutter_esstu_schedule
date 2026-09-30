@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
-import 'package:schedule/core/time/current_time.dart';
 import 'package:schedule/core/models/schedule_model.dart';
 import 'package:schedule/core/static/schedule_time_data.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/core/static/settings_types.dart';
+import 'package:schedule/core/time/current_time.dart';
 import 'package:schedule/core/view/lesson_section.dart';
 import 'package:schedule/modules/favorite/favorite_button_bloc/favorite_button_bloc.dart';
 import 'package:schedule/modules/settings/bloc/settings_bloc.dart';
@@ -401,7 +401,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
   }
 
   Widget _favoriteButton() {
-    Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
+    inject<FavoriteButtonBloc>().add(CheckSchedule(
       scheduleType: widget.scheduleModel!.type,
       name: widget.scheduleModel!.name,
     ));
@@ -412,14 +412,14 @@ class SchedulePageBodyState extends State<SchedulePageBody>
         return FilledButton(
           onPressed: () {
             if (state is FavoriteExist) {
-              Modular.get<FavoriteButtonBloc>().add(DeleteSchedule(
+              inject<FavoriteButtonBloc>().add(DeleteSchedule(
                   name: widget.scheduleModel!.name,
                   scheduleType: widget.scheduleModel!.type));
               return;
             }
 
             if (state is FavoriteDoesNotExist) {
-              Modular.get<FavoriteButtonBloc>()
+              inject<FavoriteButtonBloc>()
                   .add(SaveSchedule(scheduleModel: widget.scheduleModel!));
 
               if (widget.scheduleModel?.type != ScheduleType.zoTeacher &&
@@ -463,7 +463,7 @@ class SchedulePageBodyState extends State<SchedulePageBody>
                 child: const Text('Нет')),
             FilledButton(
                 onPressed: () {
-                  Modular.get<FavoriteButtonBloc>().add(AddFavoriteToMainPage(
+                  inject<FavoriteButtonBloc>().add(AddFavoriteToMainPage(
                     scheduleType: widget.scheduleModel!.type,
                     name: widget.scheduleModel!.name,
                   ));

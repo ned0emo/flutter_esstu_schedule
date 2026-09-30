@@ -4,26 +4,21 @@ import 'package:schedule/modules/favorite/favorite_list_bloc/favorite_list_bloc.
 import 'package:schedule/modules/favorite/favorite_update_bloc/favorite_update_bloc.dart';
 import 'package:schedule/modules/favorite/view/favorite_list_page.dart';
 import 'package:schedule/modules/favorite/view/favorite_schedule_page.dart';
-import 'package:schedule/modules/home/home_module.dart';
 
-class FavoriteModule extends Module {
-  @override
-  void binds(i) {
-    i.addSingleton(FavoriteListBloc.new);
-    i.addSingleton(FavoriteUpdateBloc.new);
-  }
+final favoriteModule = createModule(
+    path: AppRoutes.favoriteListRoute,
+    register: (c) {
+      c.addSingleton(FavoriteListBloc.new);
+      c.addSingleton(FavoriteUpdateBloc.new);
 
-  @override
-  void routes(RouteManager r) {
-    r.child('/', child: (context) => const FavoriteListPage());
-    r.child(AppRoutes.favoriteScheduleRoute,
-        child: (context) => FavoriteSchedulePage(
-              scheduleName: r.args.data[0],
-              scheduleType: r.args.data[1],
-              isAutoUpdateEnabled: r.args.data[2],
-            ));
-  }
+      c.route('/', child: (context, rs) => const FavoriteListPage());
+      c.route(AppRoutes.favoriteScheduleRoute, child: (context, rs) {
+        final args = rs.arguments! as List<String?>;
 
-  @override
-  List<Module> get imports => [HomeModule()];
-}
+        return FavoriteSchedulePage(
+          scheduleName: args[0]!,
+          scheduleType: args[1]!,
+          isAutoUpdateEnabled: args[2] == 'true',
+        );
+      });
+    });

@@ -75,7 +75,7 @@ class StudentsDrawer extends StatelessWidget {
                         ),
                         child: Text(studScheduleMap.keys.elementAt(index)),
                         onPressed: () {
-                          Modular.get<AllGroupsBloc>().add(SelectCourse(
+                          inject<AllGroupsBloc>().add(SelectCourse(
                               courseName: studScheduleMap.keys.elementAt(index),
                               studType: studType));
                           Navigator.pop(context);

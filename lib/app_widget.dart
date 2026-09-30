@@ -21,9 +21,7 @@ class AppWidget extends StatelessWidget {
             if (state is SettingsLoaded) {
               return MaterialApp.router(
                 title: 'Расписание ВСГУТУ',
-                //routeInformationParser: Modular.routeInformationParser,
-                //routerDelegate: Modular.routerDelegate,
-                routerConfig: Modular.routerConfig,
+                routerConfig: ModularApp.routerConfigOf(context),
                 theme: state.darkTheme ? DarkTheme().data : PrimaryTheme().data,
               );
             }
@@ -31,9 +29,7 @@ class AppWidget extends StatelessWidget {
             if (state is SettingsError) {
               MaterialApp.router(
                 title: 'Расписание ВСГУТУ',
-                //routeInformationParser: Modular.routeInformationParser,
-                //routerDelegate: Modular.routerDelegate,
-                routerConfig: Modular.routerConfig,
+                routerConfig: ModularApp.routerConfigOf(context),
                 theme: PrimaryTheme().data,
               );
             }

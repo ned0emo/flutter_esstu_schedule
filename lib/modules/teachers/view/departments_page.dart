@@ -17,7 +17,7 @@ class DepartmentsPage extends StatelessWidget {
     return MultiBlocProvider(
         providers: [
           BlocProvider.value(
-            value: Modular.get<DepartmentBloc>()
+            value: inject<DepartmentBloc>()
               ..add(
                 LoadDepartment(
                   departmentName: facultyState.firstDepartment,
@@ -26,7 +26,7 @@ class DepartmentsPage extends StatelessWidget {
                 ),
               ),
           ),
-          BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
+          BlocProvider.value(value: inject<FavoriteButtonBloc>()),
         ],
         child: Scaffold(
           appBar: AppBar(title: _appBarText(context)),
@@ -145,7 +145,7 @@ class DepartmentsPage extends StatelessWidget {
                       onPressed: () {
                         final department =
                             facultyState.departmentsMap.keys.elementAt(index);
-                        Modular.get<DepartmentBloc>().add(LoadDepartment(
+                        inject<DepartmentBloc>().add(LoadDepartment(
                           departmentName: department,
                           link1: facultyState.departmentsMap[department]![0],
                           link2:
@@ -188,7 +188,7 @@ class DepartmentsPage extends StatelessWidget {
               onChanged: (value) {
                 if (value == null) return;
 
-                Modular.get<DepartmentBloc>().add(ChangeTeacher(
+                inject<DepartmentBloc>().add(ChangeTeacher(
                   teacherName: value,
                 ));
               },

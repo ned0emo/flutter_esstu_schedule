@@ -24,14 +24,14 @@ class SearchSchedulePage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(
-            value: Modular.get<SearchScheduleBloc>()
+            value: inject<SearchScheduleBloc>()
               ..add(LoadSearchingSchedule(
                 scheduleName: scheduleName,
                 link1: scheduleLink1,
                 link2: scheduleLink2,
                 scheduleType: scheduleType,
               ))),
-        BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
+        BlocProvider.value(value: inject<FavoriteButtonBloc>()),
       ],
       child: Scaffold(
         appBar: AppBar(title: _appBarText()),

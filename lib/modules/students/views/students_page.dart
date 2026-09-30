@@ -15,16 +15,16 @@ class StudentsPage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(
-            value: Modular.get<AllGroupsBloc>()..add(LoadAllGroups())),
-        BlocProvider.value(value: Modular.get<CurrentGroupBloc>()),
-        BlocProvider.value(value: Modular.get<FavoriteButtonBloc>()),
+            value: inject<AllGroupsBloc>()..add(LoadAllGroups())),
+        BlocProvider.value(value: inject<CurrentGroupBloc>()),
+        BlocProvider.value(value: inject<FavoriteButtonBloc>()),
       ],
       child: MultiBlocListener(
         listeners: [
           BlocListener<AllGroupsBloc, AllGroupsState>(
             listener: (context, state) {
               if (state is AllGroupsLoaded && state.warningMessage == null) {
-                Modular.get<CurrentGroupBloc>().add(LoadGroup(
+                inject<CurrentGroupBloc>().add(LoadGroup(
                     scheduleName: state.currentGroup,
                     link: state.currentCourseMap[state.currentGroup]!));
               }
@@ -135,8 +135,8 @@ class StudentsPage extends StatelessWidget {
               onChanged: (value) {
                 if (value == null) return;
 
-                Modular.get<AllGroupsBloc>().add(SelectGroup(groupName: value));
-                //Modular.get<FavoriteButtonBloc>().add(CheckSchedule(
+                inject<AllGroupsBloc>().add(SelectGroup(groupName: value));
+                //inject<FavoriteButtonBloc>().add(CheckSchedule(
                 //  name: value,
                 //  scheduleType: ScheduleType.student,
                 //));

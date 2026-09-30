@@ -5,25 +5,35 @@ import 'package:schedule/core/static/app_routes.dart';
 import 'package:schedule/core/static/schedule_type.dart';
 import 'package:schedule/modules/search/search_list_bloc/search_list_bloc.dart';
 
-class SearchListPage extends StatelessWidget {
+class SearchListPage extends StatefulWidget {
   final String scheduleType;
 
   const SearchListPage({super.key, required this.scheduleType});
 
   @override
+  State<StatefulWidget> createState() => _SearchListPageState();
+}
+
+class _SearchListPageState extends State<SearchListPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    inject<SearchListBloc>().add(LoadSearchList(widget.scheduleType));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
         providers: [
-          BlocProvider.value(
-              value: Modular.get<SearchListBloc>()
-                ..add(LoadSearchList(scheduleType))),
+          BlocProvider.value(value: inject<SearchListBloc>()),
         ],
         child: Scaffold(
           appBar: AppBar(
-              title: Text(scheduleType == ScheduleType.teacher
+              title: Text(widget.scheduleType == ScheduleType.teacher
                   ? 'Поиск преподавателя'
                   : 'Поиск учебной группы')),
-          body: _body(context, scheduleType),
+          body: _body(context, widget.scheduleType),
         ));
   }
 
@@ -58,7 +68,7 @@ class SearchListPage extends StatelessWidget {
                 child: TextField(
                   autofocus: true,
                   onChanged: (value) {
-                    Modular.get<SearchListBloc>().add(SearchInList(value));
+                    inject<SearchListBloc>().add(SearchInList(value));
                   },
                 ),
               ),
@@ -74,7 +84,7 @@ class SearchListPage extends StatelessWidget {
                           ? state.scheduleLinksMap[name]![1]
                           : null;
 
-                      return _searchedElement(name, link1, link2);
+                      return _searchedElement(name, link1, link2, context);
                     },
                   ),
                 ),
@@ -94,13 +104,14 @@ class SearchListPage extends StatelessWidget {
     );
   }
 
-  Widget _searchedElement(String name, String link1, String? link2) {
+  Widget _searchedElement(
+      String name, String link1, String? link2, BuildContext context) {
     return ListTile(
       title: Text(name),
       onTap: () {
-        Modular.to.pushNamed(
+        context.pushNamed(
             AppRoutes.searchRoute + AppRoutes.searchingScheduleRoute,
-            arguments: [name, scheduleType, link1, link2]);
+            arguments: [name, widget.scheduleType, link1, link2]);
       },
     );
   }

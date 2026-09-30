@@ -14,12 +14,12 @@ class FacultiesPage extends StatelessWidget {
       body: MultiBlocProvider(
         providers: [
           BlocProvider.value(
-              value: Modular.get<FacultyBloc>()..add(LoadFaculties())),
+              value: inject<FacultyBloc>()..add(LoadFaculties())),
         ],
         child: BlocListener<FacultyBloc, FacultyState>(
           listener: (context, state) {
             if (state is CurrentFacultyLoaded) {
-              Modular.to.pushNamed(
+              context.pushNamed(
                   AppRoutes.teachersRoute + AppRoutes.departmentsRoute,
                   arguments: state);
             }
@@ -65,7 +65,7 @@ class FacultiesPage extends StatelessWidget {
       child: SizedBox(
         child: ElevatedButton(
           onPressed: () {
-            Modular.get<FacultyBloc>().add(ChooseFaculty(
+            inject<FacultyBloc>().add(ChooseFaculty(
                 facultyName: facultyName, departmentsMap: departmentsMap));
           },
           child: Container(

@@ -1,7 +1,6 @@
 
 plugins {
     id "com.android.application"
-    id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -30,17 +29,13 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 36
+    compileSdkVersion 37
     ndkVersion flutter.ndkVersion
     namespace "com.KafSi.schedule"
 
     compileOptions {
-        sourceCompatibility 21//JavaVersion.VERSION_1_8
-        targetCompatibility 21//JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '21'
+        sourceCompatibility 21
+        targetCompatibility 21
     }
 
     sourceSets {
@@ -48,15 +43,14 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.KafSi.schedule"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
         minSdkVersion 25
         targetSdkVersion flutter.targetSdkVersion
-        //12.01.2025
-        versionCode 57
-        versionName "3.9.4"
+        //30.09.2026
+        versionCode 58
+        versionName "3.9.5"
     }
 
     signingConfigs {

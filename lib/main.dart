@@ -7,10 +7,11 @@ import 'package:schedule/app_module.dart';
 import 'package:schedule/app_widget.dart';
 import 'package:schedule/core/http_override.dart';
 
+final RouteObserver<Route> routeObserver = RouteObserver<PageRoute>();
 
 void main() async {
   await Jiffy.setLocale('ru');
   HttpOverrides.global = AppHttpOverrides();
 
-  runApp(ModularApp(module: AppModule(), child: const AppWidget()));
+  runApp(ModularApp(navigatorObservers: [routeObserver], module: appModule, child: const AppWidget()));
 }
